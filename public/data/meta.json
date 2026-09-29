@@ -1,32 +1,29 @@
 {
- "generated_at": "2026-09-29T06:01+00:00",
- "listing_count": 608,
+ "generated_at": "2026-09-29T06:49+00:00",
+ "listing_count": 718,
  "waverley": {
   "name": "Edinburgh Waverley",
   "lat": 55.95196,
   "lng": -3.18992
  },
- "errors": {
-  "osm_transit": "504 Server Error: Gateway Timeout for url: https://overpass-api.de/api/interpreter",
-  "espc": "('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))"
- },
+ "errors": {},
  "sources": {
   "catchments": {
    "detail": "ND: https://edinburghcouncilmaps.info/arcgis/rest/services/AdminBoundaries/MiscBoundaries/MapServer/6; RC: https://edinburghcouncilmaps.info/arcgis/rest/services/AdminBoundaries/MiscBoundaries/MapServer/7",
-   "updated": "2026-09-29T06:00+00:00"
+   "updated": "2026-09-29T06:12+00:00"
   },
   "osm_transit": {
-   "updated": "2026-09-29T05:36+00:00"
+   "updated": "2026-09-29T06:14+00:00"
   },
   "gtfs": {
-   "updated": "2026-09-29T06:00+00:00",
+   "updated": "2026-09-29T06:14+00:00",
    "service_date": "2026-10-07"
   },
   "espc": {
-   "updated": "2026-09-29T05:53+00:00"
+   "updated": "2026-09-29T06:49+00:00"
   },
   "simd": {
-   "updated": "2026-09-29T06:00+00:00",
+   "updated": "2026-09-29T06:12+00:00",
    "detail": "https://services.arcgis.com/XSeYKQzfXnEgju9o/arcgis/rest/services/SG_SIMD_2020/FeatureServer/0/query"
   }
  },
