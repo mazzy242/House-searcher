@@ -1,0 +1,52 @@
+{
+  "_comment": "Edit this file to change what the daily refresh collects. Coordinates are WGS84 (lon/lat).",
+
+  "bbox": { "west": -3.48, "south": 55.83, "east": -2.95, "north": 56.00 },
+
+  "waverley": { "name": "Edinburgh Waverley", "lat": 55.95196, "lng": -3.18992 },
+
+  "espc": {
+    "base_url": "https://espc.com",
+    "search_urls": [
+      "https://espc.com/properties?locations=edinburgh"
+    ],
+    "max_search_pages": 60,
+    "use_sitemap_fallback": true,
+    "request_delay_seconds": 1.5,
+    "refetch_details_after_days": 7,
+    "max_detail_fetches_per_run": 1500,
+    "postcode_areas": ["EH"],
+    "user_agent": "house-searcher/1.0 (personal house search; +https://github.com/mazzy242/house-searcher)"
+  },
+
+  "sources": {
+    "simd_query_url": "https://maps.gov.scot/server/rest/services/ScotGov/PeopleSociety/MapServer/7/query",
+    "catchment_feature_layers": {
+      "non_denominational": "",
+      "roman_catholic": ""
+    },
+    "catchment_search_titles": {
+      "non_denominational": "Secondary School Catchments (Non Denominational)",
+      "roman_catholic": "Secondary School Catchments (Roman Catholic)"
+    },
+    "overpass_url": "https://overpass-api.de/api/interpreter",
+    "gtfs_url": "https://data.bus-data.dft.gov.uk/timetable/download/gtfs-file/scotland/",
+    "postcodes_io": "https://api.postcodes.io/postcodes"
+  },
+
+  "bus": {
+    "operator_regex": "Lothian",
+    "main_routes": ["3", "5", "10", "11", "16", "22", "25", "26", "31", "37", "44"]
+  },
+
+  "travel": {
+    "arrive_by": ["08:30", "08:40", "08:50", "09:00", "09:10"],
+    "walk_speed_kmh": 4.8,
+    "walk_detour_factor": 1.3,
+    "max_access_walk_m": 1200,
+    "transfer_walk_m": 300,
+    "transfer_buffer_s": 60,
+    "destination_radius_m": 450,
+    "cycle_speed_kmh": 15
+  }
+}

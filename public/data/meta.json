@@ -1,0 +1,25 @@
+{
+ "sample": true,
+ "generated_at": "2026-09-29T06:00+00:00",
+ "listing_count": 220,
+ "waverley": {
+  "name": "Edinburgh Waverley",
+  "lat": 55.95196,
+  "lng": -3.18992
+ },
+ "errors": {},
+ "sources": {
+  "catchments": {
+   "detail": "Bundled council catchments (c.2014)"
+  }
+ },
+ "travel_assumptions": {
+  "arrive_by": [
+   "08:30",
+   "08:40",
+   "08:50",
+   "09:00",
+   "09:10"
+  ]
+ }
+}

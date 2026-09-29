@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en-GB">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#1f2a30" />
+    <title>Edinburgh House Browser</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏠</text></svg>" />
+  </head>
+  <body>
+    <header class="topbar">
+      <button class="icon-btn only-narrow" id="toggle-panel" aria-controls="panel" aria-expanded="false" title="Filters">☰</button>
+      <h1>Edinburgh House Browser</h1>
+      <div class="stats" id="stats" aria-live="polite"></div>
+      <div class="view-toggle" role="tablist" aria-label="View">
+        <button role="tab" id="view-map" aria-selected="true">Map</button>
+        <button role="tab" id="view-list" aria-selected="false">List</button>
+      </div>
+    </header>
+    <div id="banner" class="banner" hidden></div>
+
+    <div class="layout">
+      <aside id="panel" class="panel" aria-label="Filters and layers">
+        <section>
+          <h2>Filters</h2>
+          <div class="row two">
+            <label>Min price<select id="minPrice"></select></label>
+            <label>Max price<select id="maxPrice"></select></label>
+          </div>
+          <div class="field">
+            <span class="field-label">Bedrooms</span>
+            <div class="chips" id="minBeds" role="radiogroup" aria-label="Minimum bedrooms"></div>
+          </div>
+          <div class="checks">
+            <label class="check"><input type="checkbox" id="detached" /> Detached only</label>
+            <label class="check"><input type="checkbox" id="garage" /> Garage</label>
+            <label class="check"><input type="checkbox" id="topSchool" /> In a top-10 school catchment</label>
+            <label class="check"><input type="checkbox" id="newOnly" /> New this week</label>
+          </div>
+          <div class="row two">
+            <label>To Waverley<select id="maxMins">
+              <option value="0">Any time</option><option value="15">≤ 15 min</option><option value="20">≤ 20 min</option>
+              <option value="25">≤ 25 min</option><option value="30">≤ 30 min</option><option value="40">≤ 40 min</option>
+              <option value="50">≤ 50 min</option><option value="60">≤ 60 min</option></select></label>
+            <label>SIMD decile<select id="minSimd">
+              <option value="0">Any</option><option value="4">4 or above</option><option value="6">6 or above</option>
+              <option value="8">8 or above</option><option value="10">10 only</option></select></label>
+          </div>
+          <label>Catchment school<select id="school"><option value="">Any school</option></select></label>
+          <button class="link-btn" id="reset">Reset filters</button>
+        </section>
+
+        <section>
+          <h2>Map layers</h2>
+          <div class="checks layers">
+            <label class="check"><input type="checkbox" data-layer="catchTop" /><i class="sw sw-catch"></i> Top-10 school catchments</label>
+            <label class="check"><input type="checkbox" data-layer="catchAll" /><i class="sw sw-catch-all"></i> All secondary catchments</label>
+            <label class="check"><input type="checkbox" data-layer="simd" /><i class="sw sw-simd"></i> SIMD deprivation</label>
+            <label class="sub" id="simd-domain-wrap">Show<select id="simdDomain">
+              <option value="decile">Overall SIMD</option><option value="income">Income</option><option value="employment">Employment</option>
+              <option value="health">Health</option><option value="education">Education</option><option value="access">Access to services</option>
+              <option value="crime">Crime</option><option value="housing">Housing</option></select></label>
+            <label class="check"><input type="checkbox" data-layer="tram" /><i class="sw sw-tram"></i> Tram</label>
+            <label class="check"><input type="checkbox" data-layer="tramProposed" /><i class="sw sw-tram-p"></i> Proposed tram (indicative)</label>
+            <label class="check"><input type="checkbox" data-layer="bus" /><i class="sw sw-bus"></i> Bus routes</label>
+            <label class="check sub"><input type="checkbox" id="allBus" /> All Lothian routes, not just main ones</label>
+            <label class="check"><input type="checkbox" data-layer="areas" /><i class="sw sw-area"></i> Average asking price by postcode</label>
+          </div>
+          <label>Colour pins by<select id="colourBy">
+            <option value="price">Price</option><option value="time">Time to Waverley</option><option value="vs">Price vs area median</option></select></label>
+          <div class="legend" id="legend"></div>
+        </section>
+
+        <section>
+          <h2>Average asking price <span class="muted" id="areas-note"></span></h2>
+          <table class="areas" id="areas"></table>
+        </section>
+
+        <section class="about" id="about"></section>
+      </aside>
+
+      <main class="main">
+        <div id="map" class="map" aria-label="Map of listings"></div>
+        <div id="list" class="list" hidden>
+          <div class="list-head">
+            <span id="list-count"></span>
+            <label>Sort<select id="sort">
+              <option value="time">Quickest to Waverley</option><option value="price_asc">Price: low to high</option>
+              <option value="price_desc">Price: high to low</option><option value="newest">Newest</option>
+              <option value="value">Best value vs area</option></select></label>
+          </div>
+          <div id="cards" class="cards"></div>
+        </div>
+        <article id="detail" class="detail" hidden aria-live="polite"></article>
+      </main>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

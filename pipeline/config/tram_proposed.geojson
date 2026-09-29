@@ -1,0 +1,40 @@
+{
+  "type": "FeatureCollection",
+  "_comment": "INDICATIVE ONLY. Hand-traced from City of Edinburgh Council North-South tram consultation material (Granton to BioQuarter, with two northern options). Alignments are approximate and not yet approved or funded. Edit freely.",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": { "name": "North-South line: Granton to Haymarket via Roseburn path (option)", "segment": "north", "status": "proposed" },
+      "geometry": { "type": "LineString", "coordinates": [
+        [-3.2268, 55.9822], [-3.2318, 55.9760], [-3.2325, 55.9695], [-3.2340, 55.9640],
+        [-3.2352, 55.9588], [-3.2362, 55.9535], [-3.2372, 55.9478], [-3.2330, 55.9462],
+        [-3.2185, 55.9458]
+      ] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "North-South line: Granton to West End via Orchard Brae and Dean Bridge (option)", "segment": "north", "status": "proposed" },
+      "geometry": { "type": "LineString", "coordinates": [
+        [-3.2268, 55.9822], [-3.2318, 55.9760], [-3.2325, 55.9695], [-3.2292, 55.9640],
+        [-3.2255, 55.9590], [-3.2228, 55.9558], [-3.2175, 55.9535], [-3.2135, 55.9520],
+        [-3.2092, 55.9500]
+      ] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "North-South line: city centre to BioQuarter via the Bridges and Cameron Toll", "segment": "south", "status": "proposed" },
+      "geometry": { "type": "LineString", "coordinates": [
+        [-3.1935, 55.9542], [-3.1878, 55.9520], [-3.1862, 55.9478], [-3.1848, 55.9440],
+        [-3.1812, 55.9385], [-3.1750, 55.9335], [-3.1690, 55.9298], [-3.1560, 55.9255],
+        [-3.1420, 55.9225], [-3.1355, 55.9212]
+      ] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Possible extension: BioQuarter to Shawfair / Sheriffhall", "segment": "extension", "status": "proposed" },
+      "geometry": { "type": "LineString", "coordinates": [
+        [-3.1355, 55.9212], [-3.1180, 55.9140], [-3.1000, 55.9060], [-3.0900, 55.8990]
+      ] }
+    }
+  ]
+}

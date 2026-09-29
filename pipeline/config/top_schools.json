@@ -1,0 +1,17 @@
+{
+  "_comment": "Top 10 Edinburgh state secondary schools, highlighted on the map. 'match' is a lower-case fragment of the school's name in the council catchment data. VERIFY this order against the ESPC article (https://espc.com/news/post/top-10-secondary-schools-in-edinburgh-and-their-catchment-areas) - it could not be fetched when this file was written, so the ranking is a best guess from public league-table coverage.",
+  "verified": false,
+  "source": "https://espc.com/news/post/top-10-secondary-schools-in-edinburgh-and-their-catchment-areas",
+  "schools": [
+    { "rank": 1,  "name": "James Gillespie's High School", "match": "gillespie" },
+    { "rank": 2,  "name": "Boroughmuir High School",       "match": "boroughmuir" },
+    { "rank": 3,  "name": "The Royal High School",         "match": "royal high" },
+    { "rank": 4,  "name": "Balerno Community High School", "match": "balerno" },
+    { "rank": 5,  "name": "Currie Community High School",  "match": "currie" },
+    { "rank": 6,  "name": "Trinity Academy",               "match": "trinity" },
+    { "rank": 7,  "name": "Craigmount High School",        "match": "craigmount" },
+    { "rank": 8,  "name": "Firrhill High School",          "match": "firrhill" },
+    { "rank": 9,  "name": "Portobello High School",        "match": "portobello" },
+    { "rank": 10, "name": "Queensferry High School",       "match": "queensferry" }
+  ]
+}

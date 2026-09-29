@@ -1,0 +1,204 @@
+import datetime as dt
+import io
+import json
+import sys
+import zipfile
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
+import build  # noqa: E402
+import espc  # noqa: E402
+import layers  # noqa: E402
+import transit  # noqa: E402
+
+FIX = Path(__file__).parent / "fixtures"
+WAV = (55.95196, -3.18992)
+
+
+# ------------------------------------------------------------------ GTFS / travel time
+
+def _gtfs(tmp_path: Path) -> Path:
+    """A tiny network: bus 22 from Craigleith (4 stops) into Princes St by Waverley,
+    every 10 minutes; a feeder bus 99 joins it at stop B."""
+    stops = [
+        ("A", "Craigleith", 55.9590, -3.2350),
+        ("B", "Comely Bank", 55.9565, -3.2200),
+        ("C", "Queensferry St", 55.9515, -3.2090),
+        ("W", "Waverley Bridge", 55.9510, -3.1915),   # ~200 m from Waverley
+        ("F", "Fettes", 55.9640, -3.2150),
+    ]
+    trips, st = [], []
+    for k, start in enumerate(range(7 * 3600, 9 * 3600 + 1, 600)):
+        tid = f"t22_{k}"
+        trips.append(("r22", "wk", tid))
+        for seq, (sid, off) in enumerate([("A", 0), ("B", 240), ("C", 600), ("W", 900)]):
+            t = start + off
+            st.append((tid, seq, sid, t))
+    for k, start in enumerate(range(7 * 3600, 9 * 3600 + 1, 1200)):
+        tid = f"t99_{k}"
+        trips.append(("r99", "wk", tid))
+        st += [(tid, 0, "F", start), (tid, 1, "B", start + 300)]
+    fmt = lambda s: f"{s // 3600:02d}:{s % 3600 // 60:02d}:{s % 60:02d}"  # noqa: E731
+    files = {
+        "stops.txt": "stop_id,stop_name,stop_lat,stop_lon\n" + "".join(f"{a},{b},{c},{d}\n" for a, b, c, d in stops),
+        "routes.txt": "route_id,route_short_name,route_type\nr22,22,3\nr99,99,3\n",
+        "trips.txt": "route_id,service_id,trip_id\n" + "".join(f"{r},{s},{t}\n" for r, s, t in trips),
+        "calendar.txt": "service_id,monday,tuesday,wednesday,thursday,friday,saturday,sunday,start_date,end_date\n"
+                        "wk,1,1,1,1,1,0,0,20200101,20991231\n",
+        "stop_times.txt": "trip_id,arrival_time,departure_time,stop_id,stop_sequence\n"
+                          + "".join(f"{t},{fmt(x)},{fmt(x)},{s},{q}\n" for t, q, s, x in st),
+    }
+    p = tmp_path / "gtfs.zip"
+    with zipfile.ZipFile(p, "w") as z:
+        for n, c in files.items():
+            z.writestr(n, c)
+    return p
+
+
+def test_service_date_is_midweek(tmp_path):
+    with zipfile.ZipFile(_gtfs(tmp_path)) as z:
+        day, svc = transit.pick_service_date(z, dt.date(2026, 9, 28))  # a Monday
+    assert day.weekday() in (1, 2, 3) and svc == {"wk"}
+
+
+def test_travel_time_direct_and_with_transfer(tmp_path):
+    net = transit.load_network(_gtfs(tmp_path), dt.date(2026, 9, 28))
+    profiles = transit.build_profiles(net)
+    idx = transit.StopIndex(net)
+    # Right next to stop A: ride is 15 min + ~3 min walk at Waverley end.
+    j = transit.journey(55.9591, -3.2351, net, profiles, idx)
+    assert 16 <= j["pt_min"] <= 22, j
+    assert "bus 22" in j["pt_how"] and "Craigleith" in j["pt_how"]
+    assert j["best_min"] <= j["walk_min"]
+    # At Fettes: bus 99 to B (5 min) then change onto the 22 (11 min + walk).
+    j2 = transit.journey(55.9641, -3.2151, net, profiles, idx)
+    assert "pt_min" in j2 and j2["pt_min"] < j2["walk_min"], j2
+    # Right by Waverley: walking wins and no silly bus trip is suggested.
+    j3 = transit.journey(55.9525, -3.1905, net, profiles, idx)
+    assert j3["best_how"] == "Walk" and j3["best_min"] <= 3
+
+
+def test_rail_option_near_station():
+    j = transit.journey(55.9340, -3.0740, None, [], None)  # by Musselburgh station
+    assert j["rail_min"] < j["walk_min"] and "Musselburgh" in j["rail_how"]
+
+
+# ------------------------------------------------------------------ ESPC parsing
+
+def test_extract_property_urls():
+    html = (FIX / "espc_search.html").read_text()
+    urls = espc.extract_property_urls(html, "https://espc.com/properties?locations=edinburgh")
+    assert set(urls) == {"36111111", "36222222", "36333333"}
+    assert urls["36111111"].startswith("https://espc.com/property/")
+
+
+def test_next_page():
+    html = (FIX / "espc_search.html").read_text()
+    assert espc.next_page_url(html, "https://espc.com/properties?locations=edinburgh", 1) == \
+        "https://espc.com/properties?locations=edinburgh&page=2"
+
+
+def test_parse_jsonld_property():
+    rec = espc.parse_property((FIX / "espc_property_jsonld.html").read_text(),
+                              "https://espc.com/property/12-barnton-avenue-edinburgh-eh4-6aa/36111111")
+    assert rec["id"] == "36111111"
+    assert rec["price"] == 545000 and rec["price_qualifier"] == "Offers Over"
+    assert rec["bedrooms"] == 4
+    assert rec["detached"] is True and rec["garage"] is True
+    assert rec["postcode"] == "EH4 6AA" and rec["district"] == "EH4"
+    assert abs(rec["lat"] - 55.9625) < 1e-6
+
+
+def test_parse_app_state_property():
+    rec = espc.parse_property((FIX / "espc_property_nextdata.html").read_text(),
+                              "https://espc.com/property/flat-3-5-marchmont-road-edinburgh-eh9-1hb/36222222")
+    assert rec["price"] == 295000 and rec["bedrooms"] == 2
+    assert rec["detached"] is False and rec["garage"] is False
+    assert rec["lat"] and rec["district"] == "EH9"
+
+
+def test_parse_text_only_semi_detached():
+    rec = espc.parse_property((FIX / "espc_property_text.html").read_text(),
+                              "https://espc.com/property/7-oak-lane-edinburgh-eh12-5xx/36333333")
+    assert rec["price"] == 410000 and rec["price_qualifier"] == "Fixed Price"
+    assert rec["bedrooms"] == 3
+    assert rec["detached"] is False       # semi-detached must not count
+    assert rec["garage"] is False         # "no garage" in the description
+    assert rec["postcode"] == "EH12 5XX" and "lat" in rec and rec["lat"] > 55
+
+
+# ------------------------------------------------------------------ layers / enrichment
+
+def test_esri_polygon_conversion_keeps_hole():
+    outer = [[0, 0], [0, 10], [10, 10], [10, 0], [0, 0]]         # clockwise
+    hole = [[2, 2], [8, 2], [8, 8], [2, 8], [2, 2]]              # anticlockwise
+    g = layers.esri_to_geojson_geometry({"rings": [outer, hole]})
+    assert g["type"] == "Polygon" and len(g["coordinates"]) == 2
+
+
+def test_top_school_matching_on_fallback_names():
+    fc = json.loads((layers.CONFIG / "catchments_fallback.geojson").read_text())
+    tops = json.loads((layers.CONFIG / "top_schools.json").read_text())["schools"]
+    matched = {layers._match_top(f["properties"]["school"], tops)["rank"]
+               for f in fc["features"] if f["properties"]["sector"] == "ND" and layers._match_top(f["properties"]["school"], tops)}
+    assert matched == set(range(1, 11))
+
+
+def test_area_stats_and_polygon_lookup():
+    ls = [{"district": "EH4", "price": p, "bedrooms": 3, "lat": 55.96, "lng": -3.28} for p in (300000, 400000, 500000)]
+    a = build.area_stats(ls)[0]
+    assert a["median"] == 400000 and a["by_beds"]["3"]["count"] == 3
+    fc = json.loads((layers.CONFIG / "catchments_fallback.geojson").read_text())
+    find = build.polygon_lookup(fc)
+    schools = {c["school"] for c in find(55.9330, -3.2090)}   # Bruntsfield Links area
+    assert any("Gillespie" in s or "Boroughmuir" in s for s in schools), schools
+
+
+def test_fetch_simd_field_detection(monkeypatch):
+    sq = {"type": "Polygon", "coordinates": [[[-3.2, 55.9], [-3.2, 55.91], [-3.19, 55.91], [-3.2, 55.9]]]}
+    rows = [{"type": "Feature", "geometry": sq, "properties": {
+        "DataZone": "S01008600", "Name": "Morningside - 03", "LAName": "City of Edinburgh",
+        "Rankv2": 6800, "IncRankv2": 20, "CrimeRank": 3500, "HouseRank": 700}}]
+    monkeypatch.setattr(layers, "arcgis_query", lambda *a, **k: rows)
+    p = layers.fetch_simd()["features"][0]["properties"]
+    assert p["dz"] == "S01008600" and p["decile"] == 10
+    assert p["income"] == 1 and p["crime"] == 6 and p["housing"] == 2
+
+
+def test_fetch_transit_parsing(monkeypatch):
+    way = lambda pts: {"type": "way", "role": "", "geometry": [{"lat": a, "lon": b} for a, b in pts]}  # noqa: E731
+    payload = {"elements": [
+        {"type": "relation", "tags": {"route": "tram", "name": "Tram"},
+         "members": [way([(55.95, -3.36), (55.946, -3.22)]), way([(55.946, -3.22), (55.98, -3.19)])]},
+        {"type": "relation", "tags": {"route": "bus", "ref": "22", "name": "Lothian 22: Ocean Terminal => Gyle Centre"},
+         "members": [way([(55.98, -3.17), (55.95, -3.2)])]},
+        {"type": "relation", "tags": {"route": "bus", "ref": "113", "name": "Lothian 113"},
+         "members": [way([(55.93, -3.0), (55.95, -3.2)])]},
+        {"type": "node", "lat": 55.9546, "lon": -3.1925, "tags": {"name": "St Andrew Square"}},
+    ]}
+    monkeypatch.setattr(layers, "_overpass", lambda q: payload)
+    tram, bus = layers.fetch_transit()
+    assert tram["features"][0]["geometry"]["type"] == "LineString"   # the two ways merge
+    assert any(f["properties"].get("name") == "St Andrew Square" for f in tram["features"])
+    refs = [f["properties"]["ref"] for f in bus["features"]]
+    assert refs == ["22", "113"]
+    b22 = bus["features"][0]["properties"]
+    assert b22["main"] is True and b22["name"] == "Ocean Terminal ↔ Gyle Centre"
+
+
+def test_enrich_end_to_end(tmp_path, monkeypatch):
+    """Parsed listing -> enriched record with catchment, area comparison and travel."""
+    monkeypatch.setattr(build, "OUT", tmp_path)
+    (tmp_path / "catchments.geojson").write_text((layers.CONFIG / "catchments_fallback.geojson").read_text())
+    base = {"district": "EH10", "bedrooms": 3, "detached": False, "garage": False, "active": True}
+    ls = [{**base, "id": str(i), "url": "u", "price": p, "lat": 55.9330, "lng": -3.2090}
+          for i, p in enumerate((300000, 350000, 400000, 450000))]
+    ls.append({**base, "id": "nogeo", "url": "u", "price": 1, "lat": None, "lng": None})
+    prev = {"0": {"pt_min": 9, "pt_how": "Walk 2 min to X, then bus 23"}}
+    out = build.enrich(ls, None, None, prev)
+    assert [r["id"] for r in out] == ["0", "1", "2", "3"]
+    r0 = out[0]
+    assert r0["catchment"] and r0["area"]["median"] == 375000 and r0["area"]["basis"] == "3-bed"
+    assert r0["travel"]["pt_min"] == 9 and r0["travel"]["best_min"] == 9     # reused previous PT time
+    assert (tmp_path / "areas.json").exists()

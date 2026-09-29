@@ -1,0 +1,339 @@
+import "./style.css";
+import { DEFAULTS, type Filters, fromHash, isNew, isReduced, matches, sortListings, toHash } from "./filters";
+import { PRICE_STOPS, SIMD_COLOURS, TIME_STOPS, VS_STOPS, daysAgo, esc, gbp, gbpFull, mins } from "./format";
+import { PolygonIndex } from "./geo";
+import { HouseMap } from "./map";
+import type { Area, Listing, Meta, Simd, TopSchools } from "./types";
+
+const $ = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T;
+
+const load = async <T>(path: string, fallback: T): Promise<T> => {
+  try {
+    const r = await fetch(`data/${path}`, { cache: "no-cache" });
+    return r.ok ? ((await r.json()) as T) : fallback;
+  } catch {
+    return fallback;
+  }
+};
+
+const PRICES = [100, 150, 200, 250, 300, 350, 400, 450, 500, 600, 700, 800, 1000, 1250, 1500, 2000].map((k) => k * 1000);
+
+let filters: Filters = fromHash(location.hash);
+let listings: Listing[] = [];
+let visible: Listing[] = [];
+let areas: Area[] = [];
+let meta: Meta;
+let tops: TopSchools;
+let selected: Listing | null = null;
+let simdIndex: PolygonIndex<Simd>;
+let catchIndex: PolygonIndex<{ school: string; sector: string; top_rank?: number }>;
+const map = new HouseMap();
+
+async function main(): Promise<void> {
+  const emptyFc = { type: "FeatureCollection", features: [] } as GeoJSON.FeatureCollection;
+  [listings, areas, meta, tops] = await Promise.all([
+    load<Listing[]>("listings.json", []),
+    load<Area[]>("areas.json", []),
+    load<Meta>("meta.json", { waverley: { name: "Edinburgh Waverley", lat: 55.95196, lng: -3.18992 } }),
+    load<TopSchools>("top_schools.json", { verified: false, source: "", schools: [] }),
+  ]);
+  buildControls();
+  renderBanner();
+  renderAbout();
+  await map.init($("map"), meta, {
+    onSelect: (id) => select(listings.find((l) => l.id === id) ?? null),
+    onBackgroundClick: showPointInfo,
+  });
+  // Lazy-load polygons for click-anywhere info (the map fetches its own copy).
+  Promise.all([load("simd.geojson", emptyFc), load("catchments.geojson", emptyFc)]).then(([s, c]) => {
+    simdIndex = new PolygonIndex<Simd>(s);
+    catchIndex = new PolygonIndex(c);
+  });
+  map.setAreas(areas);
+  update();
+  const id = new URLSearchParams(location.search).get("id");
+  if (id) select(listings.find((l) => l.id === id) ?? null, true);
+}
+
+// ------------------------------------------------------------------ controls
+
+function buildControls(): void {
+  const opt = (v: number, label: string) => `<option value="${v}">${label}</option>`;
+  $("minPrice").innerHTML = opt(0, "No min") + PRICES.map((p) => opt(p, gbp(p))).join("");
+  $("maxPrice").innerHTML = opt(0, "No max") + PRICES.map((p) => opt(p, gbp(p))).join("");
+  $("minBeds").innerHTML = [0, 1, 2, 3, 4, 5]
+    .map((b) => `<button role="radio" data-beds="${b}">${b ? `${b}+` : "Any"}</button>`).join("");
+  const schools = [...new Set(listings.flatMap((l) => [l.catchment, l.catchment_rc]).filter(Boolean) as string[])].sort();
+  const rank = (s: string) => listings.find((l) => l.catchment === s)?.top_school_rank;
+  $("school").innerHTML += schools.map((s) => `<option value="${esc(s)}">${esc(s)}${rank(s) ? ` (#${rank(s)})` : ""}</option>`).join("");
+
+  for (const id of ["minPrice", "maxPrice", "maxMins", "minSimd"] as const) {
+    $<HTMLSelectElement>(id).addEventListener("change", (e) => set({ [id]: Number((e.target as HTMLSelectElement).value) }));
+  }
+  for (const id of ["school", "colourBy", "sort", "simdDomain"] as const) {
+    $<HTMLSelectElement>(id).addEventListener("change", (e) => set({ [id]: (e.target as HTMLSelectElement).value } as Partial<Filters>));
+  }
+  for (const id of ["detached", "garage", "topSchool", "newOnly", "allBus"] as const) {
+    $<HTMLInputElement>(id).addEventListener("change", (e) => set({ [id]: (e.target as HTMLInputElement).checked }));
+  }
+  $("minBeds").addEventListener("click", (e) => {
+    const b = (e.target as HTMLElement).dataset.beds;
+    if (b != null) set({ minBeds: Number(b) });
+  });
+  document.querySelectorAll<HTMLInputElement>("[data-layer]").forEach((el) =>
+    el.addEventListener("change", () => set({ layers: { ...filters.layers, [el.dataset.layer!]: el.checked } })),
+  );
+  $("allBus").addEventListener("change", () => {
+    if (filters.allBus && !filters.layers.bus) set({ layers: { ...filters.layers, bus: true } });
+  });
+  $("reset").addEventListener("click", () => set({ ...DEFAULTS, layers: filters.layers, colourBy: filters.colourBy, simdDomain: filters.simdDomain }));
+
+  const panel = $("panel");
+  $("toggle-panel").addEventListener("click", () => {
+    const open = panel.classList.toggle("open");
+    $("toggle-panel").setAttribute("aria-expanded", String(open));
+  });
+  $("view-map").addEventListener("click", () => setView("map"));
+  $("view-list").addEventListener("click", () => setView("list"));
+  $("cards").addEventListener("click", (e) => {
+    const card = (e.target as HTMLElement).closest<HTMLElement>("[data-id]");
+    if (card && !(e.target as HTMLElement).closest("a")) {
+      setView("map");
+      select(listings.find((l) => l.id === card.dataset.id) ?? null, true);
+    }
+  });
+  $("detail").addEventListener("click", (e) => {
+    if ((e.target as HTMLElement).closest("[data-close]")) select(null);
+  });
+  document.addEventListener("keydown", (e) => e.key === "Escape" && select(null));
+  window.addEventListener("hashchange", () => {
+    const next = toHash(fromHash(location.hash));
+    if (next !== toHash(filters)) {
+      filters = fromHash(location.hash);
+      update();
+    }
+  });
+}
+
+function set(patch: Partial<Filters>): void {
+  filters = { ...filters, ...patch };
+  history.replaceState(null, "", `${location.pathname}${location.search}${toHash(filters) ? `#${toHash(filters)}` : ""}`);
+  update();
+}
+
+function syncControls(): void {
+  const f = filters;
+  for (const id of ["minPrice", "maxPrice", "maxMins", "minSimd", "school", "colourBy", "sort", "simdDomain"] as const) {
+    $<HTMLSelectElement>(id).value = String(f[id]);
+  }
+  for (const id of ["detached", "garage", "topSchool", "newOnly", "allBus"] as const) $<HTMLInputElement>(id).checked = f[id];
+  document.querySelectorAll<HTMLButtonElement>("#minBeds button").forEach((b) =>
+    b.setAttribute("aria-checked", String(Number(b.dataset.beds) === f.minBeds)),
+  );
+  document.querySelectorAll<HTMLInputElement>("[data-layer]").forEach((el) => (el.checked = !!f.layers[el.dataset.layer!]));
+  $("simd-domain-wrap").hidden = !f.layers.simd;
+}
+
+function update(): void {
+  syncControls();
+  visible = listings.filter((l) => matches(l, filters));
+  map.applyFilters(filters);
+  map.setListings(visible);
+  const total = listings.length;
+  const med = median(visible.map((l) => l.price));
+  $("stats").innerHTML = `<b>${visible.length}</b> of ${total} homes${med ? ` · median ${gbp(med)}` : ""}`;
+  renderLegend();
+  renderAreas();
+  if (!$("list").hidden) renderList();
+  if (selected && !visible.includes(selected)) select(null);
+}
+
+function setView(v: "map" | "list"): void {
+  $("list").hidden = v !== "list";
+  $("view-map").setAttribute("aria-selected", String(v === "map"));
+  $("view-list").setAttribute("aria-selected", String(v === "list"));
+  if (v === "list") {
+    renderList();
+    $("detail").hidden = true;
+  } else {
+    map.map.resize();
+    if (selected) $("detail").hidden = false;
+  }
+}
+
+// ------------------------------------------------------------------ rendering
+
+const median = (xs: number[]): number => {
+  if (!xs.length) return 0;
+  const s = [...xs].sort((a, b) => a - b);
+  return s.length % 2 ? s[(s.length - 1) / 2] : (s[s.length / 2 - 1] + s[s.length / 2]) / 2;
+};
+
+function renderBanner(): void {
+  const b = $("banner");
+  const errs = Object.keys(meta.errors ?? {});
+  if (meta.sample) {
+    b.innerHTML = `<p><b>Sample data.</b> These are made-up listings to preview the site. Real ESPC listings, SIMD, bus routes and timetable-based journey times appear after the first daily refresh runs.</p><button aria-label="Dismiss">×</button>`;
+    b.hidden = false;
+  } else if (errs.length) {
+    b.innerHTML = `<p>Last refresh couldn't update: <b>${errs.map(esc).join(", ")}</b>. Showing the most recent data available.</p><button aria-label="Dismiss">×</button>`;
+    b.className = "banner warn";
+    b.hidden = false;
+  }
+  b.querySelector("button")?.addEventListener("click", () => {
+    b.hidden = true;
+    map.map?.resize();
+  });
+}
+
+function renderAbout(): void {
+  const updated = meta.generated_at ? new Date(meta.generated_at).toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" }) : "never";
+  const arr = meta.travel_assumptions?.arrive_by ?? [];
+  $("about").innerHTML = `
+    <h2>About the data</h2>
+    <p>Updated ${esc(updated)}. Prices are <em>asking</em> prices from ESPC; averages are medians of current listings by postcode district.</p>
+    <p>Time to Waverley: fastest of walking, bus/tram (weekday timetable, arriving ${esc(arr[0] ?? "")}–${esc(arr[arr.length - 1] ?? "")}) and train from a nearby station. Door to door, including walking.</p>
+    <p>Top-10 schools: <a href="${esc(tops.source)}" target="_blank" rel="noopener">ESPC list</a>${tops.verified ? "" : " <span class=\"muted\">(order not yet verified)</span>"}.
+      Catchments: ${esc(meta.sources?.catchments?.detail ?? "City of Edinburgh Council")}. Always confirm with the council before buying.</p>
+    <p>Proposed tram routes are indicative only.</p>`;
+}
+
+function renderLegend(): void {
+  const f = filters;
+  const stops = f.colourBy === "time" ? TIME_STOPS : f.colourBy === "vs" ? VS_STOPS : PRICE_STOPS;
+  const fmt = (v: number) => (f.colourBy === "time" ? `${v}` : f.colourBy === "vs" ? `${v > 0 ? "+" : ""}${v}%` : gbp(v));
+  const unit = f.colourBy === "time" ? " min" : "";
+  const items = stops.map(([v, c], i) => {
+    const lo = i ? fmt(stops[i - 1][0]) : null;
+    const label = i === stops.length - 1 ? `${lo}${unit}+` : lo ? `${lo}–${fmt(v)}${unit}` : `< ${fmt(v)}${unit}`;
+    return `<span><i style="background:${c}"></i>${label}</span>`;
+  });
+  let simd = "";
+  if (f.layers.simd) {
+    simd = `<div class="simd-scale"><span>Most deprived</span>${SIMD_COLOURS.map((c, i) => `<i title="Decile ${i + 1}" style="background:${c}"></i>`).join("")}<span>Least</span></div>`;
+  }
+  $("legend").innerHTML = `<div class="legend-items">${items.join("")}</div>${simd}<div class="muted small">Purple ring = in a top-10 school catchment</div>`;
+}
+
+function renderAreas(): void {
+  const beds = filters.minBeds ? String(Math.min(filters.minBeds, 5)) : "";
+  $("areas-note").textContent = beds ? `(${beds}${beds === "5" ? "+" : ""}-bed)` : "";
+  const rows = areas
+    .map((a) => {
+      const b = beds ? a.by_beds[beds] : { count: a.count, median: a.median };
+      return b ? { d: a.district, ...b } : null;
+    })
+    .filter((r): r is { d: string; count: number; median: number } => !!r)
+    .sort((x, y) => y.median - x.median);
+  const max = Math.max(...rows.map((r) => r.median), 1);
+  $("areas").innerHTML = rows.length
+    ? `<tbody>${rows.map((r) => `<tr><th>${esc(r.d)}</th><td class="bar"><i style="width:${(100 * r.median) / max}%"></i></td><td>${gbp(r.median)}</td><td class="muted">${r.count}</td></tr>`).join("")}</tbody>`
+    : `<tbody><tr><td class="muted">No listings yet</td></tr></tbody>`;
+}
+
+function badges(l: Listing): string {
+  const b: string[] = [];
+  if (l.detached) b.push(`<span class="badge">Detached</span>`);
+  if (l.garage) b.push(`<span class="badge">Garage</span>`);
+  if (l.top_school_rank) b.push(`<span class="badge school">Top-10 school #${l.top_school_rank}</span>`);
+  if (isNew(l)) b.push(`<span class="badge new">New</span>`);
+  if (isReduced(l)) b.push(`<span class="badge reduced">Reduced</span>`);
+  return b.join("");
+}
+
+function simdBar(decile?: number): string {
+  if (!decile) return `<span class="muted">Not available yet</span>`;
+  return `<span class="deciles" aria-label="SIMD decile ${decile} of 10">${SIMD_COLOURS.map((c, i) => `<i style="background:${i < decile ? c : "var(--line)"}"></i>`).join("")}</span> <b>${decile}</b>/10`;
+}
+
+function renderDetail(l: Listing): void {
+  const t = l.travel;
+  const hist = l.price_history ?? [];
+  const age = daysAgo(l.first_seen);
+  const vs = l.area;
+  const domains = l.simd ? (["income", "employment", "health", "education", "access", "crime", "housing"] as const)
+    .filter((k) => l.simd![k] != null).map((k) => `<span title="${k} decile">${k[0].toUpperCase() + k.slice(1)} <b>${l.simd![k]}</b></span>`).join("") : "";
+  $("detail").innerHTML = `
+    <button class="close" data-close aria-label="Close">×</button>
+    ${l.image ? `<img class="photo" src="${esc(l.image)}" alt="" loading="lazy" referrerpolicy="no-referrer">` : ""}
+    <div class="body">
+      <div class="price">${l.price_qualifier ? `<span class="q">${esc(l.price_qualifier)}</span> ` : ""}${gbpFull(l.price)}</div>
+      <h3>${esc(l.title || `${l.bedrooms ?? "?"} bedroom ${l.property_type ?? "home"}`)}</h3>
+      <div class="addr">${esc(l.address)}${l.approx_location ? ` <span class="muted">(location approximate)</span>` : ""}</div>
+      <div class="badges">${badges(l)}</div>
+
+      <div class="waverley">
+        <div class="big"><span>🚆 Waverley</span><b>${mins(t.best_min)}</b></div>
+        <div class="how">${esc(t.best_how)}</div>
+        <dl class="modes">
+          ${t.pt_min != null ? `<div><dt>Bus/tram</dt><dd>${mins(t.pt_min)}</dd></div>` : ""}
+          ${t.rail_min != null ? `<div><dt>Train</dt><dd>${mins(t.rail_min)}</dd></div>` : ""}
+          <div><dt>Cycle</dt><dd>${mins(t.cycle_min)}</dd></div>
+          <div><dt>Walk</dt><dd>${mins(t.walk_min)}</dd></div>
+        </dl>
+        ${t.pt_how && t.pt_how !== t.best_how ? `<div class="how muted">Bus/tram: ${esc(t.pt_how)}</div>` : ""}
+      </div>
+
+      <dl class="facts">
+        <div><dt>Bedrooms</dt><dd>${l.bedrooms ?? "–"}</dd></div>
+        <div><dt>Type</dt><dd>${esc(l.property_type ?? "–")}</dd></div>
+        <div><dt>SIMD</dt><dd>${simdBar(l.simd?.decile)}${l.simd?.name ? `<div class="muted small">${esc(l.simd.name)}</div>` : ""}${domains ? `<div class="domains">${domains}</div>` : ""}</dd></div>
+        <div><dt>Catchment</dt><dd>${esc(l.catchment ?? "–")}${l.top_school_rank ? ` <b class="rank">#${l.top_school_rank}</b>` : ""}${l.catchment_rc ? `<div class="muted small">RC: ${esc(l.catchment_rc)}</div>` : ""}</dd></div>
+        ${vs ? `<div><dt>vs area</dt><dd><b class="${vs.vs_pct > 5 ? "up" : vs.vs_pct < -5 ? "down" : ""}">${vs.vs_pct > 0 ? "+" : ""}${vs.vs_pct}%</b> vs ${esc(l.district)} ${vs.basis === "all" ? "" : `${esc(vs.basis)} `}median ${gbp(vs.median)}</dd></div>` : ""}
+        ${hist.length > 1 ? `<div><dt>History</dt><dd>${hist.map(([d, p]) => `${gbp(p)} <span class="muted small">${esc(d)}</span>`).join(" → ")}</dd></div>` : ""}
+        ${age != null ? `<div><dt>Listed</dt><dd>${age === 0 ? "today" : `${age} day${age === 1 ? "" : "s"} ago`}</dd></div>` : ""}
+      </dl>
+      <a class="cta" href="${esc(l.url)}" target="_blank" rel="noopener">View on ESPC ↗</a>
+    </div>`;
+}
+
+function select(l: Listing | null, fly = false): void {
+  selected = l;
+  map.select(l, meta);
+  const d = $("detail");
+  if (!l) {
+    d.hidden = true;
+    const u = new URL(location.href);
+    u.searchParams.delete("id");
+    history.replaceState(null, "", u);
+    return;
+  }
+  renderDetail(l);
+  d.hidden = false;
+  d.scrollTop = 0;
+  const u = new URL(location.href);
+  u.searchParams.set("id", l.id);
+  history.replaceState(null, "", u);
+  if (fly) map.flyTo(l);
+}
+
+function renderList(): void {
+  const ls = sortListings(visible, filters.sort);
+  $("list-count").textContent = `${ls.length} homes`;
+  $("cards").innerHTML = ls.slice(0, 400).map((l) => `
+    <div class="card" data-id="${esc(l.id)}" tabindex="0">
+      ${l.image ? `<img src="${esc(l.image)}" alt="" loading="lazy" referrerpolicy="no-referrer">` : `<div class="noimg">🏠</div>`}
+      <div class="c-body">
+        <div class="c-price">${gbpFull(l.price)} ${l.area ? `<span class="${l.area.vs_pct > 5 ? "up" : l.area.vs_pct < -5 ? "down" : "muted"} small">${l.area.vs_pct > 0 ? "+" : ""}${l.area.vs_pct}% vs area</span>` : ""}</div>
+        <div class="c-title">${esc(l.title || "")}</div>
+        <div class="muted small">${esc(l.address)}</div>
+        <div class="c-meta"><span>🚆 ${mins(l.travel.best_min)}</span><span>SIMD ${l.simd?.decile ?? "–"}</span><span>${esc(l.catchment ?? "")}</span></div>
+        <div class="badges">${badges(l)}</div>
+      </div>
+    </div>`).join("") || `<p class="muted">No homes match these filters.</p>`;
+  $("cards").querySelectorAll<HTMLElement>(".card").forEach((c) =>
+    c.addEventListener("keydown", (e) => e.key === "Enter" && c.click()),
+  );
+}
+
+function showPointInfo([lng, lat]: [number, number]): void {
+  if (selected) return select(null);
+  const z = simdIndex?.at(lng, lat)[0];
+  const c = catchIndex?.at(lng, lat) ?? [];
+  const parts: string[] = [];
+  if (z?.decile) parts.push(`<b>SIMD decile ${z.decile}</b> of 10${z.name ? `<br><span class="muted">${esc(z.name)}</span>` : ""}`);
+  for (const s of c) parts.push(`${s.sector === "RC" ? "RC catchment" : "Catchment"}: <b>${esc(s.school)}</b>${s.top_rank ? ` (#${s.top_rank})` : ""}`);
+  if (parts.length) map.showPopup([lng, lat], parts.join("<br>"));
+}
+
+main();

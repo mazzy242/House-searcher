@@ -1,0 +1,21 @@
+{
+  "_comment": "Rail stations with a direct train to Waverley. The GTFS bus/tram feed has no trains, so rail is estimated as: walk to station + half the peak interval between trains + minutes on the train. Figures are approximate weekday-peak values; correct them if you know better.",
+  "stations": [
+    { "name": "Haymarket",          "lat": 55.94573, "lng": -3.21829, "minutes": 4,  "trains_per_hour": 12 },
+    { "name": "Edinburgh Park",     "lat": 55.92751, "lng": -3.30757, "minutes": 10, "trains_per_hour": 4 },
+    { "name": "South Gyle",         "lat": 55.93610, "lng": -3.29947, "minutes": 10, "trains_per_hour": 2 },
+    { "name": "Edinburgh Gateway",  "lat": 55.94076, "lng": -3.32027, "minutes": 12, "trains_per_hour": 3 },
+    { "name": "Dalmeny",            "lat": 55.98643, "lng": -3.38164, "minutes": 16, "trains_per_hour": 2 },
+    { "name": "Slateford",          "lat": 55.92662, "lng": -3.24336, "minutes": 9,  "trains_per_hour": 1 },
+    { "name": "Kingsknowe",         "lat": 55.91864, "lng": -3.26538, "minutes": 12, "trains_per_hour": 1 },
+    { "name": "Wester Hailes",      "lat": 55.91433, "lng": -3.28499, "minutes": 14, "trains_per_hour": 1 },
+    { "name": "Curriehill",         "lat": 55.90063, "lng": -3.31883, "minutes": 14, "trains_per_hour": 2 },
+    { "name": "Kirknewton",         "lat": 55.88867, "lng": -3.43245, "minutes": 20, "trains_per_hour": 2 },
+    { "name": "Brunstane",          "lat": 55.94264, "lng": -3.10080, "minutes": 8,  "trains_per_hour": 2 },
+    { "name": "Newcraighall",       "lat": 55.93307, "lng": -3.09078, "minutes": 11, "trains_per_hour": 2 },
+    { "name": "Shawfair",           "lat": 55.91740, "lng": -3.08030, "minutes": 14, "trains_per_hour": 2 },
+    { "name": "Eskbank",            "lat": 55.88270, "lng": -3.08030, "minutes": 19, "trains_per_hour": 2 },
+    { "name": "Musselburgh",        "lat": 55.93378, "lng": -3.07329, "minutes": 7,  "trains_per_hour": 3 },
+    { "name": "Wallyford",          "lat": 55.94014, "lng": -3.01490, "minutes": 10, "trains_per_hour": 3 }
+  ]
+}

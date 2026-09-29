@@ -1,0 +1,435 @@
+"""ESPC listings scraper (personal use, once a day, polite).
+
+ESPC has no public API and its markup can change, so this is deliberately
+defensive and layered:
+
+1. Search results pages (settings.json -> espc.search_urls), following
+   pagination, collect property URLs.  If none are found it falls back to the
+   property sitemap(s) advertised in robots.txt.
+2. Each *new* property page (and any not refreshed for N days) is fetched and
+   parsed from, in order of trust: JSON-LD, embedded app-state JSON, meta tags,
+   then plain-text heuristics.
+3. robots.txt is honoured and requests are spaced out.
+
+If a run finds zero listings it raises, and the raw HTML is saved to
+pipeline/debug/ (uploaded by the workflow) so the parser can be fixed.
+"""
+from __future__ import annotations
+
+import datetime as dt
+import json
+import re
+import time
+import urllib.robotparser
+from typing import Any, Iterable
+from urllib.parse import urljoin, urlparse
+
+from bs4 import BeautifulSoup
+
+from common import DEBUG, SETTINGS, get, in_bbox, log, session
+
+CFG = SETTINGS["espc"]
+PROPERTY_PATH = re.compile(r"/property/[a-z0-9][a-z0-9\-/]*?(\d{5,})/?(?=[\"'?#\s]|$)", re.I)
+POSTCODE = re.compile(r"\b([A-Z]{1,2}\d[A-Z\d]?)\s*(\d[A-Z]{2})\b")
+PRICE = re.compile(
+    r"(?P<q>offers over|offers around|offers in the region of|offers in excess of|fixed price|"
+    r"oieo|oiro|o/o|price on application|from)?\s*£\s?(?P<n>\d{1,3}(?:,\d{3})+|\d{5,})", re.I)
+BEDS = re.compile(r"\b(\d{1,2})\s*(?:-|\s)?\s*(?:bed(?:room)?s?)\b", re.I)
+DETACHED = re.compile(r"(?<!semi)(?<!semi-)(?<!semi )\bdetached\b", re.I)
+NOT_GARAGE = re.compile(r"\b(no|without)\s+(a\s+)?garag", re.I)
+GARAGE = re.compile(r"\bgarag(e|es|ing)\b", re.I)
+TYPE_WORDS = ["semi-detached", "detached", "terraced", "end-terrace", "mid-terrace", "villa",
+              "bungalow", "cottage", "flat", "apartment", "maisonette", "townhouse", "house", "duplex"]
+
+
+class Robots:
+    def __init__(self, s):
+        self.rp = urllib.robotparser.RobotFileParser()
+        self.sitemaps: list[str] = []
+        try:
+            r = get(s, urljoin(CFG["base_url"], "/robots.txt"), timeout=30)
+            lines = r.text.splitlines() if r.ok else []
+        except Exception:  # noqa: BLE001
+            lines = []
+        self.rp.parse(lines)
+        self.sitemaps = [l.split(":", 1)[1].strip() for l in lines if l.lower().startswith("sitemap:")]
+
+    def allowed(self, url: str) -> bool:
+        return self.rp.can_fetch(CFG["user_agent"], url)
+
+
+class Fetcher:
+    def __init__(self):
+        self.s = session(CFG["user_agent"])
+        self.robots = Robots(self.s)
+        self.last = 0.0
+        self.count = 0
+
+    def html(self, url: str) -> str | None:
+        if not self.robots.allowed(url):
+            log.warning("robots.txt disallows %s - skipping", url)
+            return None
+        wait = CFG["request_delay_seconds"] - (time.monotonic() - self.last)
+        if wait > 0:
+            time.sleep(wait)
+        self.last = time.monotonic()
+        self.count += 1
+        r = get(self.s, url, timeout=45)
+        if r.status_code == 404 or r.status_code == 410:
+            return None
+        r.raise_for_status()
+        return r.text
+
+
+def listing_id(url: str) -> str | None:
+    m = PROPERTY_PATH.search(urlparse(url).path)
+    return m.group(1) if m else None
+
+
+def extract_property_urls(html: str, base: str) -> dict[str, str]:
+    """Map ESPC id -> absolute property URL, from hrefs and any embedded JSON."""
+    found: dict[str, str] = {}
+    html = html.replace("\\/", "/")  # JSON-escaped URLs in embedded state
+    for m in re.finditer(r"""(?:href=|"url"\s*:\s*|"link"\s*:\s*)["']([^"']*/property/[^"']+)["']""", html, re.I):
+        url = urljoin(base, m.group(1))
+        pid = listing_id(url)
+        if pid:
+            found.setdefault(pid, url.split("#")[0])
+    return found
+
+
+def next_page_url(html: str, current: str, page: int) -> str | None:
+    soup = BeautifulSoup(html, "html.parser")
+    link = soup.find("link", rel="next") or soup.find("a", rel="next")
+    if link and link.get("href"):
+        return urljoin(current, link["href"])
+    for a in soup.find_all("a", href=True):
+        label = (a.get("aria-label") or a.get_text(" ", strip=True)).lower()
+        if label in ("next", "next page", "›", "»", ">") and a["href"] not in ("#", ""):
+            return urljoin(current, a["href"])
+    return None
+
+
+def discover(f: Fetcher) -> dict[str, str]:
+    urls: dict[str, str] = {}
+    for start in CFG["search_urls"]:
+        url, page, seen = start, 1, set()
+        while url and page <= CFG["max_search_pages"] and url not in seen:
+            seen.add(url)
+            html = f.html(url)
+            if not html:
+                break
+            got = extract_property_urls(html, url)
+            if page == 1:
+                (DEBUG / "search_page_1.html").write_text(html)
+            new = {k: v for k, v in got.items() if k not in urls}
+            log.info("Search page %d: %d property links (%d new)", page, len(got), len(new))
+            urls.update(got)
+            if not new:
+                break
+            url = next_page_url(html, url, page)
+            if not url:  # no explicit link: try the conventional ?page=N
+                sep = "&" if "?" in start else "?"
+                url = f"{start}{sep}page={page + 1}"
+            page += 1
+    if not urls and CFG["use_sitemap_fallback"]:
+        urls = discover_from_sitemaps(f)
+    return urls
+
+
+def discover_from_sitemaps(f: Fetcher) -> dict[str, str]:
+    urls: dict[str, str] = {}
+    queue = list(f.robots.sitemaps) or [urljoin(CFG["base_url"], "/sitemap.xml")]
+    seen = set()
+    while queue and len(seen) < 50:
+        sm = queue.pop(0)
+        if sm in seen:
+            continue
+        seen.add(sm)
+        xml = f.html(sm)
+        if not xml:
+            continue
+        for loc in re.findall(r"<loc>\s*([^<\s]+)\s*</loc>", xml):
+            if loc.endswith(".xml") and ("propert" in loc or "sitemap" in loc):
+                queue.append(loc)
+            elif (pid := listing_id(loc)):
+                urls[pid] = loc
+    log.info("Sitemaps: %d property URLs", len(urls))
+    return urls
+
+
+# ------------------------------------------------------------------ parsing
+
+def _walk(obj: Any) -> Iterable[dict]:
+    if isinstance(obj, dict):
+        yield obj
+        for v in obj.values():
+            yield from _walk(v)
+    elif isinstance(obj, list):
+        for v in obj:
+            yield from _walk(v)
+
+
+def _first(d: dict, *keys: str) -> Any:
+    lower = {k.lower(): v for k, v in d.items()}
+    for k in keys:
+        v = lower.get(k.lower())
+        if v not in (None, "", [], {}):
+            return v
+    return None
+
+
+def _first_num(d: dict, *keys: str) -> float | None:
+    lower = {k.lower(): v for k, v in d.items()}
+    for k in keys:
+        n = _num(lower.get(k.lower()))
+        if n is not None:
+            return n
+    return None
+
+
+def _num(v: Any) -> float | None:
+    if isinstance(v, (int, float)):
+        return float(v)
+    if isinstance(v, str):
+        m = re.search(r"-?\d[\d,]*\.?\d*", v)
+        if m:
+            try:
+                return float(m.group(0).replace(",", ""))
+            except ValueError:
+                return None
+    return None
+
+
+def _json_blobs(soup: BeautifulSoup, html: str) -> tuple[list[Any], list[Any]]:
+    ld, app = [], []
+    for sc in soup.find_all("script"):
+        text = sc.string or sc.get_text() or ""
+        typ = (sc.get("type") or "").lower()
+        if "ld+json" in typ:
+            try:
+                ld.append(json.loads(text))
+            except json.JSONDecodeError:
+                pass
+        elif typ == "application/json" or sc.get("id") in ("__NEXT_DATA__", "__NUXT_DATA__"):
+            try:
+                app.append(json.loads(text))
+            except json.JSONDecodeError:
+                pass
+        else:
+            for m in re.finditer(r"window\.__[A-Z_]+__\s*=\s*(\{.*?\})\s*;?\s*$", text, re.S | re.M):
+                try:
+                    app.append(json.loads(m.group(1)))
+                except json.JSONDecodeError:
+                    pass
+    return ld, app
+
+
+def parse_property(html: str, url: str) -> dict:
+    """Best-effort extraction of one ESPC property page."""
+    soup = BeautifulSoup(html, "html.parser")
+    ld, app = _json_blobs(soup, html)
+    out: dict[str, Any] = {"id": listing_id(url), "url": url}
+
+    # 1) JSON-LD (schema.org)
+    for d in _walk(ld):
+        geo = d.get("geo") if isinstance(d.get("geo"), dict) else None
+        if geo and out.get("lat") is None:
+            out["lat"], out["lng"] = _num(geo.get("latitude")), _num(geo.get("longitude"))
+        addr = d.get("address")
+        if isinstance(addr, dict) and not out.get("address"):
+            parts = [addr.get(k) for k in ("streetAddress", "addressLocality", "postalCode")]
+            out["address"] = ", ".join(p for p in parts if p)
+            if addr.get("postalCode"):
+                out["postcode"] = addr["postalCode"]
+        elif isinstance(addr, str) and not out.get("address"):
+            out["address"] = addr
+        if out.get("price") is None:
+            offers = d.get("offers")
+            for o in (offers if isinstance(offers, list) else [offers] if isinstance(offers, dict) else []):
+                if _num(o.get("price")):
+                    out["price"] = int(_num(o["price"]))
+        beds = _first(d, "numberOfBedrooms", "numberOfRooms")
+        if beds is not None and out.get("bedrooms") is None and _num(beds):
+            out["bedrooms"] = int(_num(beds))
+        if not out.get("image"):
+            img = d.get("image")
+            img = img[0] if isinstance(img, list) and img else img
+            if isinstance(img, dict):
+                img = img.get("url")
+            if isinstance(img, str):
+                out["image"] = img
+        if not out.get("title") and isinstance(d.get("name"), str):
+            out["title"] = d["name"]
+        if not out.get("description") and isinstance(d.get("description"), str):
+            out["description"] = d["description"]
+
+    # 2) Embedded app state: look for property-like objects.
+    for d in _walk(app):
+        la, ln = _first_num(d, "latitude", "lat"), _first_num(d, "longitude", "lng", "lon")
+        if out.get("lat") is None and la and ln and 50 < la < 60:
+            out["lat"], out["lng"] = la, ln
+        if out.get("bedrooms") is None:
+            b = _first_num(d, "bedrooms", "beds", "numberOfBedrooms", "bedroomCount")
+            if b is not None and 0 <= b < 20:
+                out["bedrooms"] = int(b)
+        if out.get("price") is None:
+            p = _first_num(d, "price", "askingPrice", "priceValue", "displayPrice")
+            if p and p > 10000:
+                out["price"] = int(p)
+        if not out.get("property_type"):
+            t = _first(d, "propertyType", "propertyTypeName", "type", "style")
+            if isinstance(t, str) and any(w in t.lower() for w in TYPE_WORDS):
+                out["property_type"] = t
+        if not out.get("features"):
+            feats = _first(d, "features", "keyFeatures", "bullets")
+            if isinstance(feats, list) and feats and all(isinstance(x, str) for x in feats):
+                out["features"] = feats
+        if not out.get("description"):
+            desc = _first(d, "description", "summary", "fullDescription")
+            if isinstance(desc, str) and len(desc) > 80:
+                out["description"] = desc
+
+    # 3) Meta tags and data attributes
+    def meta(prop: str) -> str | None:
+        el = soup.find("meta", attrs={"property": prop}) or soup.find("meta", attrs={"name": prop})
+        return el.get("content") if el else None
+    out.setdefault("title", meta("og:title") or (soup.title.get_text(strip=True) if soup.title else ""))
+    if not out.get("image"):
+        out["image"] = meta("og:image")
+    if not out.get("description"):
+        out["description"] = meta("og:description") or meta("description") or ""
+    if out.get("lat") is None:
+        la, ln = meta("place:location:latitude"), meta("place:location:longitude")
+        if la and ln:
+            out["lat"], out["lng"] = _num(la), _num(ln)
+    if out.get("lat") is None:
+        el = soup.find(attrs={"data-lat": True}) or soup.find(attrs={"data-latitude": True})
+        if el:
+            out["lat"] = _num(el.get("data-lat") or el.get("data-latitude"))
+            out["lng"] = _num(el.get("data-lng") or el.get("data-lon") or el.get("data-longitude"))
+    if out.get("lat") is None:  # static map / map links: ...center=55.9,-3.2 or ?q=55.9,-3.2 or @55.9,-3.2
+        m = re.search(r"(?:center=|q=|ll=|@)(5[5-6]\.\d{3,}),\s*(-[23]\.\d{3,})", html)
+        if m:
+            out["lat"], out["lng"] = float(m.group(1)), float(m.group(2))
+
+    # 4) Text heuristics
+    for tag in soup(["script", "style", "noscript"]):
+        tag.decompose()
+    text = re.sub(r"\s+", " ", soup.get_text(" "))
+    head = f"{out.get('title', '')} {out.get('property_type', '')}"
+    feats_text = " ".join(out.get("features") or [])
+
+    pm = PRICE.search(head) or PRICE.search(text)
+    if pm:
+        if out.get("price") is None:
+            out["price"] = int(pm.group("n").replace(",", ""))
+        if pm.group("q"):
+            out["price_qualifier"] = pm.group("q").title()
+    if out.get("bedrooms") is None:
+        bm = BEDS.search(head) or BEDS.search(text)
+        if bm:
+            out["bedrooms"] = int(bm.group(1))
+    if not out.get("postcode"):
+        pc = POSTCODE.search(out.get("address") or "") or POSTCODE.search(head) or POSTCODE.search(text)
+        if pc:
+            out["postcode"] = f"{pc.group(1)} {pc.group(2)}"
+    if not out.get("address"):
+        h1 = soup.find("h1")
+        out["address"] = h1.get_text(" ", strip=True) if h1 else out.get("title", "")
+    if not out.get("property_type"):
+        for w in TYPE_WORDS:
+            if re.search(rf"\b{re.escape(w)}\b", head, re.I):
+                out["property_type"] = w
+                break
+    # Detached: from the title/type/features; only fall back to the opening of the
+    # description when the headline doesn't already say what kind of home it is.
+    type_text = f"{head} {feats_text}"
+    desc_open = (out.get("description") or "")[:300]
+    out["detached"] = bool(DETACHED.search(type_text) or (
+        not re.search(r"semi|terrace|flat|apartment|maisonette", type_text, re.I) and DETACHED.search(desc_open)))
+    garage_text = f"{head} {feats_text} {out.get('description') or ''}"
+    out["garage"] = bool(GARAGE.search(garage_text)) and not NOT_GARAGE.search(garage_text)
+    if out.get("postcode"):
+        out["postcode"] = out["postcode"].upper()
+        out["district"] = out["postcode"].split()[0]
+    for k in ("description", "features"):
+        out.pop(k, None)
+    out["title"] = (out.get("title") or "").split("|")[0].strip()
+    return out
+
+
+def geocode_postcodes(listings: list[dict]) -> None:
+    """Fill missing coordinates from postcodes.io (free, no key)."""
+    need = sorted({l["postcode"] for l in listings if l.get("lat") is None and l.get("postcode")})
+    if not need:
+        return
+    s = session()
+    found: dict[str, tuple[float, float]] = {}
+    for i in range(0, len(need), 100):
+        r = s.post(SETTINGS["sources"]["postcodes_io"], json={"postcodes": need[i:i + 100]}, timeout=60)
+        if not r.ok:
+            continue
+        for item in r.json().get("result", []):
+            res = item.get("result")
+            if res:
+                found[item["query"]] = (res["latitude"], res["longitude"])
+    for l in listings:
+        if l.get("lat") is None and l.get("postcode") in found:
+            l["lat"], l["lng"] = found[l["postcode"]]
+            l["approx_location"] = True
+    log.info("Geocoded %d postcodes", len(found))
+
+
+def scrape(state: dict[str, dict]) -> dict[str, dict]:
+    """Update and return `state` (id -> listing record)."""
+    DEBUG.mkdir(parents=True, exist_ok=True)
+    f = Fetcher()
+    today = dt.date.today().isoformat()
+    urls = discover(f)
+    if not urls:
+        raise RuntimeError("ESPC: no property links found on search pages or sitemaps - see pipeline/debug/")
+    stale_before = (dt.date.today() - dt.timedelta(days=CFG["refetch_details_after_days"])).isoformat()
+    todo = [pid for pid in urls if pid not in state or state[pid].get("fetched", "") < stale_before
+            or not state[pid].get("active")]
+    todo = todo[:CFG["max_detail_fetches_per_run"]]
+    log.info("ESPC: %d live listings, fetching %d detail pages", len(urls), len(todo))
+    parsed_ok = 0
+    for n, pid in enumerate(todo, 1):
+        try:
+            html = f.html(urls[pid])
+        except Exception as e:  # noqa: BLE001
+            log.warning("detail %s failed: %s", pid, e)
+            continue
+        if not html:
+            continue
+        if n <= 3:
+            (DEBUG / f"property_{pid}.html").write_text(html)
+        rec = parse_property(html, urls[pid])
+        prev = state.get(pid, {})
+        history = prev.get("price_history", [])
+        if rec.get("price") and (not history or history[-1][1] != rec["price"]):
+            history.append([today, rec["price"]])
+        state[pid] = {**prev, **{k: v for k, v in rec.items() if v not in (None, "")},
+                      "price_history": history, "fetched": today,
+                      "first_seen": prev.get("first_seen", today)}
+        if rec.get("price") and (rec.get("lat") or rec.get("postcode")):
+            parsed_ok += 1
+        if n % 50 == 0:
+            log.info("  ... %d/%d", n, len(todo))
+    if todo and parsed_ok == 0:
+        raise RuntimeError("ESPC: fetched detail pages but could not parse price/location from any - see pipeline/debug/")
+    for pid, rec in state.items():
+        rec["active"] = pid in urls
+        if rec["active"]:
+            rec["last_seen"] = today
+    geocode_postcodes([r for r in state.values() if r["active"]])
+    area = set(CFG["postcode_areas"])
+    for rec in state.values():
+        pc_area = re.match(r"[A-Z]+", rec.get("postcode") or "")
+        if rec["active"] and area and pc_area and pc_area.group(0) not in area:
+            rec["active"] = False  # outside the areas we care about
+        if rec["active"] and rec.get("lat") is not None and not in_bbox(rec["lat"], rec["lng"]):
+            rec["active"] = False
+    log.info("ESPC: %d requests, %d active listings in area", f.count, sum(r["active"] for r in state.values()))
+    return state
