@@ -17,8 +17,10 @@ permissions:
   pages: write
   id-token: write
 
+# Code pushes and data refreshes queue separately: GitHub keeps only one *pending* run per group,
+# so sharing a group let a push silently cancel a waiting refresh.
 concurrency:
-  group: refresh-${{ github.ref }}
+  group: ${{ github.event_name == 'push' && 'push' || 'refresh' }}-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
