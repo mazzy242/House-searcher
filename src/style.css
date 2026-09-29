@@ -175,6 +175,10 @@ table.areas td.bar i { display: block; height: 8px; background: #9ecae1; border-
   padding: 10px; border-radius: 8px; font-weight: 600;
 }
 
+.basemap-ctrl { display: flex; }
+.maplibregl-ctrl-group.basemap-ctrl button { width: auto; padding: 0 9px; font-size: 12px; font-weight: 550; border: 0; border-left: 1px solid #ddd; }
+.maplibregl-ctrl-group.basemap-ctrl button:first-child { border-left: 0; }
+.maplibregl-ctrl-group.basemap-ctrl button[aria-checked="true"]:not(:disabled) { background: var(--top); color: #fff; }
 .maplibregl-popup-content { font-size: 13px; line-height: 1.45; border-radius: 8px; padding: 10px 26px 10px 12px; }
 
 /* ---------------------------------------------------------------- narrow screens */

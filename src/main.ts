@@ -43,7 +43,8 @@ async function main(): Promise<void> {
   await map.init($("map"), meta, {
     onSelect: (id) => select(listings.find((l) => l.id === id) ?? null),
     onBackgroundClick: showPointInfo,
-  });
+    onBasemap: (basemap) => set({ basemap }),
+  }, filters.basemap);
   // Lazy-load polygons for click-anywhere info (the map fetches its own copy).
   Promise.all([load("simd.geojson", emptyFc), load("catchments.geojson", emptyFc)]).then(([s, c]) => {
     simdIndex = new PolygonIndex<Simd>(s);
@@ -86,7 +87,7 @@ function buildControls(): void {
   $("allBus").addEventListener("change", () => {
     if (filters.allBus && !filters.layers.bus) set({ layers: { ...filters.layers, bus: true } });
   });
-  $("reset").addEventListener("click", () => set({ ...DEFAULTS, layers: filters.layers, colourBy: filters.colourBy, simdDomain: filters.simdDomain }));
+  $("reset").addEventListener("click", () => set({ ...DEFAULTS, layers: filters.layers, colourBy: filters.colourBy, simdDomain: filters.simdDomain, basemap: filters.basemap }));
 
   const panel = $("panel");
   $("toggle-panel").addEventListener("click", () => {
@@ -145,6 +146,7 @@ function update(): void {
   syncControls();
   visible = listings.filter((l) => matches(l, filters));
   map.applyFilters(filters);
+  void map.setBasemap(filters.basemap);
   map.setListings(visible);
   const total = listings.length;
   const med = median(visible.map((l) => l.price));

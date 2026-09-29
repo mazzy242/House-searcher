@@ -7,27 +7,93 @@ import { PRICE_STOPS, SIMD_COLOURS, TIME_STOPS, VS_STOPS, gbp } from "./format";
 import type { ColourBy, Filters } from "./filters";
 import type { Area, Listing, Meta } from "./types";
 
-const BASEMAP = "https://tiles.openfreemap.org/styles/positron";
 const GLYPHS = "https://tiles.openfreemap.org/fonts/{fontstack}/{range}.pbf";
 const FONT_BOLD = ["Noto Sans Bold"];
 const EMPTY = { type: "FeatureCollection", features: [] } as GeoJSON.FeatureCollection;
+const ESRI = "https://server.arcgisonline.com/ArcGIS/rest/services";
 
-maplibregl.setWorkerUrl(workerUrl);
+export type Basemap = "light" | "roads" | "satellite";
+export const BASEMAPS: { id: Basemap; label: string }[] = [
+  { id: "light", label: "Light" },
+  { id: "roads", label: "Roads" },
+  { id: "satellite", label: "Satellite" },
+];
 
-async function loadStyle(): Promise<StyleSpecification | string> {
+const VECTOR_STYLES: Record<Exclude<Basemap, "satellite">, string> = {
+  light: "https://tiles.openfreemap.org/styles/positron",
+  roads: "https://tiles.openfreemap.org/styles/liberty",
+};
+
+const esriRaster = (path: string, attribution = ""): maplibregl.RasterSourceSpecification => ({
+  type: "raster", tileSize: 256, maxzoom: 19, attribution,
+  tiles: [`${ESRI}/${path}/MapServer/tile/{z}/{y}/{x}`],
+});
+
+/** Aerial imagery with road and place-name overlays on top (Esri World Imagery). */
+const SATELLITE: StyleSpecification = {
+  version: 8,
+  glyphs: GLYPHS,
+  sources: {
+    imagery: esriRaster("World_Imagery", "Imagery © Esri, Maxar, Earthstar Geographics"),
+    roads: esriRaster("Reference/World_Transportation"),
+    places: esriRaster("Reference/World_Boundaries_and_Places"),
+  },
+  layers: [
+    { id: "imagery", type: "raster", source: "imagery" },
+    { id: "sat-roads", type: "raster", source: "roads", paint: { "raster-opacity": 0.85 } },
+    { id: "sat-places", type: "raster", source: "places" },
+  ],
+};
+
+const PLAIN: StyleSpecification = {
+  version: 8,
+  glyphs: GLYPHS,
+  sources: {},
+  layers: [{ id: "bg", type: "background", paint: { "background-color": "#eef0ec" } }],
+};
+
+async function styleFor(b: Basemap): Promise<StyleSpecification | string> {
+  if (b === "satellite") return SATELLITE;
   try {
-    const r = await fetch(BASEMAP, { signal: AbortSignal.timeout(6000) });
-    if (r.ok) return BASEMAP;
+    const r = await fetch(VECTOR_STYLES[b], { signal: AbortSignal.timeout(6000) });
+    if (r.ok) return VECTOR_STYLES[b];
   } catch {
     /* fall through to a plain background so the overlays still work offline */
   }
-  return {
-    version: 8,
-    glyphs: GLYPHS,
-    sources: {},
-    layers: [{ id: "bg", type: "background", paint: { "background-color": "#eef0ec" } }],
-  };
+  return PLAIN;
 }
+
+// Our overlays that should sit under the basemap's labels rather than on top of them.
+const UNDER_LABELS = new Set(["simd-fill", "catch-top-fill"]);
+
+/** Base-map switcher shown on the map itself, so it's one tap away on a phone too. */
+class BasemapControl implements maplibregl.IControl {
+  private el = document.createElement("div");
+  constructor(private current: Basemap, private onChange: (b: Basemap) => void) {}
+  onAdd(): HTMLElement {
+    this.el.className = "maplibregl-ctrl maplibregl-ctrl-group basemap-ctrl";
+    this.el.setAttribute("role", "radiogroup");
+    this.el.setAttribute("aria-label", "Base map");
+    this.el.innerHTML = BASEMAPS.map((b) => `<button type="button" role="radio" data-basemap="${b.id}">${b.label}</button>`).join("");
+    this.el.addEventListener("click", (e) => {
+      const b = (e.target as HTMLElement).dataset.basemap as Basemap | undefined;
+      if (b && b !== this.current) this.onChange(b);
+    });
+    this.set(this.current);
+    return this.el;
+  }
+  onRemove(): void {
+    this.el.remove();
+  }
+  set(b: Basemap): void {
+    this.current = b;
+    this.el.querySelectorAll<HTMLButtonElement>("button").forEach((btn) =>
+      btn.setAttribute("aria-checked", String(btn.dataset.basemap === b)),
+    );
+  }
+}
+
+maplibregl.setWorkerUrl(workerUrl);
 
 const step = (prop: unknown, stops: [number, string][]): unknown[] => {
   const e: unknown[] = ["step", prop, stops[0][1]];
@@ -41,14 +107,20 @@ export const colourExpr = (by: ColourBy): unknown[] =>
 export interface MapHandlers {
   onSelect: (id: string) => void;
   onBackgroundClick: (lngLat: [number, number]) => void;
+  onBasemap: (b: Basemap) => void;
 }
 
 export class HouseMap {
   map!: MLMap;
   private popup = new maplibregl.Popup({ closeButton: true, maxWidth: "280px" });
+  private ownSources = new Set<string>();
+  private ownLayers = new Set<string>();
+  private basemap: Basemap = "light";
+  private basemapCtrl!: BasemapControl;
 
-  async init(container: HTMLElement, meta: Meta, h: MapHandlers): Promise<void> {
-    const style = await loadStyle();
+  async init(container: HTMLElement, meta: Meta, h: MapHandlers, basemap: Basemap = "light"): Promise<void> {
+    this.basemap = basemap;
+    const style = await styleFor(basemap);
     this.map = new maplibregl.Map({
       container,
       style,
@@ -61,9 +133,39 @@ export class HouseMap {
     this.map.addControl(new maplibregl.NavigationControl({ showCompass: false }), "top-left");
     this.map.addControl(new maplibregl.GeolocateControl({}), "top-left");
     this.map.addControl(new maplibregl.ScaleControl({ unit: "metric" }), "bottom-left");
+    this.basemapCtrl = new BasemapControl(basemap, h.onBasemap);
+    this.map.addControl(this.basemapCtrl, "top-left");
     await new Promise<void>((res) => this.map.once("load", () => res()));
+    const before = this.map.getStyle();
+    const [srcBefore, layersBefore] = [new Set(Object.keys(before.sources)), new Set(before.layers.map((l) => l.id))];
     this.addLayers(meta);
+    const after = this.map.getStyle();
+    this.ownSources = new Set(Object.keys(after.sources).filter((s) => !srcBefore.has(s)));
+    this.ownLayers = new Set(after.layers.map((l) => l.id).filter((id) => !layersBefore.has(id)));
     this.bind(h);
+  }
+
+  /** Swap the base map, carrying our sources and layers (with their current data and visibility) across. */
+  async setBasemap(b: Basemap): Promise<void> {
+    if (b === this.basemap) return;
+    this.basemap = b;
+    this.basemapCtrl.set(b);
+    const style = await styleFor(b);
+    if (this.basemap !== b) return; // a quicker second click won
+    this.map.setStyle(style, {
+      transformStyle: (prev, next) => {
+        if (!prev) return next;
+        const ours = prev.layers.filter((l) => this.ownLayers.has(l.id));
+        const under = ours.filter((l) => UNDER_LABELS.has(l.id));
+        const over = ours.filter((l) => !UNDER_LABELS.has(l.id));
+        const firstLabel = next.layers.findIndex((l) => l.type === "symbol");
+        const base = [...next.layers];
+        base.splice(firstLabel < 0 ? base.length : firstLabel, 0, ...under);
+        const sources = { ...next.sources };
+        for (const id of this.ownSources) sources[id] = prev.sources[id];
+        return { ...next, glyphs: next.glyphs ?? GLYPHS, sources, layers: [...base, ...over] };
+      },
+    });
   }
 
   private addLayers(meta: Meta): void {

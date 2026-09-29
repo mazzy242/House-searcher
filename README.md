@@ -37,7 +37,7 @@ GitHub Actions (daily 05:17 UTC)
   commit data → vite build → GitHub Pages
 ```
 
-The site is static (Vite + TypeScript + MapLibre GL, OpenFreeMap basemap), so hosting is free and nothing needs an API key.
+The site is static (Vite + TypeScript + MapLibre GL), so hosting is free and nothing needs an API key. There are three base maps, switchable on the map: Light and Roads (OpenFreeMap vector tiles) and Satellite (Esri World Imagery with road and place-name overlays).
 
 ### Time to Waverley
 
@@ -94,4 +94,4 @@ python pipeline/build.py --skip-espc                  # refresh layers + journey
 - Catchments © City of Edinburgh Council (OGL). Confirm with the council before relying on them.
 - Timetables: Bus Open Data Service (OGL).
 - Routes © OpenStreetMap contributors (ODbL).
-- Basemap © OpenFreeMap / OpenMapTiles / OSM.
+- Base maps © OpenFreeMap / OpenMapTiles / OSM. Satellite imagery © Esri, Maxar, Earthstar Geographics (Esri's terms allow non-commercial use with attribution).

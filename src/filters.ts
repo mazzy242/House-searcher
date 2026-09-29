@@ -19,6 +19,7 @@ export interface Filters {
   layers: Record<string, boolean>;
   simdDomain: string;
   allBus: boolean;
+  basemap: "light" | "roads" | "satellite";
 }
 
 export const DEFAULTS: Filters = {
@@ -37,11 +38,12 @@ export const DEFAULTS: Filters = {
   layers: { simd: false, tram: true, tramProposed: true, bus: false, catchTop: true, catchAll: false, areas: false },
   simdDomain: "decile",
   allBus: false,
+  basemap: "light",
 };
 
 const NUM = ["minPrice", "maxPrice", "minBeds", "maxMins", "minSimd"] as const;
 const BOOL = ["detached", "garage", "topSchool", "newOnly", "allBus"] as const;
-const STR = ["school", "colourBy", "sort", "simdDomain"] as const;
+const STR = ["school", "colourBy", "sort", "simdDomain", "basemap"] as const;
 
 /** Filters live in the URL hash so a search can be bookmarked or shared. */
 export function toHash(f: Filters): string {
