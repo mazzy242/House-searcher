@@ -283,6 +283,8 @@ function renderAreas(): void {
 
 function badges(l: Listing): string {
   const b: string[] = [];
+  if (l.bathrooms) b.push(`<span class="badge size">🛁 ${l.bathrooms} bath${l.bathrooms === 1 ? "" : "s"}</span>`);
+  if (l.floor_area_m2) b.push(`<span class="badge size">📐 ${l.floor_area_m2} m²</span>`);
   if (l.detached) b.push(`<span class="badge">Detached</span>`);
   if (l.garage) b.push(`<span class="badge">Garage</span>`);
   if (l.top_school_rank) b.push(`<span class="badge school">Top-10 school #${l.top_school_rank}</span>`);
@@ -325,7 +327,8 @@ function renderDetail(l: Listing): void {
       </div>
 
       <dl class="facts">
-        <div><dt>Bedrooms</dt><dd>${l.bedrooms ?? "–"}</dd></div>
+        <div><dt>Rooms</dt><dd>${l.bedrooms ?? "–"} bed · ${l.bathrooms ?? "–"} bath</dd></div>
+        <div><dt>Floor area</dt><dd>${l.floor_area_m2 ? `${l.floor_area_m2} m² <span class="muted">(${Math.round(l.floor_area_m2 * 10.764).toLocaleString("en-GB")} sq ft) · ${gbpFull(Math.round(l.price / l.floor_area_m2))}/m²</span>` : `<span class="muted">Not listed</span>`}</dd></div>
         <div><dt>Type</dt><dd>${esc(l.property_type ?? "–")}</dd></div>
         <div><dt>SIMD</dt><dd>${simdBar(l.simd?.decile)}${l.simd?.name ? `<div class="muted small">${esc(l.simd.name)}</div>` : ""}${domains ? `<div class="domains">${domains}</div>` : ""}</dd></div>
         <div><dt>Catchment</dt><dd>${l.catchment || l.catchment_rc ? "" : `<span class="muted">Outside Edinburgh – check with ${esc(l.region ?? "the local")} council</span>`}${esc(l.catchment ?? "")}${topFor(l.catchment) ? ` <b class="rank">#${topFor(l.catchment)!.rank}</b>` : ""}${l.catchment_rc ? `<div class="small">RC: ${esc(l.catchment_rc)}${topFor(l.catchment_rc) ? ` <b class="rank">#${topFor(l.catchment_rc)!.rank}</b>` : ""}</div>` : ""}${[topFor(l.catchment), topFor(l.catchment_rc)].filter((t): t is TopSchool => !!t).map(schoolStats).join("")}</dd></div>

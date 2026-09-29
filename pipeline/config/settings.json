@@ -12,11 +12,9 @@
       "https://espc.com/properties?locations=midlothian",
       "https://espc.com/properties?locations=east-lothian",
       "https://espc.com/properties?locations=west-lothian",
-      "https://espc.com/properties?locations=north-queensferry",
-      "https://espc.com/properties?locations=inverkeithing",
-      "https://espc.com/properties?locations=dalgety-bay",
-      "https://espc.com/properties?locations=aberdour",
-      "https://espc.com/properties?locations=burntisland"
+      "https://espc.com/properties?locations=south-queensferry",
+      "https://espc.com/properties?locations=west-fife",
+      "https://espc.com/properties?locations=dunfermline"
     ],
     "_search_comment": "No page limit: each search is followed until ESPC stops returning new listings. A search whose first page isn't titled 'for sale in <place>' (an unrecognised location) is skipped.",
     "use_sitemap_fallback": true,

@@ -40,6 +40,15 @@ BEDS = re.compile(r"\b(\d{1,2})\s*(?:-|\s)?\s*(?:bed(?:room)?s?)\b", re.I)
 DETACHED = re.compile(r"(?<!semi)(?<!semi-)(?<!semi )\bdetached\b", re.I)
 NOT_GARAGE = re.compile(r"\b(no|without)\s+(a\s+)?garag", re.I)
 GARAGE = re.compile(r"\bgarag(e|es|ing)\b", re.I)
+BATHS = re.compile(r"\b(\d{1,2})\s*(?:-|\s)?\s*bath(?:room)?s?\b", re.I)
+BATHS_LABEL = re.compile(r"\bbathrooms\s*:?\s*(\d{1,2})\b(?!\s*(?:\.\d|x|m\b))", re.I)
+AREA_UNIT = r"(m²|m2|sq\.?\s?m(?:etres|eters)?\b|square\s+met(?:re|er)s|sq\.?\s?ft\b|square\s+f(?:ee|oo)t|ft²)"
+AREA_NUM = r"(?<![\d,.])(\d{1,3}(?:,\d{3})+|\d{2,5})(?:\.\d+)?"  # 112, 1,076, 98.5
+AREA_LABELLED = re.compile(r"(?:floor\s*area|internal\s*area|total\s*area|living\s*area|floor\s*space|size)"
+                           r"[^\d]{0,40}?" + AREA_NUM + r"\s*" + AREA_UNIT, re.I)
+AREA_ANY = re.compile(AREA_NUM + r"\s*" + AREA_UNIT, re.I)
+PARSER_VERSION = 2  # bump when the parser learns new fields, so kept houses are re-read once
+
 TYPE_WORDS = ["semi-detached", "detached", "terraced", "end-terrace", "mid-terrace", "villa",
               "bungalow", "cottage", "flat", "apartment", "maisonette", "townhouse", "house", "duplex"]
 
@@ -311,6 +320,19 @@ def _num(v: Any) -> float | None:
     return None
 
 
+def _area(value: Any, unit: str = "") -> int | None:
+    """Floor area in whole m² from a number/string/{value, unitCode} and a unit hint; None if implausible."""
+    if isinstance(value, dict):
+        unit = str(value.get("unitCode") or value.get("unitText") or value.get("unit") or unit)
+        value = value.get("value") if value.get("value") is not None else value.get("amount")
+    n = _num(str(value).replace(",", "")) if value is not None else None
+    if n is None:
+        return None
+    if re.search(r"ft|feet|FTK", unit or "", re.I):
+        n *= 0.092903
+    return int(round(n)) if 25 <= n <= 2000 else None
+
+
 def _json_blobs(soup: BeautifulSoup, html: str) -> tuple[list[Any], list[Any]]:
     ld, app = [], []
     for sc in soup.find_all("script"):
@@ -359,6 +381,12 @@ def parse_property(html: str, url: str) -> dict:
             for o in (offers if isinstance(offers, list) else [offers] if isinstance(offers, dict) else []):
                 if _num(o.get("price")):
                     out["price"] = int(_num(o["price"]))
+        if out.get("bathrooms") is None:
+            b = _first_num(d, "numberOfBathroomsTotal", "numberOfBathrooms", "numberOfFullBathrooms")
+            if b is not None and 0 < b < 15:
+                out["bathrooms"] = int(b)
+        if out.get("floor_area_m2") is None and d.get("floorSize") is not None:
+            out["floor_area_m2"] = _area(d["floorSize"])
         beds = _first(d, "numberOfBedrooms", "numberOfRooms")
         if beds is not None and out.get("bedrooms") is None and _num(beds):
             out["bedrooms"] = int(_num(beds))
@@ -383,6 +411,17 @@ def parse_property(html: str, url: str) -> dict:
             b = _first_num(d, "bedrooms", "beds", "numberOfBedrooms", "bedroomCount")
             if b is not None and 0 <= b < 20:
                 out["bedrooms"] = int(b)
+        if out.get("bathrooms") is None:
+            b = _first_num(d, "bathrooms", "baths", "numberOfBathrooms", "bathroomCount")
+            if b is not None and 0 < b < 15:
+                out["bathrooms"] = int(b)
+        if out.get("floor_area_m2") is None:
+            for k, v in d.items():
+                if re.search(r"floor.?area|internal.?area|floor.?size|sq(uare)?.?(m|metres|meters|ft|feet)$", k, re.I):
+                    unit = "ft" if re.search(r"ft|feet", k, re.I) else ""
+                    out["floor_area_m2"] = _area(v, unit)
+                    if out["floor_area_m2"]:
+                        break
         if out.get("price") is None:
             p = _first_num(d, "price", "askingPrice", "priceValue", "displayPrice")
             if p and p > 10000:
@@ -458,6 +497,29 @@ def parse_property(html: str, url: str) -> dict:
     desc_open = (out.get("description") or "")[:300]
     out["detached"] = bool(DETACHED.search(type_text) or (
         not re.search(r"semi|terrace|flat|apartment|maisonette", type_text, re.I) and DETACHED.search(desc_open)))
+    desc = out.get("description") or ""
+    # Bathrooms: "2 bathrooms" in the headline/features/description, then the page's own
+    # "3 bedrooms 2 bathrooms" summary or a "Bathrooms: 2" label.
+    if out.get("bathrooms") is None:
+        for src in (f"{head} {feats_text} {desc}", text):
+            m = BATHS.search(src) or BATHS_LABEL.search(src)
+            if m and 0 < int(m.group(1)) < 15:
+                out["bathrooms"] = int(m.group(1))
+                break
+    # Floor area: a labelled figure ("Floor area: 112 m²", often from the Home Report) first,
+    # then any area figure in the description/features, then anywhere on the page.
+    if not out.get("floor_area_m2"):
+        for rx, src in ((AREA_LABELLED, f"{feats_text} {desc} {text}"), (AREA_ANY, f"{feats_text} {desc}"), (AREA_ANY, text)):
+            for m in rx.finditer(src):
+                a = _area(m.group(1), m.group(2))
+                if a:
+                    out["floor_area_m2"] = a
+                    break
+            if out.get("floor_area_m2"):
+                break
+    if not out.get("floor_area_m2"):
+        out.pop("floor_area_m2", None)
+    out["parser_version"] = PARSER_VERSION
     garage_text = f"{head} {feats_text} {out.get('description') or ''}"
     out["garage"] = bool(GARAGE.search(garage_text)) and not NOT_GARAGE.search(garage_text)
     if out.get("postcode"):
@@ -514,11 +576,12 @@ def scrape(state: dict[str, dict]) -> dict[str, dict]:
         why = rec.get("excluded") or ""
         if why.startswith(permanent) or re.match(r"\d+ bedroom$", why):
             return False
-        return rec.get("fetched", "") < stale_before
+        return rec.get("fetched", "") < stale_before or rec.get("parser_version", 1) < PARSER_VERSION
     todo = [pid for pid in urls if not pre[pid] and needs_fetch(pid)]
     todo = todo[:CFG["max_detail_fetches_per_run"]]
     log.info("ESPC: fetching %d detail pages", len(todo))
     parsed_ok = 0
+    missing_logged = 0
     for n, pid in enumerate(todo, 1):
         try:
             html = f.html(urls[pid])
@@ -530,6 +593,13 @@ def scrape(state: dict[str, dict]) -> dict[str, dict]:
         if n <= 3:
             (DEBUG / f"property_{pid}.html").write_text(html)
         rec = parse_property(html, urls[pid])
+        if missing_logged < 3 and not rec.get("floor_area_m2") and not rec.get("excluded"):
+            # Show where the page mentions these, so the parser can be tuned from the job log.
+            flat_text = re.sub(r"<[^>]+>", " ", html)
+            snippets = [re.sub(r"\s+", " ", flat_text[max(0, m.start() - 80): m.end() + 80])
+                        for m in re.finditer(r"bathroom|m²|sq\.? ?ft|floor area|EPC", flat_text, re.I)][:6]
+            log.info("  no floor area on %s; context: %s", pid, " | ".join(snippets)[:1200])
+            missing_logged += 1
         prev = state.get(pid, {})
         history = prev.get("price_history", [])
         if rec.get("price") and (not history or history[-1][1] != rec["price"]):
@@ -541,6 +611,10 @@ def scrape(state: dict[str, dict]) -> dict[str, dict]:
             parsed_ok += 1
         if n % 50 == 0:
             log.info("  ... %d/%d", n, len(todo))
+    got = [state[p] for p in todo if p in state and state[p].get("fetched") == today]
+    if got:
+        log.info("ESPC: of %d pages read, bathrooms found on %d, floor area on %d", len(got),
+                 sum(1 for r in got if r.get("bathrooms")), sum(1 for r in got if r.get("floor_area_m2")))
     if todo and parsed_ok == 0:
         raise RuntimeError("ESPC: fetched detail pages but could not parse price/location from any - see pipeline/debug/")
     excluded: Counter = Counter()

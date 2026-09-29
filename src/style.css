@@ -147,6 +147,7 @@ table.areas td.bar i { display: block; height: 8px; background: #9ecae1; border-
 .detail .addr { color: var(--muted); margin-bottom: 8px; }
 .badges { display: flex; flex-wrap: wrap; gap: 4px; }
 .badge { font-size: 11px; font-weight: 600; padding: 2px 7px; border-radius: 10px; background: #eef1ef; color: var(--ink); }
+.badge.size { background: #e8eef7; color: #1f3b63; }
 .badge.school { background: #f1e6f6; color: var(--school); }
 .badge.new { background: #e2f3ec; color: var(--down); }
 .badge.reduced { background: #fde7e4; color: var(--up); }

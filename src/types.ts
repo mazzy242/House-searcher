@@ -37,6 +37,8 @@ export interface Listing {
   price: number;
   price_qualifier?: string;
   bedrooms?: number;
+  bathrooms?: number;
+  floor_area_m2?: number;
   property_type?: string;
   detached: boolean;
   garage: boolean;

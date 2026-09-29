@@ -115,7 +115,7 @@ def enrich(listings: list[dict], net, profiles, previous: dict | None = None) ->
             continue
         rec = {k: l.get(k) for k in (
             "id", "url", "title", "address", "postcode", "district", "lat", "lng", "price", "price_qualifier",
-            "bedrooms", "property_type", "detached", "garage", "image", "first_seen", "price_history",
+            "bedrooms", "bathrooms", "floor_area_m2", "property_type", "detached", "garage", "image", "first_seen", "price_history",
             "approx_location")}
         rec.pop("top_school_rank", None)
         rec["lat"], rec["lng"] = round(rec["lat"], 5), round(rec["lng"], 5)

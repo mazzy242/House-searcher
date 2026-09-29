@@ -108,6 +108,7 @@ def test_parse_jsonld_property():
     assert rec["detached"] is True and rec["garage"] is True
     assert rec["postcode"] == "EH4 6AA" and rec["district"] == "EH4"
     assert abs(rec["lat"] - 55.9625) < 1e-6
+    assert rec["bathrooms"] == 2 and rec["floor_area_m2"] == 168
 
 
 def test_parse_app_state_property():
@@ -116,6 +117,7 @@ def test_parse_app_state_property():
     assert rec["price"] == 295000 and rec["bedrooms"] == 2
     assert rec["detached"] is False and rec["garage"] is False
     assert rec["lat"] and rec["district"] == "EH9"
+    assert rec["bathrooms"] == 1 and rec["floor_area_m2"] == 68
 
 
 def test_parse_text_only_semi_detached():
@@ -126,6 +128,8 @@ def test_parse_text_only_semi_detached():
     assert rec["detached"] is False       # semi-detached must not count
     assert rec["garage"] is False         # "no garage" in the description
     assert rec["postcode"] == "EH12 5XX" and "lat" in rec and rec["lat"] > 55
+    assert rec["bathrooms"] == 2                        # the listing's own, not the "similar homes" one
+    assert rec["floor_area_m2"] == 100                  # 1,076 sq ft -> 100 m²
 
 
 # ------------------------------------------------------------------ layers / enrichment
