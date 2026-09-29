@@ -1,5 +1,8 @@
-import maplibregl, { type GeoJSONSource, type Map as MLMap, type StyleSpecification } from "maplibre-gl";
+import * as maplibregl from "maplibre-gl";
+import type { GeoJSONSource, Map as MLMap, StyleSpecification } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
+// MapLibre 6 runs its tile worker from a separate ES module; let Vite bundle it and hand over the URL.
+import workerUrl from "maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url";
 import { PRICE_STOPS, SIMD_COLOURS, TIME_STOPS, VS_STOPS, gbp } from "./format";
 import type { ColourBy, Filters } from "./filters";
 import type { Area, Listing, Meta } from "./types";
@@ -8,6 +11,8 @@ const BASEMAP = "https://tiles.openfreemap.org/styles/positron";
 const GLYPHS = "https://tiles.openfreemap.org/fonts/{fontstack}/{range}.pbf";
 const FONT_BOLD = ["Noto Sans Bold"];
 const EMPTY = { type: "FeatureCollection", features: [] } as GeoJSON.FeatureCollection;
+
+maplibregl.setWorkerUrl(workerUrl);
 
 async function loadStyle(): Promise<StyleSpecification | string> {
   try {
