@@ -1,6 +1,6 @@
 {
- "generated_at": "2026-09-29T09:19+00:00",
- "listing_count": 718,
+ "generated_at": "2026-09-29T10:16+00:00",
+ "listing_count": 720,
  "waverley": {
   "name": "Edinburgh Waverley",
   "lat": 55.95196,
@@ -10,20 +10,20 @@
  "sources": {
   "catchments": {
    "detail": "ND: https://edinburghcouncilmaps.info/arcgis/rest/services/AdminBoundaries/MiscBoundaries/MapServer/6; RC: https://edinburghcouncilmaps.info/arcgis/rest/services/AdminBoundaries/MiscBoundaries/MapServer/7",
-   "updated": "2026-09-29T09:13+00:00"
+   "updated": "2026-09-29T09:51+00:00"
   },
   "osm_transit": {
-   "updated": "2026-09-29T09:13+00:00"
+   "updated": "2026-09-29T09:51+00:00"
   },
   "gtfs": {
-   "updated": "2026-09-29T09:13+00:00",
+   "updated": "2026-09-29T09:52+00:00",
    "service_date": "2026-10-07"
   },
   "espc": {
-   "updated": "2026-09-29T09:19+00:00"
+   "updated": "2026-09-29T10:16+00:00"
   },
   "simd": {
-   "updated": "2026-09-29T09:13+00:00",
+   "updated": "2026-09-29T09:51+00:00",
    "detail": "https://services.arcgis.com/XSeYKQzfXnEgju9o/arcgis/rest/services/SG_SIMD_2020/FeatureServer/0/query"
   }
  },
