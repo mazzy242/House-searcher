@@ -20,6 +20,8 @@ from collections import defaultdict
 from shapely.geometry import Point
 from shapely.strtree import STRtree
 
+import auctions
+import epc
 import espc
 import layers
 import transit
@@ -105,7 +107,8 @@ def area_stats(listings: list[dict]) -> list[dict]:
     return out
 
 
-def enrich(listings: list[dict], net, profiles, previous: dict | None = None) -> list[dict]:
+def enrich(listings: list[dict], net, profiles, previous: dict | None = None,
+           epc_index: dict | None = None) -> list[dict]:
     simd_at = polygon_lookup(read_json(OUT / "simd.geojson"))
     catch_at = polygon_lookup(read_json(OUT / "catchments.geojson"))
     index = transit.StopIndex(net) if net else None
@@ -116,7 +119,15 @@ def enrich(listings: list[dict], net, profiles, previous: dict | None = None) ->
         rec = {k: l.get(k) for k in (
             "id", "url", "title", "address", "postcode", "district", "lat", "lng", "price", "price_qualifier",
             "bedrooms", "bathrooms", "floor_area_m2", "property_type", "detached", "garage", "image", "first_seen", "price_history",
-            "approx_location")}
+            "approx_location", "flags", "closing_date", "source", "auction")}
+        if rec.get("closing_date") and rec["closing_date"] < dt.date.today().isoformat():
+            rec.pop("closing_date")
+        if epc_index:
+            cert = epc.match(rec.get("address") or "", rec.get("postcode") or "", epc_index)
+            if cert:
+                rec["epc"] = cert
+                if not rec.get("floor_area_m2") and cert.get("floor_area_m2"):
+                    rec["floor_area_m2"], rec["floor_area_source"] = cert["floor_area_m2"], "EPC"
         rec.pop("top_school_rank", None)
         rec["lat"], rec["lng"] = round(rec["lat"], 5), round(rec["lng"], 5)
         rec["region"] = REGION_OF.get(rec.get("district") or "")
@@ -138,7 +149,8 @@ def enrich(listings: list[dict], net, profiles, previous: dict | None = None) ->
             if old["pt_min"] < rec["travel"]["best_min"]:
                 rec["travel"]["best_min"], rec["travel"]["best_how"] = old["pt_min"], old["pt_how"]
         out.append({k: v for k, v in rec.items() if v not in (None, "", [], False) or k in ("detached", "garage")})
-    areas = area_stats(out)
+    # Auction opening bids aren't asking prices, so they don't feed the area averages.
+    areas = area_stats([r for r in out if r.get("source") != "auction"])
     lookup = {a["district"]: a for a in areas}
     for rec in out:
         a = lookup.get(rec.get("district"))
@@ -186,8 +198,25 @@ def main() -> int:
         write_meta(run, None)
         return 1 if "espc" in run.meta["errors"] else 0
     active = [r for r in state.values() if r.get("active")]
+
+    auction_path = STATE / "auctions_state.json"
+    lots = read_json(auction_path, {}) or {}
+    if not args.skip_espc:
+        new_lots = run.step("auctions", auctions.scrape, lots)
+        if new_lots is not None:
+            lots = new_lots
+            write_json(auction_path, lots, compact=False)
+    active += [r for r in lots.values() if r.get("active")]
+
+    districts = {d for ds in SETTINGS["espc"]["allowed_postcode_districts"].values() for d in ds}
+    epc_index = run.step("epc", epc.load_index, districts)
+
     previous = {l["id"]: l.get("travel") for l in read_json(OUT / "listings.json", []) or []}
-    listings = enrich(active, net, profiles, previous)
+    listings = enrich(active, net, profiles, previous, epc_index)
+    matched = sum(1 for l in listings if l.get("epc"))
+    if epc_index is not None:
+        run.meta["sources"]["epc"]["detail"] = f"matched {matched} of {len(listings)} homes"
+        log.info("EPC: matched %d of %d homes", matched, len(listings))
     write_json(OUT / "listings.json", listings)
     write_meta(run, listings)
     log.info("Wrote %d listings", len(listings))

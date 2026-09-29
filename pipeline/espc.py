@@ -47,7 +47,46 @@ AREA_NUM = r"(?<![\d,.])(\d{1,3}(?:,\d{3})+|\d{2,5})(?:\.\d+)?"  # 112, 1,076, 9
 AREA_LABELLED = re.compile(r"(?:floor\s*area|internal\s*area|total\s*area|living\s*area|floor\s*space|size)"
                            r"[^\d]{0,40}?" + AREA_NUM + r"\s*" + AREA_UNIT, re.I)
 AREA_ANY = re.compile(AREA_NUM + r"\s*" + AREA_UNIT, re.I)
-PARSER_VERSION = 2  # bump when the parser learns new fields, so kept houses are re-read once
+PARSER_VERSION = 3  # bump when the parser learns new fields, so kept houses are re-read once
+
+WORD_NUMS = {"one": 1, "two": 2, "three": 3, "four": 4, "five": 5, "six": 6, "seven": 7, "eight": 8}
+BEDS_WORD = re.compile(r"\b(one|two|three|four|five|six|seven|eight)[\s-]+bed(?:room)?s?\b", re.I)
+
+# Signs the seller wants a quick or unconditional sale (lender, executor, trustee...).
+MOTIVATED = re.compile(
+    r"heritable creditors?|repossess\w*|lender in possession|executry|executors? of|on behalf of the executor|"
+    r"trustees? in sequestration|sequestrat\w*|\breceivers?\b|power of sale|sold as seen|"
+    r"cash buyers? only|suited to cash buyers|priced for (?:a )?quick sale", re.I)
+NEEDS_WORK = re.compile(
+    r"(?:require|requires|requiring|in need of|would benefit from|scope for)\s+(?:some\s+|full\s+|complete\s+|general\s+|"
+    r"extensive\s+|a programme of\s+)?(?:modernisation|modernization|refurbishment|renovation|upgrading|updating|repair)|"
+    r"renovation project|refurbishment project|restoration project|project property|development opportunity|"
+    r"doer[- ]upper|in need of (?:some )?(?:tlc|work)", re.I)
+MONTHS = {m: i for i, m in enumerate(["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"], 1)}
+CLOSING = re.compile(
+    r"closing date[^.\d]{0,40}?(?:(\d{1,2})(?:st|nd|rd|th)?(?:\s+of)?\s+(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\w*,?"
+    r"(?:\s+(\d{4}))?|(\d{1,2})[/.](\d{1,2})[/.](\d{2,4}))", re.I)
+
+
+def closing_date(text: str, today: dt.date | None = None) -> str | None:
+    """ISO date of a set closing date ("Closing date: Friday 10th October at 12 noon"), if any."""
+    today = today or dt.date.today()
+    m = CLOSING.search(text)
+    if not m:
+        return None
+    try:
+        if m.group(1):
+            day, month = int(m.group(1)), MONTHS[m.group(2)[:3].lower()]
+            year = int(m.group(3)) if m.group(3) else today.year
+            d = dt.date(year, month, day)
+            if not m.group(3) and d < today - dt.timedelta(days=60):
+                d = dt.date(year + 1, month, day)  # "10th January" seen in December
+        else:
+            year = int(m.group(6))
+            d = dt.date(year + 2000 if year < 100 else year, int(m.group(5)), int(m.group(4)))
+    except (ValueError, KeyError):
+        return None
+    return d.isoformat()
 
 TYPE_WORDS = ["semi-detached", "detached", "terraced", "end-terrace", "mid-terrace", "villa",
               "bungalow", "cottage", "flat", "apartment", "maisonette", "townhouse", "house", "duplex"]
@@ -479,6 +518,10 @@ def parse_property(html: str, url: str) -> dict:
         bm = BEDS.search(head) or BEDS.search(text)
         if bm:
             out["bedrooms"] = int(bm.group(1))
+        else:
+            wm = BEDS_WORD.search(head) or BEDS_WORD.search(text)
+            if wm:
+                out["bedrooms"] = WORD_NUMS[wm.group(1).lower()]
     if not out.get("postcode"):
         pc = POSTCODE.search(out.get("address") or "") or POSTCODE.search(head) or POSTCODE.search(text)
         if pc:
@@ -519,6 +562,18 @@ def parse_property(html: str, url: str) -> dict:
                 break
     if not out.get("floor_area_m2"):
         out.pop("floor_area_m2", None)
+    # Seller situation and sale stage, from the listing's own words (not site-wide boilerplate).
+    own = f"{head} {feats_text} {desc}"
+    flags = []
+    if MOTIVATED.search(own):
+        flags.append("motivated")
+    if NEEDS_WORK.search(own):
+        flags.append("needs_work")
+    if flags:
+        out["flags"] = flags
+    cd = closing_date(f"{own} {text}")
+    if cd:
+        out["closing_date"] = cd
     out["parser_version"] = PARSER_VERSION
     garage_text = f"{head} {feats_text} {out.get('description') or ''}"
     out["garage"] = bool(GARAGE.search(garage_text)) and not NOT_GARAGE.search(garage_text)

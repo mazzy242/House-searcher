@@ -6,8 +6,11 @@ A map of the **houses** (not flats) with **2 or more bedrooms** for sale on ESPC
 - **Which secondary school catchment it's in**, with the top 10 schools highlighted.
 - **SIMD deprivation decile** of the neighbourhood.
 - **How the price compares** to the median asking price in its postcode district.
+- **Auction lots** from Future Property Auctions and Auction House Scotland, alongside the ESPC listings (orange-ringed pins, with opening bid / guide price and auction date).
+- **Seller situation**: "Motivated seller" (repossession/heritable creditor, executry, trustee, cash buyers), "Needs work", "Closing date set" and "Price reduced".
+- **EPC band and floor area** from the Scottish Government's EPC open data, filling in m² where the listing doesn't give it.
 
-Filter by price, bedrooms, detached, garage, time to Waverley, school catchment and SIMD. Overlay tram lines (existing and proposed), main bus routes, school catchments and SIMD.
+Filter by price, bedrooms, detached, garage, time to Waverley, school catchment, SIMD, sale type (estate agents / auctions) and seller situation. Overlay tram lines (existing and proposed), main bus routes, school catchments and SIMD.
 
 ```
 ┌────────────────────────────────────────────────────────────────────────────┐
@@ -33,6 +36,8 @@ GitHub Actions (daily 05:17 UTC)
     ├─ Tram + Lothian bus routes .... OpenStreetMap (Overpass API)
     ├─ Bus/tram timetable ........... BODS Scotland GTFS → travel time to Waverley
     ├─ Listings ..................... espc.com (polite scrape, new/changed listings only)
+    ├─ Auction lots ................. Future Property Auctions, Auction House Scotland catalogues
+    ├─ EPC certificates ............. statistics.gov.scot domestic EPC extract (cached 30 days)
     └─ enrich + write public/data/*.json
   commit data → vite build → GitHub Pages
 ```

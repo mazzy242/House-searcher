@@ -16,6 +16,9 @@ const load = async <T>(path: string, fallback: T): Promise<T> => {
   }
 };
 
+const SELECTS = ["school", "region", "saleType", "colourBy", "sort", "simdDomain"] as const;
+const CHECKS = ["detached", "garage", "topSchool", "newOnly", "allBus", "motivated", "needsWork", "closingDate", "reduced"] as const;
+
 const PRICES = [100, 150, 200, 250, 300, 350, 400, 450, 500, 600, 700, 800, 1000, 1250, 1500, 2000].map((k) => k * 1000);
 
 let filters: Filters = fromHash(location.hash);
@@ -77,10 +80,10 @@ function buildControls(): void {
   for (const id of ["minPrice", "maxPrice", "maxMins", "minSimd"] as const) {
     $<HTMLSelectElement>(id).addEventListener("change", (e) => set({ [id]: Number((e.target as HTMLSelectElement).value) }));
   }
-  for (const id of ["school", "region", "colourBy", "sort", "simdDomain"] as const) {
+  for (const id of SELECTS) {
     $<HTMLSelectElement>(id).addEventListener("change", (e) => set({ [id]: (e.target as HTMLSelectElement).value } as Partial<Filters>));
   }
-  for (const id of ["detached", "garage", "topSchool", "newOnly", "allBus"] as const) {
+  for (const id of CHECKS) {
     $<HTMLInputElement>(id).addEventListener("change", (e) => set({ [id]: (e.target as HTMLInputElement).checked }));
   }
   $("minBeds").addEventListener("click", (e) => {
@@ -137,10 +140,10 @@ function set(patch: Partial<Filters>): void {
 
 function syncControls(): void {
   const f = filters;
-  for (const id of ["minPrice", "maxPrice", "maxMins", "minSimd", "school", "region", "colourBy", "sort", "simdDomain"] as const) {
+  for (const id of [...(["minPrice", "maxPrice", "maxMins", "minSimd"] as const), ...SELECTS]) {
     $<HTMLSelectElement>(id).value = String(f[id]);
   }
-  for (const id of ["detached", "garage", "topSchool", "newOnly", "allBus"] as const) $<HTMLInputElement>(id).checked = f[id];
+  for (const id of CHECKS) $<HTMLInputElement>(id).checked = f[id];
   document.querySelectorAll<HTMLButtonElement>("#minBeds button").forEach((b) =>
     b.setAttribute("aria-checked", String(Number(b.dataset.beds) === f.minBeds)),
   );
@@ -262,7 +265,7 @@ function renderLegend(): void {
   if (f.layers.simd) {
     simd = `<div class="simd-scale"><span>Most deprived</span>${SIMD_COLOURS.map((c, i) => `<i title="Decile ${i + 1}" style="background:${c}"></i>`).join("")}<span>Least</span></div>`;
   }
-  $("legend").innerHTML = `<div class="legend-items">${items.join("")}</div>${simd}<div class="muted small">Purple ring = in a top-10 school catchment. Orange dashed outline = St Thomas of Aquin's (RC) catchment.</div>`;
+  $("legend").innerHTML = `<div class="legend-items">${items.join("")}</div>${simd}<div class="muted small">Purple ring = in a top-10 school catchment. Thick orange ring = auction lot. Orange dashed outline = St Thomas of Aquin's (RC) catchment.</div>`;
 }
 
 function renderAreas(): void {
@@ -281,10 +284,18 @@ function renderAreas(): void {
     : `<tbody><tr><td class="muted">No listings yet</td></tr></tbody>`;
 }
 
+const shortDate = (iso: string): string =>
+  new Date(`${iso}T12:00:00`).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" });
+
 function badges(l: Listing): string {
   const b: string[] = [];
+  if (l.auction) b.push(`<span class="badge auction">🔨 Auction${l.auction.date ? ` ${shortDate(l.auction.date)}` : ""}</span>`);
+  if (l.closing_date) b.push(`<span class="badge closing">⏱ Closing date ${shortDate(l.closing_date)}</span>`);
+  if (l.flags?.includes("motivated")) b.push(`<span class="badge motivated">Motivated seller</span>`);
+  if (l.flags?.includes("needs_work")) b.push(`<span class="badge work">Needs work</span>`);
   if (l.bathrooms) b.push(`<span class="badge size">🛁 ${l.bathrooms} bath${l.bathrooms === 1 ? "" : "s"}</span>`);
   if (l.floor_area_m2) b.push(`<span class="badge size">📐 ${l.floor_area_m2} m²</span>`);
+  if (l.epc?.band) b.push(`<span class="badge epc epc-${l.epc.band.toLowerCase()}">EPC ${l.epc.band}</span>`);
   if (l.detached) b.push(`<span class="badge">Detached</span>`);
   if (l.garage) b.push(`<span class="badge">Garage</span>`);
   if (l.top_school_rank) b.push(`<span class="badge school">Top-10 school #${l.top_school_rank}</span>`);
@@ -309,10 +320,15 @@ function renderDetail(l: Listing): void {
     <button class="close" data-close aria-label="Close">×</button>
     ${l.image ? `<img class="photo" src="${esc(l.image)}" alt="" loading="lazy" referrerpolicy="no-referrer">` : ""}
     <div class="body">
-      <div class="price">${l.price_qualifier ? `<span class="q">${esc(l.price_qualifier)}</span> ` : ""}${gbpFull(l.price)}</div>
+      <div class="price">${l.auction ? `<span class="q">${esc(l.auction.basis)}</span> ` : l.price_qualifier ? `<span class="q">${esc(l.price_qualifier)}</span> ` : ""}${gbpFull(l.price)}</div>
       <h3>${esc(l.title || `${l.bedrooms ?? "?"} bedroom ${l.property_type ?? "home"}`)}</h3>
       <div class="addr">${esc(l.address)}${l.region && l.region !== "Edinburgh" ? ` · ${esc(l.region)}` : ""}${l.approx_location ? ` <span class="muted">(location approximate)</span>` : ""}</div>
       <div class="badges">${badges(l)}</div>
+      ${l.auction ? `<div class="auction-note">
+        <b>${esc(l.auction.house)}${l.auction.date ? ` · auction ${shortDate(l.auction.date)}` : ""}</b>
+        The ${esc(l.auction.basis.toLowerCase())} is where bidding starts, not the likely price. The winning bidder usually pays a
+        10% deposit on the day and completes within about 28 days, so a normal mortgage rarely works: cash or bridging finance.
+        Read the legal pack (and any Home Report) before bidding.</div>` : ""}
 
       <div class="waverley">
         <div class="big"><span>🚆 Waverley</span><b>${mins(t.best_min)}</b></div>
@@ -328,7 +344,9 @@ function renderDetail(l: Listing): void {
 
       <dl class="facts">
         <div><dt>Rooms</dt><dd>${l.bedrooms ?? "–"} bed · ${l.bathrooms ?? "–"} bath</dd></div>
-        <div><dt>Floor area</dt><dd>${l.floor_area_m2 ? `${l.floor_area_m2} m² <span class="muted">· ${gbpFull(Math.round(l.price / l.floor_area_m2))}/m²</span>` : `<span class="muted">Not listed</span>`}</dd></div>
+        <div><dt>Floor area</dt><dd>${l.floor_area_m2 ? `${l.floor_area_m2} m² <span class="muted">· ${gbpFull(Math.round(l.price / l.floor_area_m2))}/m²${l.floor_area_source === "EPC" ? " · from the EPC" : ""}</span>` : `<span class="muted">Not listed</span>`}</dd></div>
+        ${l.epc?.band ? `<div><dt>EPC</dt><dd><span class="badge epc epc-${l.epc.band.toLowerCase()}">${l.epc.band}</span>${l.epc.date ? ` <span class="muted small">certificate ${esc(l.epc.date.slice(0, 7))}</span>` : ""}</dd></div>` : ""}
+        ${l.closing_date ? `<div><dt>Closing date</dt><dd>${esc(shortDate(l.closing_date))} <span class="muted small">– offers by then, usually at noon</span></dd></div>` : ""}
         <div><dt>Type</dt><dd>${esc(l.property_type ?? "–")}</dd></div>
         <div><dt>SIMD</dt><dd>${simdBar(l.simd?.decile)}${l.simd?.name ? `<div class="muted small">${esc(l.simd.name)}</div>` : ""}${domains ? `<div class="domains">${domains}</div>` : ""}</dd></div>
         <div><dt>Catchment</dt><dd>${l.catchment || l.catchment_rc ? "" : `<span class="muted">Outside Edinburgh – check with ${esc(l.region ?? "the local")} council</span>`}${esc(l.catchment ?? "")}${topFor(l.catchment) ? ` <b class="rank">#${topFor(l.catchment)!.rank}</b>` : ""}${l.catchment_rc ? `<div class="small">RC: ${esc(l.catchment_rc)}${topFor(l.catchment_rc) ? ` <b class="rank">#${topFor(l.catchment_rc)!.rank}</b>` : ""}</div>` : ""}${[topFor(l.catchment), topFor(l.catchment_rc)].filter((t): t is TopSchool => !!t).map(schoolStats).join("")}</dd></div>
@@ -336,7 +354,7 @@ function renderDetail(l: Listing): void {
         ${hist.length > 1 ? `<div><dt>History</dt><dd>${hist.map(([d, p]) => `${gbp(p)} <span class="muted small">${esc(d)}</span>`).join(" → ")}</dd></div>` : ""}
         ${age != null ? `<div><dt>Listed</dt><dd>${age === 0 ? "today" : `${age} day${age === 1 ? "" : "s"} ago`}</dd></div>` : ""}
       </dl>
-      <a class="cta" href="${esc(l.url)}" target="_blank" rel="noopener">View on ESPC ↗</a>
+      <a class="cta" href="${esc(l.url)}" target="_blank" rel="noopener">View on ${esc(l.auction?.house ?? "ESPC")} ↗</a>
     </div>`;
 }
 

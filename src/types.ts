@@ -54,6 +54,13 @@ export interface Listing {
   top_school_rank?: number;
   travel: Travel;
   area?: { median: number; basis: string; vs_pct: number };
+  /** "motivated" (lender/executor/trustee sale, cash buyers...) and/or "needs_work". */
+  flags?: ("motivated" | "needs_work")[];
+  closing_date?: string;
+  source?: "auction";
+  auction?: { house: string; date?: string; basis: string };
+  epc?: { band?: string; floor_area_m2?: number; date?: string };
+  floor_area_source?: "EPC";
 }
 
 export interface Area {

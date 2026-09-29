@@ -222,7 +222,8 @@ export class HouseMap {
       layout: { "text-field": ["get", "point_count_abbreviated"], "text-font": FONT_BOLD, "text-size": 12 }, paint: { "text-color": "#fff" } });
     m.addLayer({ id: "pins", type: "circle", source: "listings", filter: ["!", ["has", "point_count"]],
       paint: { "circle-color": colourExpr("price") as never, "circle-radius": ["interpolate", ["linear"], ["zoom"], 10, 5, 15, 9] as never,
-        "circle-stroke-color": ["case", ["get", "top"], "#7b3294", "#fff"] as never, "circle-stroke-width": ["case", ["get", "top"], 2.5, 1.5] as never } });
+        "circle-stroke-color": ["case", ["get", "auction"], "#ea580c", ["get", "top"], "#7b3294", "#fff"] as never,
+        "circle-stroke-width": ["case", ["get", "auction"], 3.5, ["get", "top"], 2.5, 1.5] as never } });
     m.addLayer({ id: "pin-labels", type: "symbol", source: "listings", filter: ["!", ["has", "point_count"]], minzoom: 13.5,
       layout: { "text-field": ["get", "label"], "text-font": FONT_BOLD, "text-size": 11, "text-offset": [0, -1.4], "text-anchor": "bottom" },
       paint: { "text-color": "#111", "text-halo-color": "#fff", "text-halo-width": 1.5 } });
@@ -269,7 +270,8 @@ export class HouseMap {
       features: ls.map((l) => ({
         type: "Feature",
         geometry: { type: "Point", coordinates: [l.lng, l.lat] },
-        properties: { id: l.id, price: l.price, mins: l.travel.best_min, vs: l.area?.vs_pct ?? 0, top: topSet.has(l.id) || !!l.top_school_rank, label: gbp(l.price) },
+        properties: { id: l.id, price: l.price, mins: l.travel.best_min, vs: l.area?.vs_pct ?? 0, top: topSet.has(l.id) || !!l.top_school_rank,
+          auction: !!l.auction, label: l.auction ? `Auction ${gbp(l.price)}` : gbp(l.price) },
       })),
     };
     (this.map.getSource("listings") as GeoJSONSource).setData(fc);

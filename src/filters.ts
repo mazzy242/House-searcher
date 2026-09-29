@@ -1,7 +1,10 @@
 import type { Listing } from "./types";
 
 export type ColourBy = "price" | "time" | "vs";
-export type SortBy = "price_asc" | "price_desc" | "time" | "newest" | "value";
+export type SortBy = "price_asc" | "price_desc" | "time" | "newest" | "value" | "soonest";
+
+/** The date something happens: auction day, or a closing date for offers. */
+export const deadline = (l: Listing): string | undefined => l.auction?.date ?? l.closing_date;
 
 export interface Filters {
   minPrice: number;
@@ -15,6 +18,11 @@ export interface Filters {
   region: string; // "" = any
   minSimd: number; // 0 = any
   newOnly: boolean;
+  saleType: "" | "private" | "auction";
+  motivated: boolean;
+  needsWork: boolean;
+  closingDate: boolean;
+  reduced: boolean;
   colourBy: ColourBy;
   sort: SortBy;
   layers: Record<string, boolean>;
@@ -35,6 +43,11 @@ export const DEFAULTS: Filters = {
   region: "",
   minSimd: 0,
   newOnly: false,
+  saleType: "",
+  motivated: false,
+  needsWork: false,
+  closingDate: false,
+  reduced: false,
   colourBy: "price",
   sort: "time",
   layers: { simd: false, tram: true, tramProposed: true, bus: false, catchTop: true, catchAll: false, areas: false },
@@ -44,8 +57,8 @@ export const DEFAULTS: Filters = {
 };
 
 const NUM = ["minPrice", "maxPrice", "minBeds", "maxMins", "minSimd"] as const;
-const BOOL = ["detached", "garage", "topSchool", "newOnly", "allBus"] as const;
-const STR = ["school", "region", "colourBy", "sort", "simdDomain", "basemap"] as const;
+const BOOL = ["detached", "garage", "topSchool", "newOnly", "allBus", "motivated", "needsWork", "closingDate", "reduced"] as const;
+const STR = ["school", "region", "saleType", "colourBy", "sort", "simdDomain", "basemap"] as const;
 
 /** Filters live in the URL hash so a search can be bookmarked or shared. */
 export function toHash(f: Filters): string {
@@ -84,6 +97,12 @@ export function matches(l: Listing, f: Filters): boolean {
   if (f.region && l.region !== f.region) return false;
   if (f.minSimd && (l.simd?.decile ?? 0) < f.minSimd) return false;
   if (f.newOnly && !isNew(l)) return false;
+  if (f.saleType === "auction" && l.source !== "auction") return false;
+  if (f.saleType === "private" && l.source === "auction") return false;
+  if (f.motivated && !l.flags?.includes("motivated")) return false;
+  if (f.needsWork && !l.flags?.includes("needs_work")) return false;
+  if (f.closingDate && !l.closing_date) return false;
+  if (f.reduced && !isReduced(l)) return false;
   return true;
 }
 
@@ -101,6 +120,7 @@ export function sortListings(ls: Listing[], by: SortBy): Listing[] {
     price_desc: (a, b) => b.price - a.price,
     time: (a, b) => a.travel.best_min - b.travel.best_min,
     newest: (a, b) => (b.first_seen ?? "").localeCompare(a.first_seen ?? ""),
+    soonest: (a, b) => (deadline(a) ?? "9999").localeCompare(deadline(b) ?? "9999"),
     value: (a, b) => (a.area?.vs_pct ?? 0) - (b.area?.vs_pct ?? 0),
   };
   return [...ls].sort(cmp[by]);

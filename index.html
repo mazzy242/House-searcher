@@ -50,6 +50,15 @@
             <label>Area<select id="region"><option value="">Everywhere</option></select></label>
             <label>Catchment school<select id="school"><option value="">Any school</option></select></label>
           </div>
+          <label>Sale type<select id="saleType">
+            <option value="">Estate agents + auctions</option><option value="private">Estate agents only</option>
+            <option value="auction">Auctions only</option></select></label>
+          <div class="checks">
+            <label class="check"><input type="checkbox" id="motivated" /><span>Motivated seller<small class="hint">Lender (repossession), executry, trustee, cash buyers</small></span></label>
+            <label class="check"><input type="checkbox" id="needsWork" /><span>Needs work<small class="hint">Modernisation, renovation, project</small></span></label>
+            <label class="check"><input type="checkbox" id="closingDate" /> Closing date set</label>
+            <label class="check"><input type="checkbox" id="reduced" /> Price reduced</label>
+          </div>
           <button class="link-btn" id="reset">Reset filters</button>
         </section>
 
@@ -95,7 +104,8 @@
             <label>Sort<select id="sort">
               <option value="time">Quickest to Waverley</option><option value="price_asc">Price: low to high</option>
               <option value="price_desc">Price: high to low</option><option value="newest">Newest</option>
-              <option value="value">Best value vs area</option></select></label>
+              <option value="value">Best value vs area</option>
+              <option value="soonest">Auction / closing date soonest</option></select></label>
           </div>
           <div id="cards" class="cards"></div>
         </div>

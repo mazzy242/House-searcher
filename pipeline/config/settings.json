@@ -50,6 +50,29 @@
     "postcodes_io": "https://api.postcodes.io/postcodes"
   },
 
+  "auctions": {
+    "_comment": "Auction catalogues. lot_link_regex picks lot pages out of each catalogue page's links; the job log lists the links seen so it can be tuned. Lots go through the same houses/2+ bed/postcode rules as ESPC.",
+    "max_lot_fetches_per_source": 200,
+    "sources": [
+      {
+        "name": "Future Property Auctions",
+        "start_urls": ["https://www.futurepropertyauctions.co.uk/catalogue_area.asp?search=Edinburgh%2CLothian%2CBorders"],
+        "lot_link_regex": "(?i)^(?!.*catalogue).*(\\.asp\\?(?:[^\"']*&)?(?:id|lotid|propertyid|pid)=\\d+|/lots?/\\d+|/property/\\d+)"
+      },
+      {
+        "name": "Auction House Scotland",
+        "start_urls": ["https://www.auctionhouse.co.uk/scotland/auction/search-results"],
+        "lot_link_regex": "(?i)/(?:lot|lots|property)/[\\w-]*\\d+"
+      }
+    ]
+  },
+
+  "epc": {
+    "_comment": "Scottish domestic EPC open data (OGL). The zip link is found on the dataset page; set download_url to override.",
+    "dataset_page": "https://statistics.gov.scot/data/domestic-energy-performance-certificates",
+    "download_url": ""
+  },
+
   "bus": {
     "operator_regex": "Lothian",
     "main_routes": ["3", "5", "10", "11", "16", "22", "25", "26", "31", "37", "44"]
