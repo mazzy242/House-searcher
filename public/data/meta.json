@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-09-29T05:53+00:00",
+ "generated_at": "2026-09-29T06:01+00:00",
  "listing_count": 608,
  "waverley": {
   "name": "Edinburgh Waverley",
@@ -7,22 +7,27 @@
   "lng": -3.18992
  },
  "errors": {
-  "simd": "403 Client Error: Forbidden for url: https://maps.gov.scot/server/rest/services/ScotGov/PeopleSociety/MapServer/7/query?where=1%3D1&outFields=%2A&outSR=4326&f=geojson&returnGeometry=true&resultOffset=0&resultRecordCount=1000&maxAllowableOffset=3e-05&geometryPrecision=5&geometry=-3.48%2C55.83%2C-2.95%2C56.0&geometryType=esriGeometryEnvelope&inSR=4326&spatialRel=esriSpatialRelIntersects"
+  "osm_transit": "504 Server Error: Gateway Timeout for url: https://overpass-api.de/api/interpreter",
+  "espc": "('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))"
  },
  "sources": {
   "catchments": {
    "detail": "ND: https://edinburghcouncilmaps.info/arcgis/rest/services/AdminBoundaries/MiscBoundaries/MapServer/6; RC: https://edinburghcouncilmaps.info/arcgis/rest/services/AdminBoundaries/MiscBoundaries/MapServer/7",
-   "updated": "2026-09-29T05:36+00:00"
+   "updated": "2026-09-29T06:00+00:00"
   },
   "osm_transit": {
    "updated": "2026-09-29T05:36+00:00"
   },
   "gtfs": {
-   "updated": "2026-09-29T05:37+00:00",
+   "updated": "2026-09-29T06:00+00:00",
    "service_date": "2026-10-07"
   },
   "espc": {
    "updated": "2026-09-29T05:53+00:00"
+  },
+  "simd": {
+   "updated": "2026-09-29T06:00+00:00",
+   "detail": "https://services.arcgis.com/XSeYKQzfXnEgju9o/arcgis/rest/services/SG_SIMD_2020/FeatureServer/0/query"
   }
  },
  "travel_assumptions": {
