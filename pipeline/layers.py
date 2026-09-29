@@ -4,6 +4,7 @@ from __future__ import annotations
 import json
 import math
 import re
+import time
 from typing import Any
 
 from shapely.geometry import LineString, MultiLineString, Polygon, mapping, shape
@@ -285,11 +286,25 @@ def _tidy_school(name: str) -> str:
 
 # ---------------------------------------------------------------- OpenStreetMap
 
+OVERPASS_MIRRORS = ["https://overpass.kumi.systems/api/interpreter",
+                    "https://maps.mail.ru/osm/tools/overpass/api/interpreter"]
+
+
 def _overpass(query: str) -> dict:
+    """The public Overpass servers are often busy (504/429): try the main one twice, then mirrors."""
     s = session()
-    r = s.post(SETTINGS["sources"]["overpass_url"], data={"data": query}, timeout=300)
-    r.raise_for_status()
-    return r.json()
+    main = SETTINGS["sources"]["overpass_url"]
+    errors = []
+    for url in [main, main, *OVERPASS_MIRRORS]:
+        try:
+            r = s.post(url, data={"data": query}, timeout=300)
+            r.raise_for_status()
+            return r.json()
+        except Exception as e:  # noqa: BLE001
+            errors.append(f"{url}: {e}")
+            log.warning("Overpass failed (%s), trying next", e)
+            time.sleep(20)
+    raise RuntimeError("all Overpass servers failed: " + " | ".join(errors)[:600])
 
 
 def _relation_lines(rel: dict) -> list[list[list[float]]]:

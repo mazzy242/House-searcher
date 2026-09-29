@@ -294,3 +294,37 @@ def test_scrape_keeps_only_wanted_houses(monkeypatch, tmp_path):
     assert state["36000011"]["active"] is True
     assert "36000019" in state and state["36000019"]["active"] is False and state["36000019"]["excluded"] == "flat"
     assert state["36000001"]["active"] is False     # no longer listed -> inactive, kept for history
+
+
+def test_cut_short_search_does_not_mark_listings_sold(monkeypatch, tmp_path):
+    monkeypatch.setattr(espc, "DEBUG", tmp_path)
+
+    class FlakyFetcher:
+        count = 0
+        robots = type("R", (), {"sitemaps": []})()
+        def html(self, url):
+            raise espc.requests.ConnectionError("Connection reset by peer")
+    monkeypatch.setattr(espc, "Fetcher", FlakyFetcher)
+    monkeypatch.setattr(espc, "geocode_postcodes", lambda ls: None)
+    monkeypatch.setitem(espc.CFG, "search_urls", ["https://espc.com/properties?locations=edinburgh"])
+    monkeypatch.setitem(espc.CFG, "use_sitemap_fallback", False)
+    house = {"title": "3 bed detached house for sale", "property_type": "detached", "bedrooms": 3,
+             "district": "EH4", "active": True}
+    flat = {"title": "2 bed top floor flat for sale", "property_type": "flat", "bedrooms": 2,
+            "district": "EH6", "active": True}
+    # Nothing found at all -> the run fails and the caller keeps the previous state untouched.
+    import pytest
+    with pytest.raises(RuntimeError):
+        espc.scrape({"1": dict(house)})
+    # Partly found (a search cut short): the unseen house stays listed, the unseen flat is still dropped.
+    found = {"36000011": "https://espc.com/property/x-eh4-1aa/36000011"}
+    monkeypatch.setattr(espc, "discover", lambda f, hints=None: (found, False))
+
+    class OneHouse:
+        count = 0
+        def html(self, url):
+            return "<title>4 bed detached house for sale</title><h1>X EH4 1AA</h1><div>Offers over £600,000</div>"
+    monkeypatch.setattr(espc, "Fetcher", OneHouse)
+    state = espc.scrape({"1": dict(house), "2": dict(flat)})
+    assert state["1"]["active"] is True and state["36000011"]["active"] is True
+    assert "2" not in state or state["2"]["active"] is False

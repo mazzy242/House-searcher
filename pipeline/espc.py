@@ -25,6 +25,7 @@ import urllib.robotparser
 from typing import Any, Iterable
 from urllib.parse import urljoin, urlparse
 
+import requests
 from bs4 import BeautifulSoup
 
 from common import DEBUG, SETTINGS, get, in_bbox, log, session
@@ -75,7 +76,15 @@ class Fetcher:
             time.sleep(wait)
         self.last = time.monotonic()
         self.count += 1
-        r = get(self.s, url, timeout=45)
+        for pause in (60, 180, None):  # ESPC occasionally resets connections: back off, then give up
+            try:
+                r = get(self.s, url, timeout=45)
+                break
+            except requests.RequestException as e:
+                if pause is None:
+                    raise
+                log.warning("ESPC request failed (%s); pausing %ds", e, pause)
+                time.sleep(pause)
         if r.status_code == 404 or r.status_code == 410:
             return None
         r.raise_for_status()
@@ -179,14 +188,21 @@ def next_page_url(html: str, current: str, page: int) -> str | None:
     return None
 
 
-def discover(f: Fetcher, hints: dict[str, str] | None = None) -> dict[str, str]:
+def discover(f: Fetcher, hints: dict[str, str] | None = None) -> tuple[dict[str, str], bool]:
+    """(id -> URL for every listing on the search pages, whether every search ran to the end)."""
     urls: dict[str, str] = {}
     hints = {} if hints is None else hints
+    complete = True
     for n_search, start in enumerate(CFG["search_urls"], 1):
         url, page, seen, empty = start, 1, set(), 0
         while url and page <= CFG["max_search_pages"] and url not in seen:
             seen.add(url)
-            html = f.html(url)
+            try:
+                html = f.html(url)
+            except requests.RequestException as e:
+                log.error("%s: page %d failed (%s) - moving on; listings not seen keep their status", start, page, e)
+                complete = False
+                break
             if not html:
                 break
             got = extract_property_urls(html, url)
@@ -210,9 +226,12 @@ def discover(f: Fetcher, hints: dict[str, str] | None = None) -> dict[str, str]:
                 sep = "&" if "?" in start else "?"
                 url = f"{start}{sep}page={page + 1}"
             page += 1
+        if page > CFG["max_search_pages"]:
+            log.warning("%s: hit max_search_pages", start)
+            complete = False
     if not urls and CFG["use_sitemap_fallback"]:
         urls = discover_from_sitemaps(f)
-    return urls
+    return urls, complete
 
 
 def discover_from_sitemaps(f: Fetcher) -> dict[str, str]:
@@ -465,7 +484,7 @@ def scrape(state: dict[str, dict]) -> dict[str, dict]:
     f = Fetcher()
     today = dt.date.today().isoformat()
     hints: dict[str, str] = {}
-    urls = discover(f, hints)
+    urls, complete = discover(f, hints)
     if not urls:
         raise RuntimeError("ESPC: no property links found on search pages or sitemaps - see pipeline/debug/")
     # Drop flats, 1-beds and far-away districts using only the results page (URL postcode + card text).
@@ -503,7 +522,12 @@ def scrape(state: dict[str, dict]) -> dict[str, dict]:
         raise RuntimeError("ESPC: fetched detail pages but could not parse price/location from any - see pipeline/debug/")
     excluded: Counter = Counter()
     for pid, rec in state.items():
-        why = pre.get(pid) if pid in urls else "no longer listed"
+        if pid in urls:
+            why = pre.get(pid)
+        elif not complete and rec.get("active"):
+            why = None  # a search was cut short, so we can't tell whether this one has sold
+        else:
+            why = "no longer listed"
         if not why:
             why = rejection(rec.get("title", ""), rec.get("property_type", ""), rec.get("bedrooms"), rec.get("district"))
         rec["active"] = not why
