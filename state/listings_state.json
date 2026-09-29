@@ -14433,7 +14433,7 @@
   "first_seen": "2026-09-29",
   "active": false,
   "last_seen": "2026-09-29",
-  "excluded": "flat"
+  "excluded": "no longer listed"
  },
  "36411502": {
   "id": "36411502",
@@ -18329,7 +18329,7 @@
   "fetched": "2026-09-29",
   "first_seen": "2026-09-29",
   "active": false,
-  "excluded": "flat",
+  "excluded": "no longer listed",
   "last_seen": "2026-09-29"
  },
  "36407315": {
@@ -22373,7 +22373,7 @@
   "fetched": "2026-09-29",
   "first_seen": "2026-09-29",
   "active": false,
-  "excluded": "flat",
+  "excluded": "no longer listed",
   "last_seen": "2026-09-29"
  },
  "36406020": {
@@ -49104,6 +49104,34 @@
   "fetched": "2026-09-29",
   "first_seen": "2026-09-29",
   "active": true,
+  "last_seen": "2026-09-29"
+ },
+ "36407371": {
+  "id": "36407371",
+  "url": "https://espc.com/property/178-3-portobello-high-street-portobello-edinburgh-eh15-1ex/36407371",
+  "title": "3 bed top floor flat for sale in Portobello",
+  "lat": 55.95266,
+  "lng": -3.113317,
+  "address": "178/3 Portobello High Street, Edinburgh, EH15 1EX",
+  "postcode": "EH15 1EX",
+  "bedrooms": 3,
+  "image": "https://espc.com/images?i=https://media.scottishhomereports.com/MediaServer/PropertyMarketing/588046/MainImage/588046_0.202609290907.jpg&width=1200&height=800",
+  "price": 360000,
+  "price_qualifier": "Offers Over",
+  "property_type": "flat",
+  "detached": false,
+  "garage": false,
+  "district": "EH15",
+  "price_history": [
+   [
+    "2026-09-29",
+    360000
+   ]
+  ],
+  "fetched": "2026-09-29",
+  "first_seen": "2026-09-29",
+  "active": false,
+  "excluded": "flat",
   "last_seen": "2026-09-29"
  }
 }
