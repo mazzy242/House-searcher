@@ -227,3 +227,70 @@ def test_simd_falls_back_to_next_source(monkeypatch):
     assert fc["source"] == "mirror"
     assert p["rank"] == 3000 and p["decile"] == 5    # overall rank, not the income-domain rank
     assert p["income"] == 1
+
+
+# ------------------------------------------------------------------ what we keep
+
+def test_slug_district():
+    u = "https://espc.com/property/2-lilybank-lane-ratho-station-newbridge-eh28-8aw/36392542"
+    assert espc.slug_district(u) == "EH28"
+    assert espc.slug_district("https://espc.com/property/12-some-road-dalgety-bay-ky11-9ab/36000001") == "KY11"
+    assert espc.slug_district("https://espc.com/property/no-postcode-here/36000002") is None
+
+
+def test_rejection_rules():
+    r = espc.rejection
+    assert r("3 bed semi-detached house for sale in Corstorphine", "semi-detached", 3, "EH12") is None
+    assert r("4 bed detached bungalow for sale in Dalgety Bay", "detached", 4, "KY11") is None
+    assert r("2 bed first floor flat for sale in Leith", "flat", 2, "EH6") == "flat"
+    assert r("3 bed maisonette flat for sale", "flat", 3, "EH4") == "flat"
+    assert r("2 bed duplex for sale", "duplex", 2, "EH7") == "flat"
+    assert r("1 bed retirement property for sale", "", 1, "EH10") == "flat"
+    assert r("1 bed terraced house for sale", "terraced", 1, "EH6") == "1 bedroom"
+    assert r("3 bed detached house for sale in Bathgate", "detached", 3, "EH48") == "district EH48"
+    assert r("Plot for sale", "", None, "EH26") == "bedrooms unknown"
+    assert r("3 bed house to rent", "house", 3, "EH4") == "rental"
+
+
+def test_card_hints_and_prefilter():
+    html = """<ul>
+      <li><a href="/property/1-a-road-edinburgh-eh4-1aa/36000011"><img></a>
+          <h3>3 bed detached house for sale in Barnton</h3><a href="/property/1-a-road-edinburgh-eh4-1aa/36000011">View</a></li>
+      <li><a href="/property/2-b-street-edinburgh-eh6-2bb/36000012">2 bed ground floor flat for sale in Leith</a></li>
+      <li><a href="/property/3-c-lane-bathgate-eh48-3cc/36000013">4 bed detached house for sale in Bathgate</a></li>
+      <li><a href="/property/4-d-view-musselburgh-eh21-4dd/36000014">1 bed terraced house for sale</a></li>
+    </ul>"""
+    urls = espc.extract_property_urls(html, "https://espc.com/properties")
+    hints = espc.extract_card_hints(html)
+    assert "Barnton" in hints["36000011"] and "Leith" not in hints["36000011"]
+    got = {pid: espc.prefilter(u, hints.get(pid)) for pid, u in urls.items()}
+    assert got == {"36000011": None, "36000012": "flat", "36000013": "district EH48", "36000014": "1 bedroom"}
+
+
+def test_scrape_keeps_only_wanted_houses(monkeypatch, tmp_path):
+    monkeypatch.setattr(espc, "DEBUG", tmp_path)
+    search = """<a href="/property/1-a-road-edinburgh-eh4-1aa/36000011">3 bed detached house for sale</a>
+                <a href="/property/9-z-road-edinburgh-eh5-9zz/36000019">house</a>"""
+    pages = {"36000011": "<title>3 bed detached house for sale in Barnton</title><h1>1 A Road, Edinburgh EH4 1AA</h1>"
+                         "<div>Offers over £500,000</div><meta property='place:location:latitude' content='55.96'>"
+                         "<meta property='place:location:longitude' content='-3.28'>",
+             "36000019": "<title>2 bed upper flat for sale in Trinity</title><h1>9 Z Road, Edinburgh EH5 9ZZ</h1>"
+                         "<div>Offers over £250,000</div>"}
+
+    class FakeFetcher:
+        count = 0
+        robots = type("R", (), {"sitemaps": []})()
+        def html(self, url):
+            self.count += 1
+            if "/property/" in url:
+                return pages[espc.listing_id(url)]
+            return search if "page=" not in url else ""
+    monkeypatch.setattr(espc, "Fetcher", FakeFetcher)
+    monkeypatch.setattr(espc, "geocode_postcodes", lambda ls: None)
+    monkeypatch.setitem(espc.CFG, "search_urls", ["https://espc.com/properties?locations=edinburgh"])
+    old_flat = {"title": "2 bed first floor flat for sale", "property_type": "flat", "bedrooms": 2,
+                "district": "EH6", "active": True, "fetched": "2099-01-01"}
+    state = espc.scrape({"36000001": old_flat})
+    assert state["36000011"]["active"] is True
+    assert "36000019" in state and state["36000019"]["active"] is False and state["36000019"]["excluded"] == "flat"
+    assert state["36000001"]["active"] is False     # no longer listed -> inactive, kept for history

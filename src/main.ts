@@ -62,8 +62,14 @@ function buildControls(): void {
   const opt = (v: number, label: string) => `<option value="${v}">${label}</option>`;
   $("minPrice").innerHTML = opt(0, "No min") + PRICES.map((p) => opt(p, gbp(p))).join("");
   $("maxPrice").innerHTML = opt(0, "No max") + PRICES.map((p) => opt(p, gbp(p))).join("");
-  $("minBeds").innerHTML = [0, 1, 2, 3, 4, 5]
-    .map((b) => `<button role="radio" data-beds="${b}">${b ? `${b}+` : "Any"}</button>`).join("");
+  // Every listing already has 2+ bedrooms (the scraper only keeps houses with 2 or more).
+  $("minBeds").innerHTML = [0, 3, 4, 5]
+    .map((b) => `<button role="radio" data-beds="${b}">${b ? `${b}+` : "2+"}</button>`).join("");
+  const regions = [...new Set(listings.map((l) => l.region).filter(Boolean) as string[])];
+  const order = ["Edinburgh", "Midlothian", "East Lothian", "West Lothian", "Fife"];
+  regions.sort((a, b) => (order.indexOf(a) + 99) % 99 - (order.indexOf(b) + 99) % 99 || a.localeCompare(b));
+  $("region").innerHTML += regions
+    .map((r) => `<option value="${esc(r)}">${esc(r)} (${listings.filter((l) => l.region === r).length})</option>`).join("");
   const schools = [...new Set(listings.flatMap((l) => [l.catchment, l.catchment_rc]).filter(Boolean) as string[])].sort();
   const rank = (s: string) => topFor(s)?.rank;
   $("school").innerHTML += schools.map((s) => `<option value="${esc(s)}">${esc(s)}${rank(s) ? ` (#${rank(s)})` : ""}</option>`).join("");
@@ -71,7 +77,7 @@ function buildControls(): void {
   for (const id of ["minPrice", "maxPrice", "maxMins", "minSimd"] as const) {
     $<HTMLSelectElement>(id).addEventListener("change", (e) => set({ [id]: Number((e.target as HTMLSelectElement).value) }));
   }
-  for (const id of ["school", "colourBy", "sort", "simdDomain"] as const) {
+  for (const id of ["school", "region", "colourBy", "sort", "simdDomain"] as const) {
     $<HTMLSelectElement>(id).addEventListener("change", (e) => set({ [id]: (e.target as HTMLSelectElement).value } as Partial<Filters>));
   }
   for (const id of ["detached", "garage", "topSchool", "newOnly", "allBus"] as const) {
@@ -131,7 +137,7 @@ function set(patch: Partial<Filters>): void {
 
 function syncControls(): void {
   const f = filters;
-  for (const id of ["minPrice", "maxPrice", "maxMins", "minSimd", "school", "colourBy", "sort", "simdDomain"] as const) {
+  for (const id of ["minPrice", "maxPrice", "maxMins", "minSimd", "school", "region", "colourBy", "sort", "simdDomain"] as const) {
     $<HTMLSelectElement>(id).value = String(f[id]);
   }
   for (const id of ["detached", "garage", "topSchool", "newOnly", "allBus"] as const) $<HTMLInputElement>(id).checked = f[id];
@@ -303,7 +309,7 @@ function renderDetail(l: Listing): void {
     <div class="body">
       <div class="price">${l.price_qualifier ? `<span class="q">${esc(l.price_qualifier)}</span> ` : ""}${gbpFull(l.price)}</div>
       <h3>${esc(l.title || `${l.bedrooms ?? "?"} bedroom ${l.property_type ?? "home"}`)}</h3>
-      <div class="addr">${esc(l.address)}${l.approx_location ? ` <span class="muted">(location approximate)</span>` : ""}</div>
+      <div class="addr">${esc(l.address)}${l.region && l.region !== "Edinburgh" ? ` · ${esc(l.region)}` : ""}${l.approx_location ? ` <span class="muted">(location approximate)</span>` : ""}</div>
       <div class="badges">${badges(l)}</div>
 
       <div class="waverley">
@@ -322,7 +328,7 @@ function renderDetail(l: Listing): void {
         <div><dt>Bedrooms</dt><dd>${l.bedrooms ?? "–"}</dd></div>
         <div><dt>Type</dt><dd>${esc(l.property_type ?? "–")}</dd></div>
         <div><dt>SIMD</dt><dd>${simdBar(l.simd?.decile)}${l.simd?.name ? `<div class="muted small">${esc(l.simd.name)}</div>` : ""}${domains ? `<div class="domains">${domains}</div>` : ""}</dd></div>
-        <div><dt>Catchment</dt><dd>${esc(l.catchment ?? "–")}${topFor(l.catchment) ? ` <b class="rank">#${topFor(l.catchment)!.rank}</b>` : ""}${l.catchment_rc ? `<div class="small">RC: ${esc(l.catchment_rc)}${topFor(l.catchment_rc) ? ` <b class="rank">#${topFor(l.catchment_rc)!.rank}</b>` : ""}</div>` : ""}${[topFor(l.catchment), topFor(l.catchment_rc)].filter((t): t is TopSchool => !!t).map(schoolStats).join("")}</dd></div>
+        <div><dt>Catchment</dt><dd>${l.catchment || l.catchment_rc ? "" : `<span class="muted">Outside Edinburgh – check with ${esc(l.region ?? "the local")} council</span>`}${esc(l.catchment ?? "")}${topFor(l.catchment) ? ` <b class="rank">#${topFor(l.catchment)!.rank}</b>` : ""}${l.catchment_rc ? `<div class="small">RC: ${esc(l.catchment_rc)}${topFor(l.catchment_rc) ? ` <b class="rank">#${topFor(l.catchment_rc)!.rank}</b>` : ""}</div>` : ""}${[topFor(l.catchment), topFor(l.catchment_rc)].filter((t): t is TopSchool => !!t).map(schoolStats).join("")}</dd></div>
         ${vs ? `<div><dt>vs area</dt><dd><b class="${vs.vs_pct > 5 ? "up" : vs.vs_pct < -5 ? "down" : ""}">${vs.vs_pct > 0 ? "+" : ""}${vs.vs_pct}%</b> vs ${esc(l.district)} ${vs.basis === "all" ? "" : `${esc(vs.basis)} `}median ${gbp(vs.median)}</dd></div>` : ""}
         ${hist.length > 1 ? `<div><dt>History</dt><dd>${hist.map(([d, p]) => `${gbp(p)} <span class="muted small">${esc(d)}</span>`).join(" → ")}</dd></div>` : ""}
         ${age != null ? `<div><dt>Listed</dt><dd>${age === 0 ? "today" : `${age} day${age === 1 ? "" : "s"} ago`}</dd></div>` : ""}

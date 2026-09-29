@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import datetime as dt
 import json
+from collections import Counter
 import re
 import time
 import urllib.robotparser
@@ -98,6 +99,74 @@ def extract_property_urls(html: str, base: str) -> dict[str, str]:
     return found
 
 
+# ---------------------------------------------------------------- what we keep
+
+EXCLUDE_TYPES = re.compile(CFG["exclude_types_regex"], re.I)
+ALLOWED_DISTRICTS = {d for ds in CFG["allowed_postcode_districts"].values() for d in ds}
+ALLOWED_AREAS = {re.match(r"[A-Z]+", d).group(0) for d in ALLOWED_DISTRICTS}
+SLUG_POSTCODE = re.compile(r"-([a-z]{1,2}\d[a-z\d]?)-(\d[a-z]{2})(?:/|$)", re.I)
+
+
+def slug_district(url: str) -> str | None:
+    """ESPC property URLs end with the postcode: /property/2-lilybank-lane-...-eh28-8aw/36392542."""
+    path = urlparse(url).path.rstrip("/")
+    path = path[: path.rfind("/")] if re.search(r"/\d{5,}$", path) else path
+    m = SLUG_POSTCODE.search(path + "/")
+    return m.group(1).upper() if m else None
+
+
+def rejection(title: str = "", ptype: str = "", beds: int | None = None, district: str | None = None,
+              beds_required: bool = True) -> str | None:
+    """Why a listing isn't wanted (None = keep): houses for sale, 2+ bedrooms, commutable districts."""
+    text = f"{title} {ptype}"
+    if re.search(r"\bto (rent|let)\b", text, re.I):
+        return "rental"
+    if EXCLUDE_TYPES.search(text):
+        return "flat"
+    if beds is None and beds_required:
+        return "bedrooms unknown"
+    if beds is not None and beds < CFG["min_bedrooms"]:
+        return f"{beds} bedroom"
+    if district and district not in ALLOWED_DISTRICTS:
+        return f"district {district}"
+    return None
+
+
+def extract_card_hints(html: str) -> dict[str, str]:
+    """ESPC id -> the text of its results card ("3 bed semi-detached house for sale in ..."), when
+    the card can be isolated. Lets us skip flats and 1-beds without fetching their pages."""
+    soup = BeautifulSoup(html, "html.parser")
+    hints: dict[str, str] = {}
+    for a in soup.find_all("a", href=True):
+        pid = listing_id(a["href"])
+        if not pid or pid in hints:
+            continue
+        node = a
+        for _ in range(6):
+            node = node.parent
+            if node is None or node.name in ("body", "html", "[document]"):
+                break
+            ids = {listing_id(x["href"]) for x in node.find_all("a", href=True)} - {None}
+            if ids != {pid}:
+                break  # this container holds other listings too
+            text = node.get_text(" ", strip=True)
+            if BEDS.search(text) and len(text) < 800:
+                hints[pid] = text
+                break
+    return hints
+
+
+def prefilter(url: str, hint: str | None) -> str | None:
+    """Rejection reason decidable from the results page alone, else None (fetch the details)."""
+    district = slug_district(url)
+    if district and district not in ALLOWED_DISTRICTS:
+        return f"district {district}"
+    if hint:
+        bm = BEDS.search(hint)
+        return rejection(hint, beds=int(bm.group(1)) if bm else None, beds_required=False)
+    return None
+
+
 def next_page_url(html: str, current: str, page: int) -> str | None:
     soup = BeautifulSoup(html, "html.parser")
     link = soup.find("link", rel="next") or soup.find("a", rel="next")
@@ -110,22 +179,31 @@ def next_page_url(html: str, current: str, page: int) -> str | None:
     return None
 
 
-def discover(f: Fetcher) -> dict[str, str]:
+def discover(f: Fetcher, hints: dict[str, str] | None = None) -> dict[str, str]:
     urls: dict[str, str] = {}
-    for start in CFG["search_urls"]:
-        url, page, seen = start, 1, set()
+    hints = {} if hints is None else hints
+    for n_search, start in enumerate(CFG["search_urls"], 1):
+        url, page, seen, empty = start, 1, set(), 0
         while url and page <= CFG["max_search_pages"] and url not in seen:
             seen.add(url)
             html = f.html(url)
             if not html:
                 break
             got = extract_property_urls(html, url)
+            hints.update(extract_card_hints(html))
             if page == 1:
-                (DEBUG / "search_page_1.html").write_text(html)
+                (DEBUG / f"search_{n_search}_page_1.html").write_text(html)
             new = {k: v for k, v in got.items() if k not in urls}
-            log.info("Search page %d: %d property links (%d new)", page, len(got), len(new))
+            log.info("%s page %d: %d property links (%d new)", start.split("?")[-1], page, len(got), len(new))
             urls.update(got)
             if not new:
+                break
+            # Guard against a location ESPC doesn't recognise (and so returns all of Scotland):
+            # give up on this search after several pages with nothing in our postcode areas.
+            areas = {re.match(r"[A-Z]+", d).group(0) for d in map(slug_district, got.values()) if d}
+            empty = 0 if (not areas or areas & ALLOWED_AREAS) else empty + 1
+            if empty >= CFG["stop_after_empty_pages"]:
+                log.warning("%s: %d pages with no listings in %s - stopping this search", start, empty, sorted(ALLOWED_AREAS))
                 break
             url = next_page_url(html, url, page)
             if not url:  # no explicit link: try the conventional ?page=N
@@ -386,14 +464,18 @@ def scrape(state: dict[str, dict]) -> dict[str, dict]:
     DEBUG.mkdir(parents=True, exist_ok=True)
     f = Fetcher()
     today = dt.date.today().isoformat()
-    urls = discover(f)
+    hints: dict[str, str] = {}
+    urls = discover(f, hints)
     if not urls:
         raise RuntimeError("ESPC: no property links found on search pages or sitemaps - see pipeline/debug/")
+    # Drop flats, 1-beds and far-away districts using only the results page (URL postcode + card text).
+    pre = {pid: prefilter(u, hints.get(pid)) for pid, u in urls.items()}
+    reasons = Counter(r.split()[0] if r.startswith("district") else r for r in pre.values() if r)
+    log.info("ESPC: %d listings found; skipped from results page: %s", len(urls), dict(reasons))
     stale_before = (dt.date.today() - dt.timedelta(days=CFG["refetch_details_after_days"])).isoformat()
-    todo = [pid for pid in urls if pid not in state or state[pid].get("fetched", "") < stale_before
-            or not state[pid].get("active")]
+    todo = [pid for pid in urls if not pre[pid] and (pid not in state or state[pid].get("fetched", "") < stale_before)]
     todo = todo[:CFG["max_detail_fetches_per_run"]]
-    log.info("ESPC: %d live listings, fetching %d detail pages", len(urls), len(todo))
+    log.info("ESPC: fetching %d detail pages", len(todo))
     parsed_ok = 0
     for n, pid in enumerate(todo, 1):
         try:
@@ -419,17 +501,27 @@ def scrape(state: dict[str, dict]) -> dict[str, dict]:
             log.info("  ... %d/%d", n, len(todo))
     if todo and parsed_ok == 0:
         raise RuntimeError("ESPC: fetched detail pages but could not parse price/location from any - see pipeline/debug/")
+    excluded: Counter = Counter()
     for pid, rec in state.items():
-        rec["active"] = pid in urls
-        if rec["active"]:
+        why = pre.get(pid) if pid in urls else "no longer listed"
+        if not why:
+            why = rejection(rec.get("title", ""), rec.get("property_type", ""), rec.get("bedrooms"), rec.get("district"))
+        rec["active"] = not why
+        if why:
+            rec["excluded"] = why
+            excluded[why.split()[0] if why.startswith("district") else why] += 1
+        else:
+            rec.pop("excluded", None)
+        if pid in urls:
             rec["last_seen"] = today
     geocode_postcodes([r for r in state.values() if r["active"]])
-    area = set(CFG["postcode_areas"])
     for rec in state.values():
-        pc_area = re.match(r"[A-Z]+", rec.get("postcode") or "")
-        if rec["active"] and area and pc_area and pc_area.group(0) not in area:
-            rec["active"] = False  # outside the areas we care about
         if rec["active"] and rec.get("lat") is not None and not in_bbox(rec["lat"], rec["lng"]):
-            rec["active"] = False
-    log.info("ESPC: %d requests, %d active listings in area", f.count, sum(r["active"] for r in state.values()))
+            rec["active"], rec["excluded"] = False, "outside map area"
+            excluded["outside map area"] += 1
+    # Keep the state file small: forget excluded listings (they're re-checked if they change).
+    for pid in [p for p, r in state.items() if r.get("excluded") and r["excluded"] != "no longer listed" and p not in urls]:
+        del state[pid]
+    log.info("ESPC: %d requests, %d houses kept, excluded: %s", f.count,
+             sum(r["active"] for r in state.values()), dict(excluded))
     return state

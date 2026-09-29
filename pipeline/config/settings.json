@@ -1,21 +1,35 @@
 {
   "_comment": "Edit this file to change what the daily refresh collects. Coordinates are WGS84 (lon/lat).",
 
-  "bbox": { "west": -3.48, "south": 55.83, "east": -2.95, "north": 56.00 },
+  "bbox": { "west": -3.66, "south": 55.80, "east": -2.48, "north": 56.08 },
 
   "waverley": { "name": "Edinburgh Waverley", "lat": 55.95196, "lng": -3.18992 },
 
   "espc": {
     "base_url": "https://espc.com",
     "search_urls": [
-      "https://espc.com/properties?locations=edinburgh"
+      "https://espc.com/properties?locations=edinburgh",
+      "https://espc.com/properties?locations=midlothian",
+      "https://espc.com/properties?locations=east-lothian",
+      "https://espc.com/properties?locations=west-lothian",
+      "https://espc.com/properties?locations=fife"
     ],
     "max_search_pages": 300,
     "use_sitemap_fallback": true,
     "request_delay_seconds": 1.5,
     "refetch_details_after_days": 7,
     "max_detail_fetches_per_run": 1500,
-    "postcode_areas": ["EH"],
+    "_include_comment": "Only houses for sale with at least min_bedrooms, in these postcode districts. Flats etc. are recognised from the listing title/type.",
+    "min_bedrooms": 2,
+    "exclude_types_regex": "\\b(flat|apartment|maisonette|penthouse|duplex|studio|retirement)\\b",
+    "allowed_postcode_districts": {
+      "Edinburgh": ["EH1", "EH2", "EH3", "EH4", "EH5", "EH6", "EH7", "EH8", "EH9", "EH10", "EH11", "EH12", "EH13", "EH14", "EH15", "EH16", "EH17", "EH28", "EH29", "EH30"],
+      "Midlothian: Lasswade, Bonnyrigg, Loanhead, Dalkeith, Newtongrange, Gorebridge, Rosewell, Roslin, Penicuik": ["EH18", "EH19", "EH20", "EH22", "EH23", "EH24", "EH25", "EH26"],
+      "East Lothian: Musselburgh, Prestonpans, Longniddry, Tranent, Gullane, North Berwick, Haddington, Dunbar": ["EH21", "EH31", "EH32", "EH33", "EH34", "EH35", "EH39", "EH41", "EH42"],
+      "West Lothian: Kirknewton, Linlithgow, Broxburn, Uphall, Winchburgh, East/Mid Calder, Livingston": ["EH27", "EH49", "EH52", "EH53", "EH54"],
+      "Fife (train to Waverley): North Queensferry, Inverkeithing, Dalgety Bay, Aberdour, Burntisland": ["KY3", "KY11"]
+    },
+    "stop_after_empty_pages": 4,
     "user_agent": "house-searcher/1.0 (personal house search; +https://github.com/mazzy242/house-searcher)"
   },
 

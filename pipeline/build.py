@@ -66,6 +66,10 @@ def refresh_layers(run: Run) -> None:
     write_json(OUT / "top_schools.json", {k: v for k, v in top.items() if not k.startswith("_")})
 
 
+REGION_OF = {d: name.split(":")[0].split(" (")[0]
+             for name, ds in SETTINGS["espc"]["allowed_postcode_districts"].items() for d in ds}
+
+
 def polygon_lookup(fc: dict | None):
     if not fc or not fc.get("features"):
         return lambda lat, lng: []
@@ -115,6 +119,7 @@ def enrich(listings: list[dict], net, profiles, previous: dict | None = None) ->
             "approx_location")}
         rec.pop("top_school_rank", None)
         rec["lat"], rec["lng"] = round(rec["lat"], 5), round(rec["lng"], 5)
+        rec["region"] = REGION_OF.get(rec.get("district") or "")
         z = simd_at(l["lat"], l["lng"])
         if z:
             rec["simd"] = {k: v for k, v in z[0].items() if k != "la"}

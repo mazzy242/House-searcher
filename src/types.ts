@@ -31,6 +31,7 @@ export interface Listing {
   address?: string;
   postcode?: string;
   district?: string;
+  region?: string;
   lat: number;
   lng: number;
   price: number;

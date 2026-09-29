@@ -1,6 +1,6 @@
 # Edinburgh House Browser
 
-A map of every house for sale on ESPC in the Edinburgh area. For each home it shows:
+A map of the **houses** (not flats) with **2 or more bedrooms** for sale on ESPC in Edinburgh and nearby commuter towns: Midlothian, East Lothian, West Lothian (Linlithgow to Livingston) and the Fife towns on the train line (North Queensferry to Burntisland). For each home it shows:
 
 - **How long it takes to get to Waverley station**, door to door (bus/tram, train, walk or cycle).
 - **Which secondary school catchment it's in**, with the top 10 schools highlighted.
@@ -70,6 +70,16 @@ Until the first successful refresh, the site shows clearly-labelled **sample dat
 - **Top-10 schools** come from the [ESPC article](https://espc.com/news/post/top-10-secondary-schools-in-edinburgh-and-their-catchment-areas) (31 Aug 2026, Sunday Times league tables), including ESPC's price stats per catchment. #4 St Thomas of Aquin's is Roman Catholic, so its catchment is drawn as an orange dashed outline. Update `pipeline/config/top_schools.json` when ESPC publishes a new list.
 - **Proposed tram routes.** `pipeline/config/tram_proposed.geojson` is hand-traced and indicative. Edit it as plans firm up.
 - **Main bus routes.** `bus.main_routes` in `settings.json` controls which routes show by default.
+
+## What gets included
+
+In `pipeline/config/settings.json` under `espc`:
+
+- `allowed_postcode_districts` lists the areas to keep, grouped by region. Add or remove districts (e.g. `EH48` for Bathgate) to widen or narrow the search.
+- `min_bedrooms` is the minimum number of bedrooms (2).
+- `exclude_types_regex` sets which property types are dropped: flats, apartments, maisonettes, penthouses, duplexes, studios and retirement flats.
+
+Most unwanted listings are skipped straight from the search results (ESPC's URLs end in the postcode, and each result card says e.g. "2 bed first floor flat"), so they never cost a page fetch. School catchments cover the City of Edinburgh only.
 
 ## Garage / detached detection
 

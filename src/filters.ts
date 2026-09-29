@@ -12,6 +12,7 @@ export interface Filters {
   maxMins: number; // 0 = any
   topSchool: boolean;
   school: string; // "" = any
+  region: string; // "" = any
   minSimd: number; // 0 = any
   newOnly: boolean;
   colourBy: ColourBy;
@@ -31,6 +32,7 @@ export const DEFAULTS: Filters = {
   maxMins: 0,
   topSchool: false,
   school: "",
+  region: "",
   minSimd: 0,
   newOnly: false,
   colourBy: "price",
@@ -43,7 +45,7 @@ export const DEFAULTS: Filters = {
 
 const NUM = ["minPrice", "maxPrice", "minBeds", "maxMins", "minSimd"] as const;
 const BOOL = ["detached", "garage", "topSchool", "newOnly", "allBus"] as const;
-const STR = ["school", "colourBy", "sort", "simdDomain", "basemap"] as const;
+const STR = ["school", "region", "colourBy", "sort", "simdDomain", "basemap"] as const;
 
 /** Filters live in the URL hash so a search can be bookmarked or shared. */
 export function toHash(f: Filters): string {
@@ -79,6 +81,7 @@ export function matches(l: Listing, f: Filters): boolean {
   if (f.maxMins && l.travel.best_min > f.maxMins) return false;
   if (f.topSchool && !l.top_school_rank) return false;
   if (f.school && l.catchment !== f.school && l.catchment_rc !== f.school) return false;
+  if (f.region && l.region !== f.region) return false;
   if (f.minSimd && (l.simd?.decile ?? 0) < f.minSimd) return false;
   if (f.newOnly && !isNew(l)) return false;
   return true;

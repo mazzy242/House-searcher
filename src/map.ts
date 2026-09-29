@@ -124,8 +124,8 @@ export class HouseMap {
     this.map = new maplibregl.Map({
       container,
       style,
-      center: [-3.22, 55.935],
-      zoom: 11.2,
+      center: [-3.2, 55.94],
+      zoom: 10.4,
       minZoom: 9,
       maxBounds: [[-4.2, 55.6], [-2.4, 56.25]],
       attributionControl: { compact: true, customAttribution: "Listings © ESPC · SIMD © Scottish Government · Catchments © City of Edinburgh Council · Transit © OpenStreetMap contributors" },
