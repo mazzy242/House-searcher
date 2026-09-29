@@ -50,6 +50,7 @@ class Run:
 def refresh_layers(run: Run) -> None:
     simd = run.step("simd", layers.fetch_simd)
     if simd:
+        run.meta["sources"]["simd"]["detail"] = simd.pop("source", "")
         write_json(OUT / "simd.geojson", simd)
     res = run.step("catchments", layers.fetch_catchments)
     if res:

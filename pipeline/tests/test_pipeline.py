@@ -167,6 +167,7 @@ def test_fetch_simd_field_detection(monkeypatch):
         "DataZone": "S01008600", "Name": "Morningside - 03", "LAName": "City of Edinburgh",
         "Rankv2": 6800, "IncRankv2": 20, "CrimeRank": 3500, "HouseRank": 700}}]
     monkeypatch.setattr(layers, "arcgis_query", lambda *a, **k: rows)
+    monkeypatch.setattr(layers, "_simd_candidates", lambda s: iter([("u", "ua")]))
     p = layers.fetch_simd()["features"][0]["properties"]
     assert p["dz"] == "S01008600" and p["decile"] == 10
     assert p["income"] == 1 and p["crime"] == 6 and p["housing"] == 2
@@ -208,3 +209,21 @@ def test_enrich_end_to_end(tmp_path, monkeypatch):
     assert r0["catchment"] and r0["area"]["median"] == 375000 and r0["area"]["basis"] == "3-bed"
     assert r0["travel"]["pt_min"] == 9 and r0["travel"]["best_min"] == 9     # reused previous PT time
     assert (tmp_path / "areas.json").exists()
+
+
+def test_simd_falls_back_to_next_source(monkeypatch):
+    sq = {"type": "Polygon", "coordinates": [[[-3.2, 55.9], [-3.2, 55.91], [-3.19, 55.91], [-3.2, 55.9]]]}
+    good = [{"type": "Feature", "geometry": sq, "properties": {
+        "DataZone": "S01008600", "SIMD2020v2_Income_Domain_Rank": 50, "SIMD2020v2_Rank": 3000, "Total_population": 800}}]
+
+    def query(s, url, extra=None):
+        if url == "blocked":
+            raise RuntimeError("403 Client Error: Forbidden")
+        return good
+    monkeypatch.setattr(layers, "arcgis_query", query)
+    monkeypatch.setattr(layers, "_simd_candidates", lambda s: iter([("blocked", "a"), ("mirror", "b")]))
+    fc = layers.fetch_simd()
+    p = fc["features"][0]["properties"]
+    assert fc["source"] == "mirror"
+    assert p["rank"] == 3000 and p["decile"] == 5    # overall rank, not the income-domain rank
+    assert p["income"] == 1

@@ -10,7 +10,7 @@
     "search_urls": [
       "https://espc.com/properties?locations=edinburgh"
     ],
-    "max_search_pages": 60,
+    "max_search_pages": 300,
     "use_sitemap_fallback": true,
     "request_delay_seconds": 1.5,
     "refetch_details_after_days": 7,

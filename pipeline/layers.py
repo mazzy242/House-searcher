@@ -100,27 +100,37 @@ def _decile(rank: Any) -> int | None:
     return min(10, max(1, math.ceil(r / (SIMD_DATAZONES / 10))))
 
 
+# Field names vary by publisher (IncRankv2, SIMD2020v2_Income_Domain_Rank, ...).
 SIMD_DOMAINS = {
-    "income": r"^inc.*rank", "employment": r"^emp.*rank", "health": r"^hl?th.*rank",
-    "education": r"^edu.*rank", "access": r"^g?acc.*rank", "crime": r"^crime.*rank",
-    "housing": r"^hous.*rank",
+    "income": r"inc\w*rank", "employment": r"emp\w*rank", "health": r"(hlth|health)\w*rank",
+    "education": r"edu\w*rank", "access": r"acc\w*rank", "crime": r"crime\w*rank",
+    "housing": r"hous\w*rank",
 }
 
 
 def fetch_simd() -> dict:
     s = session()
-    feats = arcgis_query(s, SETTINGS["sources"]["simd_query_url"], _bbox_params())
+    feats, keys, used = [], {}, ""
+    failures = []
+    for url, ua in _simd_candidates(s):
+        try:
+            s.headers["User-Agent"] = ua
+            got = arcgis_query(s, url, _bbox_params())
+            if not got:
+                raise RuntimeError("no features")
+            keys = _simd_keys(got[0]["properties"])
+            if not keys["rank"]:
+                raise RuntimeError(f"no overall rank field in {sorted(got[0]['properties'])}")
+            feats, used = got, url
+            break
+        except Exception as e:  # noqa: BLE001 - try the next source
+            failures.append(f"{url}: {str(e)[:120]}")
+            log.warning("SIMD source failed: %s (%s)", url, e)
     if not feats:
-        raise RuntimeError("SIMD query returned no features")
-    sample = feats[0]["properties"]
-    log.info("SIMD fields: %s", sorted(sample))
-    k_dz = _find_key(sample, r"^data_?zone$", r"^dz(_?code)?$", r"datazone", r"^dz")
-    k_name = _find_key(sample, r"^(dz_?)?name$", r"name")
-    k_rank = _find_key(sample, r"^rank(v2)?$", r"^simd.*rank", r"^rank")
-    k_la = _find_key(sample, r"^la_?name$", r"council", r"^laname")
-    domain_keys = {d: _find_key(sample, p) for d, p in SIMD_DOMAINS.items()}
-    if not k_rank:
-        raise RuntimeError(f"Could not find the overall SIMD rank field in {sorted(sample)}")
+        raise RuntimeError("all SIMD sources failed: " + " | ".join(failures)[:900])
+    log.info("SIMD from %s, fields: %s", used, sorted(feats[0]["properties"]))
+    k_dz, k_name, k_rank, k_la = keys["dz"], keys["name"], keys["rank"], keys["la"]
+    domain_keys = keys["domains"]
     out = []
     for f in feats:
         p = f["properties"]
@@ -137,7 +147,56 @@ def fetch_simd() -> dict:
         out.append({"type": "Feature", "properties": props,
                     "geometry": {**f["geometry"], "coordinates": round_coords(f["geometry"]["coordinates"])}})
     log.info("SIMD: %d data zones", len(out))
-    return {"type": "FeatureCollection", "features": out}
+    return {"type": "FeatureCollection", "features": out, "source": used}
+
+
+# Some government servers refuse non-browser clients; this is a public open-data layer.
+BROWSER_UA = ("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) "
+              "Chrome/126.0 Safari/537.36")
+_DOMAIN_WORDS = r"inc|emp|edu|hlth|health|acc|crime|hous|pop|work"
+
+
+def _simd_keys(props: dict) -> dict:
+    overall = [k for k in props if re.search(r"rank", k, re.I) and not re.search(_DOMAIN_WORDS, k, re.I)]
+    rank = (_find_key({k: 1 for k in overall}, r"^rank(v2)?$", r"^simd\d*(v\d)?_?rank$", r"^simd", r"rank")
+            if overall else None)
+    return {
+        "dz": _find_key(props, r"^data_?zone$", r"^dz(_?code)?$", r"datazone", r"^dz"),
+        "name": _find_key(props, r"^(dz_?)?name$", r"name"),
+        "la": _find_key(props, r"^la_?name$", r"council", r"^laname"),
+        "rank": rank,
+        "domains": {d: _find_key(props, p) for d, p in SIMD_DOMAINS.items()},
+    }
+
+
+def _simd_candidates(s):
+    """(layer query URL, user agent) pairs to try, most authoritative first."""
+    url = SETTINGS["sources"]["simd_query_url"]
+    yield url, s.headers["User-Agent"]
+    yield url, BROWSER_UA
+    try:
+        r = get(s, "https://www.arcgis.com/sharing/rest/search",
+                params={"q": 'SIMD 2020 type:"Feature Service"', "f": "json", "num": 40})
+        results = r.json().get("results", []) if r.ok else []
+    except Exception:  # noqa: BLE001
+        results = []
+    # Prefer Scottish Government / Improvement Service copies, then anything else titled SIMD 2020.
+    def score(it: dict) -> tuple:
+        blob = json.dumps(it).casefold()
+        return ("scottish government" not in blob and "gov.scot" not in blob and "improvement service" not in blob,
+                "2020" not in it.get("title", ""), -(it.get("numViews") or 0))
+    for it in sorted((i for i in results if i.get("url") and "simd" in i.get("title", "").casefold()), key=score)[:8]:
+        base = it["url"].rstrip("/")
+        if re.search(r"/\d+$", base):
+            yield base + "/query", BROWSER_UA
+            continue
+        try:
+            info = get(s, base, params={"f": "json"})
+            layers = info.json().get("layers", []) if info.ok else []
+        except Exception:  # noqa: BLE001
+            layers = []
+        for layer in layers[:3]:
+            yield f"{base}/{layer['id']}/query", BROWSER_UA
 
 
 def _discover_catchment_layer(s, title: str) -> str | None:
