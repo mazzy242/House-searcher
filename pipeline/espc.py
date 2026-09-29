@@ -176,6 +176,18 @@ def prefilter(url: str, hint: str | None) -> str | None:
     return None
 
 
+def page_title(html: str) -> str:
+    m = re.search(r"<title[^>]*>(.*?)</title>", html, re.I | re.S)
+    return re.sub(r"\s+", " ", m.group(1)).strip() if m else ""
+
+
+def recognised_location(html: str) -> bool:
+    """ESPC titles a location search 'Properties for Sale in Edinburgh | ESPC'. Without the 'in <place>'
+    it has fallen back to a broader search, which we don't want to page through."""
+    title = page_title(html)
+    return not title or bool(re.search(r"\bfor sale in \w", title, re.I))
+
+
 def next_page_url(html: str, current: str, page: int) -> str | None:
     soup = BeautifulSoup(html, "html.parser")
     link = soup.find("link", rel="next") or soup.find("a", rel="next")
@@ -195,7 +207,7 @@ def discover(f: Fetcher, hints: dict[str, str] | None = None) -> tuple[dict[str,
     complete = True
     for n_search, start in enumerate(CFG["search_urls"], 1):
         url, page, seen, empty = start, 1, set(), 0
-        while url and page <= CFG["max_search_pages"] and url not in seen:
+        while url and url not in seen:
             seen.add(url)
             try:
                 html = f.html(url)
@@ -209,6 +221,10 @@ def discover(f: Fetcher, hints: dict[str, str] | None = None) -> tuple[dict[str,
             hints.update(extract_card_hints(html))
             if page == 1:
                 (DEBUG / f"search_{n_search}_page_1.html").write_text(html)
+                if not recognised_location(html):
+                    log.warning("%s: ESPC doesn't seem to recognise this location (page title %r) - skipping",
+                                start, page_title(html))
+                    break
             new = {k: v for k, v in got.items() if k not in urls}
             log.info("%s page %d: %d property links (%d new)", start.split("?")[-1], page, len(got), len(new))
             urls.update(got)
@@ -226,9 +242,6 @@ def discover(f: Fetcher, hints: dict[str, str] | None = None) -> tuple[dict[str,
                 sep = "&" if "?" in start else "?"
                 url = f"{start}{sep}page={page + 1}"
             page += 1
-        if page > CFG["max_search_pages"]:
-            log.warning("%s: hit max_search_pages", start)
-            complete = False
     if not urls and CFG["use_sitemap_fallback"]:
         urls = discover_from_sitemaps(f)
     return urls, complete
@@ -492,7 +505,17 @@ def scrape(state: dict[str, dict]) -> dict[str, dict]:
     reasons = Counter(r.split()[0] if r.startswith("district") else r for r in pre.values() if r)
     log.info("ESPC: %d listings found; skipped from results page: %s", len(urls), dict(reasons))
     stale_before = (dt.date.today() - dt.timedelta(days=CFG["refetch_details_after_days"])).isoformat()
-    todo = [pid for pid in urls if not pre[pid] and (pid not in state or state[pid].get("fetched", "") < stale_before)]
+    # A flat stays a flat: listings already excluded for their type/size/place aren't re-fetched.
+    permanent = ("flat", "rental", "district")
+    def needs_fetch(pid: str) -> bool:
+        rec = state.get(pid)
+        if rec is None:
+            return True
+        why = rec.get("excluded") or ""
+        if why.startswith(permanent) or re.match(r"\d+ bedroom$", why):
+            return False
+        return rec.get("fetched", "") < stale_before
+    todo = [pid for pid in urls if not pre[pid] and needs_fetch(pid)]
     todo = todo[:CFG["max_detail_fetches_per_run"]]
     log.info("ESPC: fetching %d detail pages", len(todo))
     parsed_ok = 0

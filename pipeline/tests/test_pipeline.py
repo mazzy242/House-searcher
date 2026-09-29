@@ -328,3 +328,32 @@ def test_cut_short_search_does_not_mark_listings_sold(monkeypatch, tmp_path):
     state = espc.scrape({"1": dict(house), "2": dict(flat)})
     assert state["1"]["active"] is True and state["36000011"]["active"] is True
     assert "2" not in state or state["2"]["active"] is False
+
+
+def test_recognised_location():
+    assert espc.recognised_location("<title>Properties for Sale in Edinburgh | ESPC</title>")
+    assert espc.recognised_location("<title>Properties for Sale in Dalgety Bay | ESPC</title>")
+    assert not espc.recognised_location("<title>Properties for Sale | ESPC</title>")
+    assert espc.recognised_location("<html>no title</html>")   # don't block on missing titles
+
+
+def test_excluded_flats_are_not_refetched(monkeypatch, tmp_path):
+    monkeypatch.setattr(espc, "DEBUG", tmp_path)
+    fetched = []
+    found = {"36000021": "https://espc.com/property/a-eh6-1aa/36000021",
+             "36000022": "https://espc.com/property/b-eh4-1bb/36000022"}
+    monkeypatch.setattr(espc, "discover", lambda f, hints=None: (found, True))
+    monkeypatch.setattr(espc, "geocode_postcodes", lambda ls: None)
+
+    class Recorder:
+        count = 0
+        def html(self, url):
+            fetched.append(espc.listing_id(url))
+            return "<title>4 bed detached house for sale</title><h1>B EH4 1BB</h1><div>Offers over £700,000</div>"
+    monkeypatch.setattr(espc, "Fetcher", Recorder)
+    old = "2000-01-01"   # long stale
+    state = {"36000021": {"title": "2 bed flat for sale", "excluded": "flat", "fetched": old, "active": False},
+             "36000022": {"title": "4 bed detached house for sale", "bedrooms": 4, "district": "EH4",
+                          "fetched": old, "active": True}}
+    espc.scrape(state)
+    assert fetched == ["36000022"]
