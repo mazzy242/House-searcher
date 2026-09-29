@@ -46,6 +46,8 @@ export interface Listing {
   simd?: Simd;
   catchment?: string;
   catchment_rc?: string;
+  catchment_rank?: number;
+  catchment_rc_rank?: number;
   top_school_rank?: number;
   travel: Travel;
   area?: { median: number; basis: string; vs_pct: number };
@@ -71,8 +73,20 @@ export interface Meta {
   travel_assumptions?: { arrive_by: string[] };
 }
 
+export interface TopSchool {
+  rank: number;
+  name: string;
+  match: string;
+  sector?: "ND" | "RC";
+  neighbourhoods?: string;
+  avg_price?: number;
+  days_to_offer?: number;
+  home_report_pct?: number;
+}
+
 export interface TopSchools {
   verified: boolean;
+  published?: string;
   source: string;
-  schools: { rank: number; name: string; match: string }[];
+  schools: TopSchool[];
 }

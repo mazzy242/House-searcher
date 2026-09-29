@@ -67,7 +67,7 @@ Until the first successful refresh, the site shows clearly-labelled **sample dat
   python pipeline/build.py
   git add public/data state && git commit -m "Data refresh" && git push
   ```
-- **Top-10 schools.** Check the ranking in `pipeline/config/top_schools.json` against the [ESPC article](https://espc.com/news/post/top-10-secondary-schools-in-edinburgh-and-their-catchment-areas), then set `"verified": true`.
+- **Top-10 schools** come from the [ESPC article](https://espc.com/news/post/top-10-secondary-schools-in-edinburgh-and-their-catchment-areas) (31 Aug 2026, Sunday Times league tables), including ESPC's price stats per catchment. #4 St Thomas of Aquin's is Roman Catholic, so its catchment is drawn as an orange dashed outline. Update `pipeline/config/top_schools.json` when ESPC publishes a new list.
 - **Proposed tram routes.** `pipeline/config/tram_proposed.geojson` is hand-traced and indicative. Edit it as plans firm up.
 - **Main bus routes.** `bus.main_routes` in `settings.json` controls which routes show by default.
 

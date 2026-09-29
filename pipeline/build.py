@@ -62,8 +62,7 @@ def refresh_layers(run: Run) -> None:
         write_json(OUT / "bus.geojson", tb[1])
     write_json(OUT / "tram_proposed.geojson", layers.load_proposed_tram())
     top = load_config("top_schools.json")
-    write_json(OUT / "top_schools.json", {"verified": top.get("verified", False), "source": top["source"],
-                                          "schools": top["schools"]})
+    write_json(OUT / "top_schools.json", {k: v for k, v in top.items() if not k.startswith("_")})
 
 
 def polygon_lookup(fc: dict | None):
@@ -113,6 +112,7 @@ def enrich(listings: list[dict], net, profiles, previous: dict | None = None) ->
             "id", "url", "title", "address", "postcode", "district", "lat", "lng", "price", "price_qualifier",
             "bedrooms", "property_type", "detached", "garage", "image", "first_seen", "price_history",
             "approx_location")}
+        rec.pop("top_school_rank", None)
         rec["lat"], rec["lng"] = round(rec["lat"], 5), round(rec["lng"], 5)
         z = simd_at(l["lat"], l["lng"])
         if z:
@@ -121,7 +121,8 @@ def enrich(listings: list[dict], net, profiles, previous: dict | None = None) ->
             key = "catchment_rc" if c["sector"] == "RC" else "catchment"
             rec[key] = c["school"]
             if c.get("top_rank"):
-                rec["top_school_rank"] = c["top_rank"]
+                rec[f"{key}_rank"] = c["top_rank"]
+                rec["top_school_rank"] = min(c["top_rank"], rec.get("top_school_rank") or 99)
         rec["travel"] = transit.journey(l["lat"], l["lng"], net, profiles, index)
         old = (previous or {}).get(l["id"])
         if net is None and old and "pt_min" in old:

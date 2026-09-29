@@ -170,10 +170,10 @@ def _discover_catchment_layer(s, title: str) -> str | None:
     return None
 
 
-def _match_top(school: str, tops: list[dict]) -> dict | None:
+def _match_top(school: str, tops: list[dict], sector: str | None = None) -> dict | None:
     name = school.casefold().replace("’", "'")
     for t in tops:
-        if t["match"] in name:
+        if t["match"] in name and (sector is None or t.get("sector", "ND") == sector):
             return t
     return None
 
@@ -212,7 +212,7 @@ def fetch_catchments() -> tuple[dict, str]:
 
 
 def _catchment_feature(geometry: dict, school: str, sector: str, tops: list[dict]) -> dict:
-    top = _match_top(school, tops) if sector == "ND" else None
+    top = _match_top(school, tops, sector)
     return {"type": "Feature",
             "properties": {"school": _tidy_school(school), "sector": sector,
                            "top_rank": top["rank"] if top else None},

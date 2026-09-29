@@ -51,9 +51,10 @@ def main() -> None:
     write_json(OUT / "bus.geojson", {"type": "FeatureCollection", "features": []})
     write_json(OUT / "simd.geojson", {"type": "FeatureCollection", "features": []})
     top = json.loads((CONFIG / "top_schools.json").read_text())
-    write_json(OUT / "top_schools.json", {"verified": top["verified"], "source": top["source"], "schools": top["schools"]})
+    write_json(OUT / "top_schools.json", {k: v for k, v in top.items() if not k.startswith("_")})
 
     nd = [(shape(f["geometry"]), f["properties"]) for f in fc["features"] if f["properties"]["sector"] == "ND"]
+    rc = [(shape(f["geometry"]), f["properties"]) for f in fc["features"] if f["properties"]["sector"] == "RC"]
     listings = []
     pid = 90000000
     while len(listings) < 220:
@@ -90,7 +91,13 @@ def main() -> None:
                "first_seen": "2026-09-2" + str(rnd.randint(0, 8)), "travel": j,
                "price_history": [["2026-09-01", price]]}
         if props.get("top_rank"):
-            rec["top_school_rank"] = props["top_rank"]
+            rec["catchment_rank"] = rec["top_school_rank"] = props["top_rank"]
+        rc_hit = next((p for g, p in rc if g.contains(Point(lng, lat))), None)
+        if rc_hit:
+            rec["catchment_rc"] = rc_hit["school"]
+            if rc_hit.get("top_rank"):
+                rec["catchment_rc_rank"] = rc_hit["top_rank"]
+                rec["top_school_rank"] = min(rc_hit["top_rank"], rec.get("top_school_rank") or 99)
         if rnd.random() < 0.12:
             rec["price_history"] = [["2026-08-15", price + 15000], ["2026-09-12", price]]
         listings.append(rec)

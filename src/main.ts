@@ -3,7 +3,7 @@ import { DEFAULTS, type Filters, fromHash, isNew, isReduced, matches, sortListin
 import { PRICE_STOPS, SIMD_COLOURS, TIME_STOPS, VS_STOPS, daysAgo, esc, gbp, gbpFull, mins } from "./format";
 import { PolygonIndex } from "./geo";
 import { HouseMap } from "./map";
-import type { Area, Listing, Meta, Simd, TopSchools } from "./types";
+import type { Area, Listing, Meta, Simd, TopSchool, TopSchools } from "./types";
 
 const $ = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T;
 
@@ -64,7 +64,7 @@ function buildControls(): void {
   $("minBeds").innerHTML = [0, 1, 2, 3, 4, 5]
     .map((b) => `<button role="radio" data-beds="${b}">${b ? `${b}+` : "Any"}</button>`).join("");
   const schools = [...new Set(listings.flatMap((l) => [l.catchment, l.catchment_rc]).filter(Boolean) as string[])].sort();
-  const rank = (s: string) => listings.find((l) => l.catchment === s)?.top_school_rank;
+  const rank = (s: string) => topFor(s)?.rank;
   $("school").innerHTML += schools.map((s) => `<option value="${esc(s)}">${esc(s)}${rank(s) ? ` (#${rank(s)})` : ""}</option>`).join("");
 
   for (const id of ["minPrice", "maxPrice", "maxMins", "minSimd"] as const) {
@@ -95,6 +95,13 @@ function buildControls(): void {
   });
   $("view-map").addEventListener("click", () => setView("map"));
   $("view-list").addEventListener("click", () => setView("list"));
+  const pickSchool = (e: Event) => {
+    const li = (e.target as HTMLElement).closest<HTMLElement>("[data-school]");
+    if (!li?.dataset.school) return;
+    set({ school: filters.school === li.dataset.school ? "" : li.dataset.school });
+  };
+  $("tops").addEventListener("click", pickSchool);
+  $("tops").addEventListener("keydown", (e) => (e.key === "Enter" || e.key === " ") && (e.preventDefault(), pickSchool(e)));
   $("cards").addEventListener("click", (e) => {
     const card = (e.target as HTMLElement).closest<HTMLElement>("[data-id]");
     if (card && !(e.target as HTMLElement).closest("a")) {
@@ -144,6 +151,7 @@ function update(): void {
   $("stats").innerHTML = `<b>${visible.length}</b> of ${total} homes${med ? ` · median ${gbp(med)}` : ""}`;
   renderLegend();
   renderAreas();
+  renderTops();
   if (!$("list").hidden) renderList();
   if (selected && !visible.includes(selected)) select(null);
 }
@@ -193,9 +201,43 @@ function renderAbout(): void {
     <h2>About the data</h2>
     <p>Updated ${esc(updated)}. Prices are <em>asking</em> prices from ESPC; averages are medians of current listings by postcode district.</p>
     <p>Time to Waverley: fastest of walking, bus/tram (weekday timetable, arriving ${esc(arr[0] ?? "")}–${esc(arr[arr.length - 1] ?? "")}) and train from a nearby station. Door to door, including walking.</p>
-    <p>Top-10 schools: <a href="${esc(tops.source)}" target="_blank" rel="noopener">ESPC list</a>${tops.verified ? "" : " <span class=\"muted\">(order not yet verified)</span>"}.
+    <p>Top-10 schools: <a href="${esc(tops.source)}" target="_blank" rel="noopener">ESPC list</a> (Sunday Times league tables)${tops.verified ? "" : " <span class=\"muted\">(order not yet verified)</span>"}. School price stats are ESPC's figures for each catchment.
       Catchments: ${esc(meta.sources?.catchments?.detail ?? "City of Edinburgh Council")}. Always confirm with the council before buying.</p>
     <p>Proposed tram routes are indicative only.</p>`;
+}
+
+/** The ESPC top-10 entry for a council catchment school name, if it is one. */
+function topFor(school?: string): TopSchool | undefined {
+  if (!school) return undefined;
+  const name = school.toLowerCase().replace(/\u2019/g, "'");
+  const rc = /\brc\b|catholic|st thomas|st augustine|holy rood/.test(name);
+  return tops.schools.find((t) => name.includes(t.match) && (t.sector ?? "ND") === (rc ? "RC" : "ND"));
+}
+
+function schoolStats(t: TopSchool): string {
+  const bits = [
+    t.avg_price ? `avg sold ${gbp(t.avg_price)}` : "",
+    t.days_to_offer ? `${t.days_to_offer} days to under offer` : "",
+    t.home_report_pct ? `${t.home_report_pct}% of Home Report paid` : "",
+  ].filter(Boolean);
+  return `<div class="school-stats"><b>#${t.rank} ${esc(t.name)}</b>${t.sector === "RC" ? " (Roman Catholic)" : ""}<br>${bits.join(" · ")}${t.neighbourhoods ? `<div class="muted">${esc(t.neighbourhoods)}</div>` : ""}</div>`;
+}
+
+function renderTops(): void {
+  const counts = new Map<string, number>();
+  for (const l of visible) for (const s of [l.catchment, l.catchment_rc]) if (s) counts.set(s, (counts.get(s) ?? 0) + 1);
+  const councilName = (t: TopSchool) =>
+    [...new Set(listings.flatMap((l) => [l.catchment, l.catchment_rc]))].find((s) => s && topFor(s)?.rank === t.rank);
+  $("tops-note").textContent = tops.published ? `(ESPC, ${new Date(tops.published).toLocaleDateString("en-GB", { month: "short", year: "numeric" })})` : "";
+  $("tops").innerHTML = tops.schools
+    .map((t) => {
+      const cn = councilName(t);
+      const n = cn ? counts.get(cn) ?? 0 : 0;
+      return `<li tabindex="0" role="button" data-school="${esc(cn ?? "")}" aria-pressed="${!!cn && filters.school === cn}" title="${esc(t.neighbourhoods ?? "")}">
+        <span class="r">${t.rank}</span><span>${esc(t.name.replace(/ School$/, "").replace(" Community High", ""))}${t.sector === "RC" ? `<span class="rc">RC</span>` : ""}</span>
+        <span class="n">${n} home${n === 1 ? "" : "s"}</span></li>`;
+    })
+    .join("");
 }
 
 function renderLegend(): void {
@@ -212,7 +254,7 @@ function renderLegend(): void {
   if (f.layers.simd) {
     simd = `<div class="simd-scale"><span>Most deprived</span>${SIMD_COLOURS.map((c, i) => `<i title="Decile ${i + 1}" style="background:${c}"></i>`).join("")}<span>Least</span></div>`;
   }
-  $("legend").innerHTML = `<div class="legend-items">${items.join("")}</div>${simd}<div class="muted small">Purple ring = in a top-10 school catchment</div>`;
+  $("legend").innerHTML = `<div class="legend-items">${items.join("")}</div>${simd}<div class="muted small">Purple ring = in a top-10 school catchment. Orange dashed outline = St Thomas of Aquin's (RC) catchment.</div>`;
 }
 
 function renderAreas(): void {
@@ -278,7 +320,7 @@ function renderDetail(l: Listing): void {
         <div><dt>Bedrooms</dt><dd>${l.bedrooms ?? "–"}</dd></div>
         <div><dt>Type</dt><dd>${esc(l.property_type ?? "–")}</dd></div>
         <div><dt>SIMD</dt><dd>${simdBar(l.simd?.decile)}${l.simd?.name ? `<div class="muted small">${esc(l.simd.name)}</div>` : ""}${domains ? `<div class="domains">${domains}</div>` : ""}</dd></div>
-        <div><dt>Catchment</dt><dd>${esc(l.catchment ?? "–")}${l.top_school_rank ? ` <b class="rank">#${l.top_school_rank}</b>` : ""}${l.catchment_rc ? `<div class="muted small">RC: ${esc(l.catchment_rc)}</div>` : ""}</dd></div>
+        <div><dt>Catchment</dt><dd>${esc(l.catchment ?? "–")}${topFor(l.catchment) ? ` <b class="rank">#${topFor(l.catchment)!.rank}</b>` : ""}${l.catchment_rc ? `<div class="small">RC: ${esc(l.catchment_rc)}${topFor(l.catchment_rc) ? ` <b class="rank">#${topFor(l.catchment_rc)!.rank}</b>` : ""}</div>` : ""}${[topFor(l.catchment), topFor(l.catchment_rc)].filter((t): t is TopSchool => !!t).map(schoolStats).join("")}</dd></div>
         ${vs ? `<div><dt>vs area</dt><dd><b class="${vs.vs_pct > 5 ? "up" : vs.vs_pct < -5 ? "down" : ""}">${vs.vs_pct > 0 ? "+" : ""}${vs.vs_pct}%</b> vs ${esc(l.district)} ${vs.basis === "all" ? "" : `${esc(vs.basis)} `}median ${gbp(vs.median)}</dd></div>` : ""}
         ${hist.length > 1 ? `<div><dt>History</dt><dd>${hist.map(([d, p]) => `${gbp(p)} <span class="muted small">${esc(d)}</span>`).join(" → ")}</dd></div>` : ""}
         ${age != null ? `<div><dt>Listed</dt><dd>${age === 0 ? "today" : `${age} day${age === 1 ? "" : "s"} ago`}</dd></div>` : ""}
@@ -332,7 +374,11 @@ function showPointInfo([lng, lat]: [number, number]): void {
   const c = catchIndex?.at(lng, lat) ?? [];
   const parts: string[] = [];
   if (z?.decile) parts.push(`<b>SIMD decile ${z.decile}</b> of 10${z.name ? `<br><span class="muted">${esc(z.name)}</span>` : ""}`);
-  for (const s of c) parts.push(`${s.sector === "RC" ? "RC catchment" : "Catchment"}: <b>${esc(s.school)}</b>${s.top_rank ? ` (#${s.top_rank})` : ""}`);
+  for (const s of c) {
+    parts.push(`${s.sector === "RC" ? "RC catchment" : "Catchment"}: <b>${esc(s.school)}</b>${s.top_rank ? ` (#${s.top_rank})` : ""}`);
+    const t = topFor(s.school);
+    if (t) parts.push(schoolStats(t));
+  }
   if (parts.length) map.showPopup([lng, lat], parts.join("<br>"));
 }
 

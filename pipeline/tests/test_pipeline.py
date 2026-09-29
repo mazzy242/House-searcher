@@ -140,9 +140,15 @@ def test_esri_polygon_conversion_keeps_hole():
 def test_top_school_matching_on_fallback_names():
     fc = json.loads((layers.CONFIG / "catchments_fallback.geojson").read_text())
     tops = json.loads((layers.CONFIG / "top_schools.json").read_text())["schools"]
-    matched = {layers._match_top(f["properties"]["school"], tops)["rank"]
-               for f in fc["features"] if f["properties"]["sector"] == "ND" and layers._match_top(f["properties"]["school"], tops)}
-    assert matched == set(range(1, 11))
+    matched = {}
+    for f in fc["features"]:
+        t = layers._match_top(f["properties"]["school"], tops, f["properties"]["sector"])
+        if t:
+            matched[t["rank"]] = f["properties"]["school"]
+    assert set(matched) == set(range(1, 11))
+    assert "Thomas" in matched[4]                     # the one RC school in the ESPC top 10
+    # An ND school name must not pick up an RC ranking and vice versa.
+    assert layers._match_top("Trinity Academy", tops, "RC") is None
 
 
 def test_area_stats_and_polygon_lookup():

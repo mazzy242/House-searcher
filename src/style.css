@@ -95,6 +95,15 @@ table.areas th { text-align: left; font-weight: 600; width: 52px; padding: 3px 0
 table.areas td { padding: 3px 4px; white-space: nowrap; }
 table.areas td.bar { width: 100%; }
 table.areas td.bar i { display: block; height: 8px; background: #9ecae1; border-radius: 4px; }
+.tops { list-style: none; margin: 0; padding: 0; font-size: 13px; }
+.tops li { display: grid; grid-template-columns: 22px 1fr auto; gap: 6px; align-items: baseline; padding: 4px 6px; margin: 0 -6px; border-radius: 6px; cursor: pointer; }
+.tops li:hover, .tops li:focus-visible { background: #f3eef6; outline: none; }
+.tops li[aria-pressed="true"] { background: #efe3f5; font-weight: 600; }
+.tops .r { color: var(--school); font-weight: 700; }
+.tops .rc { font-size: 10px; color: #c2410c; font-weight: 700; margin-left: 4px; }
+.tops .n { color: var(--muted); font-size: 12px; }
+.school-stats { margin-top: 6px; padding: 8px 10px; background: #f7f2fa; border-radius: 8px; font-size: 12px; line-height: 1.5; }
+.school-stats b { color: var(--school); }
 .about p { font-size: 12px; color: var(--muted); line-height: 1.5; margin: 0 0 8px; }
 
 /* ---------------------------------------------------------------- map + list */

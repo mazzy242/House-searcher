@@ -78,11 +78,17 @@ export class HouseMap {
 
     // Area layers sit under the basemap labels; lines and pins above.
     m.addLayer({ id: "simd-fill", type: "fill", source: "simd", paint: { "fill-color": "#ccc", "fill-opacity": 0.5, "fill-outline-color": "rgba(0,0,0,0.08)" } }, firstLabel);
+    // Non-denominational top-10 catchments are shaded (darker = higher ranked). The Roman Catholic
+    // catchment (St Thomas of Aquin's) covers much of the city and overlaps them, so it is outline-only.
     const isTop = [">", ["to-number", ["get", "top_rank"], 0], 0];
+    const topND = ["all", isTop, ["!=", ["get", "sector"], "RC"]];
+    const topRC = ["all", isTop, ["==", ["get", "sector"], "RC"]];
     m.addLayer({ id: "catch-all-line", type: "line", source: "catchments", paint: { "line-color": "#6b6b6b", "line-width": 1, "line-dasharray": [3, 2] } });
-    m.addLayer({ id: "catch-top-fill", type: "fill", source: "catchments", filter: isTop as never,
-      paint: { "fill-color": "#7b3294", "fill-opacity": ["interpolate", ["linear"], ["get", "top_rank"], 1, 0.22, 10, 0.07] as never } }, firstLabel);
-    m.addLayer({ id: "catch-top-line", type: "line", source: "catchments", filter: isTop as never, paint: { "line-color": "#7b3294", "line-width": 2 } });
+    m.addLayer({ id: "catch-top-fill", type: "fill", source: "catchments", filter: topND as never,
+      paint: { "fill-color": "#7b3294", "fill-opacity": ["interpolate", ["linear"], ["get", "top_rank"], 1, 0.24, 10, 0.08] as never } }, firstLabel);
+    m.addLayer({ id: "catch-top-line", type: "line", source: "catchments", filter: topND as never, paint: { "line-color": "#7b3294", "line-width": 2 } });
+    m.addLayer({ id: "catch-rc-line", type: "line", source: "catchments", filter: topRC as never,
+      paint: { "line-color": "#c2410c", "line-width": 2.5, "line-dasharray": [4, 2] } });
 
     m.addLayer({ id: "bus-line", type: "line", source: "bus", layout: { "line-cap": "round", "line-join": "round" },
       paint: { "line-color": ["coalesce", ["get", "colour"], "#8c6bb1"] as never, "line-width": ["interpolate", ["linear"], ["zoom"], 10, 1.2, 15, 3] as never, "line-opacity": 0.75 } });
@@ -191,6 +197,7 @@ export class HouseMap {
     vis("bus-line", f.layers.bus);
     vis("catch-top-fill", f.layers.catchTop);
     vis("catch-top-line", f.layers.catchTop);
+    vis("catch-rc-line", f.layers.catchTop);
     vis("catch-all-line", f.layers.catchAll);
     vis("areas-circle", f.layers.areas);
     vis("areas-label", f.layers.areas);
