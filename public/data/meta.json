@@ -1,35 +1,35 @@
 {
- "generated_at": "2026-09-30T11:20+00:00",
- "listing_count": 752,
+ "generated_at": "2026-09-30T11:44+00:00",
+ "listing_count": 764,
  "waverley": {
   "name": "Edinburgh Waverley",
   "lat": 55.95196,
   "lng": -3.18992
  },
  "errors": {
-  "epc": "('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))"
+  "epc": "EPC download link not found: https://statistics.gov.scot/data/domestic-energy-performance-certificates: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response')) | https://www.scottishepcregister.org.uk/CustomerFacingPortal/DataExtract: no domestic .zip link"
  },
  "sources": {
   "catchments": {
    "detail": "ND: https://edinburghcouncilmaps.info/arcgis/rest/services/AdminBoundaries/MiscBoundaries/MapServer/6; RC: https://edinburghcouncilmaps.info/arcgis/rest/services/AdminBoundaries/MiscBoundaries/MapServer/7",
-   "updated": "2026-09-30T11:10+00:00"
+   "updated": "2026-09-30T11:36+00:00"
   },
   "osm_transit": {
-   "updated": "2026-09-30T11:10+00:00"
+   "updated": "2026-09-30T11:36+00:00"
   },
   "gtfs": {
-   "updated": "2026-09-30T11:11+00:00",
+   "updated": "2026-09-30T11:36+00:00",
    "service_date": "2026-10-07"
   },
   "espc": {
-   "updated": "2026-09-30T11:17+00:00"
+   "updated": "2026-09-30T11:42+00:00"
   },
   "simd": {
-   "updated": "2026-09-30T11:10+00:00",
+   "updated": "2026-09-30T11:36+00:00",
    "detail": "https://services.arcgis.com/XSeYKQzfXnEgju9o/arcgis/rest/services/SG_SIMD_2020/FeatureServer/0/query"
   },
   "auctions": {
-   "updated": "2026-09-30T11:20+00:00"
+   "updated": "2026-09-30T11:44+00:00"
   }
  },
  "travel_assumptions": {
@@ -42,5 +42,8 @@
   ],
   "walk_kmh": 4.8,
   "cycle_kmh": 15
- }
+ },
+ "duplicates": [
+  "auction lot auc-futurepropertyauctions-14511302 (70 and 70a Kingston Avenue, Edinburgh) includes ESPC 36376882 (70 Kingston Avenue, Edinburgh, EH16 5SW): both kept"
+ ]
 }
