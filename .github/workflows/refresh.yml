@@ -45,7 +45,10 @@ jobs:
     outputs:
       build_failed: ${{ steps.build.outcome == 'failure' }}
     steps:
+      # The branch tip, not the commit that triggered the run: a queued refresh must build on the
+      # data the previous refresh saved, or the two collide when this one commits.
       - uses: actions/checkout@v4
+        with: { ref: "${{ github.ref_name }}" }
       - uses: actions/setup-python@v5
         with: { python-version: "3.12", cache: pip, cache-dependency-path: pipeline/requirements.txt }
       - run: pip install -r pipeline/requirements.txt
@@ -74,7 +77,9 @@ jobs:
           git add public/data state
           if git diff --cached --quiet; then echo "No data changes"; exit 0; fi
           git commit -m "Data refresh $(date -u +%Y-%m-%d)"
-          git pull --rebase origin "${GITHUB_REF_NAME}"
+          # public/data and state are regenerated in full each run, so if a code push or another
+          # refresh touched them meanwhile, this run's copy (the newest) wins.
+          git pull --rebase -X theirs origin "${GITHUB_REF_NAME}"
           git push origin "HEAD:${GITHUB_REF_NAME}"
 
   deploy:
