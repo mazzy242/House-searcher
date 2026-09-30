@@ -197,3 +197,11 @@ def test_plots_are_their_own_kind():
         "A building plot of 0.2 hectares with planning permission for a detached house.")
     lot = auctions.parse_lot(lot_html, "https://x/property_details.asp?id=77", "FPA")
     assert lot["kind"] == "plot" and lot["title"] == "Plot / land at auction" and lot["plot_acres"] == 0.49
+
+
+def test_auction_plot_with_planned_bedrooms_is_a_plot():
+    html = LOT.replace("14 Craiglockhart Road", "Plot 2 Station Road Development Plot").replace(
+        "A three bedroom semi-detached house requiring modernisation, sold on behalf of the heritable creditor.",
+        "Planning consent for a three bedroom detached house.")
+    rec = auctions.parse_lot(html, "https://x/property_details.asp?id=88", "FPA")
+    assert rec["kind"] == "plot" and rec["title"] == "Plot / land at auction"

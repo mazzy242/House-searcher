@@ -186,7 +186,9 @@ def parse_lot(html: str, url: str, house: str) -> dict:
     address = rec.get("address") or rec.get("title") or ""
     if NOT_A_HOME.search(address):
         rec["not_a_home"] = True
-    if espc.is_plot(address, rec.get("bedrooms")):
+    # At auction a lot addressed as a plot/site/land is land, even if its description mentions the
+    # bedrooms of a house it has planning for (unlike ESPC's "Plot 13 - 4 bed house" new builds).
+    if espc.is_plot(address):
         rec["kind"] = "plot"
     beds = f"{rec['bedrooms']} bed " if rec.get("bedrooms") else ""
     what = "Plot / land" if rec.get("kind") == "plot" else f"{beds}{rec.get('property_type') or 'property'}"
@@ -283,8 +285,11 @@ def scrape(state: dict[str, dict]) -> dict[str, dict]:
         elif rec.get("not_a_home"):
             why = "not a home or plot"
         else:
-            text = f"{rec.get('title', '')} {rec.get('address', '')}" if rec.get("kind") == "plot" else rec.get("title", "")
-            why = espc.rejection(text, rec.get("property_type", ""), rec.get("bedrooms"), rec.get("district"))
+            if rec.get("kind") == "plot":
+                d = rec.get("district")
+                why = f"district {d}" if d and d not in espc.ALLOWED_DISTRICTS else None
+            else:
+                why = espc.rejection(rec.get("title", ""), rec.get("property_type", ""), rec.get("bedrooms"), rec.get("district"))
         rec["active"] = not why
         rec["excluded"] = why
         if why in ("no longer listed", "auction passed"):
