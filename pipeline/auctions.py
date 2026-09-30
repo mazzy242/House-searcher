@@ -35,7 +35,30 @@ AUCTION_CONTEXT = re.compile(r"auction|sale date|bidding|ends?\b", re.I)
 
 
 def lot_id(url: str) -> str:
+    """One id per lot, whatever page of the lot the link points at (details, offer form, ...):
+    the auction house's own lot number when the URL carries one."""
+    host = urlparse(url).netloc.replace("www.", "").split(".")[0]
+    m = re.search(r"[?&](?:id|lotid|propertyid)=(\d+)", url, re.I) or re.search(r"/lots?/(\d+)", url, re.I)
+    if m:
+        return f"auc-{host}-{m.group(1)}"
     return "auc-" + hashlib.sha1(url.encode()).hexdigest()[:12]
+
+
+# Auction lots that aren't a home to live in: building plots, land, sites, garages, ground rent.
+NOT_A_HOME = re.compile(
+    r"\b(?:plot|plots|land|site|sites|development with|development opportunity|planning permission|"
+    r"lock-?up|ground rent|feu duty|woodland|paddock|retail unit)\b", re.I)
+# Page furniture the auction sites put around the address in titles.
+TITLE_NOISE = re.compile(
+    r"^(?:future\s+)?auction details\s*-\s*|^property for auction in scotland\s*-\s*|"
+    r"\s*-?\s*(?:guide|opening bid|starting bid)\b.*$|\s*\|.*$", re.I)
+
+
+def clean_title(title: str) -> str:
+    t = re.sub(r"\s+", " ", title or "").strip()
+    for _ in range(3):
+        t = TITLE_NOISE.sub("", t).strip(" -")
+    return t
 
 
 def _dates(text: str) -> list[tuple[int, dt.date]]:
@@ -122,11 +145,16 @@ def prefilter(hint: str | None) -> str | None:
     bm = espc.BEDS.search(hint)
     wm = espc.BEDS_WORD.search(hint)
     beds = int(bm.group(1)) if bm else espc.WORD_NUMS[wm.group(1).lower()] if wm else None
+    if NOT_A_HOME.search(hint[:200]):
+        return "land/plot/site"
     return espc.rejection(hint[:300], beds=beds, district=district, beds_required=False)
 
 
 def parse_lot(html: str, url: str, house: str) -> dict:
     rec = espc.parse_property(html, url)
+    for k in ("title", "address"):
+        if rec.get(k):
+            rec[k] = clean_title(rec[k])
     soup = BeautifulSoup(html, "html.parser")
     for tag in soup(["script", "style", "noscript"]):
         tag.decompose()
@@ -152,9 +180,11 @@ def parse_lot(html: str, url: str, house: str) -> dict:
             if re.search(rf"\b{re.escape(w)}\b", start, re.I):
                 rec["property_type"] = w
                 break
-    if not rec.get("title") or espc.POSTCODE.search(rec.get("title", "")):
-        beds = f"{rec['bedrooms']} bed " if rec.get("bedrooms") else ""
-        rec["title"] = f"{beds}{rec.get('property_type') or 'property'} at auction".strip()
+    address = rec.get("address") or rec.get("title") or ""
+    if NOT_A_HOME.search(address):
+        rec["not_a_home"] = True
+    beds = f"{rec['bedrooms']} bed " if rec.get("bedrooms") else ""
+    rec["title"] = f"{beds}{rec.get('property_type') or 'property'} at auction".strip()
     return rec
 
 
@@ -244,6 +274,8 @@ def scrape(state: dict[str, dict]) -> dict[str, dict]:
             why = "no longer listed"
         elif date and date < today:
             why = "auction passed"
+        elif rec.get("not_a_home"):
+            why = "land/plot/site"
         else:
             why = espc.rejection(rec.get("title", ""), rec.get("property_type", ""), rec.get("bedrooms"), rec.get("district"))
         rec["active"] = not why

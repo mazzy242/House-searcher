@@ -61,6 +61,23 @@ export interface Listing {
   auction?: { house: string; date?: string; basis: string };
   epc?: { band?: string; floor_area_m2?: number; date?: string };
   floor_area_source?: "EPC";
+  /** The same home was listed on ESPC before (merged; price history carried over). */
+  relisted?: boolean;
+  /** The same home is also being auctioned. */
+  also_auction?: AuctionRef[];
+  /** An auction lot that includes this home together with others (e.g. "70 and 70a"). */
+  in_auction_lot?: AuctionRef[];
+  /** On an auction lot: ESPC listings for homes that are part of this lot. */
+  overlaps_espc?: { id: string; address: string; price: number; url: string }[];
+}
+
+export interface AuctionRef {
+  house: string;
+  date?: string;
+  basis?: string;
+  price: number;
+  url: string;
+  address: string;
 }
 
 export interface Area {

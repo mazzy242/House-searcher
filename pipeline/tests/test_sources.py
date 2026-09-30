@@ -164,3 +164,15 @@ def test_enrich_fills_floor_area_from_epc(tmp_path, monkeypatch):
     assert out["3"]["auction"]["basis"] == "Opening bid"
     areas = {a["district"]: a for a in __import__("json").loads((tmp_path / "areas.json").read_text())}
     assert areas["EH14"]["count"] == 2                                                  # auction lot not in averages
+
+
+def test_one_id_per_lot_and_land_is_dropped():
+    a = auctions.lot_id("https://www.futurepropertyauctions.co.uk/property_details.asp?id=14511302")
+    b = auctions.lot_id("https://www.futurepropertyauctions.co.uk/offer_form.asp?id=14511302")
+    assert a == b == "auc-futurepropertyauctions-14511302"
+    assert auctions.lot_id("https://www.auctionhouse.co.uk/scotland/auction/lot/152411") == "auc-auctionhouse-152411"
+    assert auctions.clean_title("Auction Details - 70 and 70a Kingston Avenue, Edinburgh -   GUIDE PRICE  £0") == \
+        "70 and 70a Kingston Avenue, Edinburgh"
+    assert auctions.prefilter("Plot 1 at Station Road, Broxburn EH52 5QR - Guide £112,000") == "land/plot/site"
+    assert auctions.prefilter("3 Harelaw, Development with Full Planning, Danderhall EH22 1SB £247,000") == "land/plot/site"
+    assert auctions.prefilter("12 Elm Row EH21 7AA - three bedroom detached house with garage. Guide £250,000") is None

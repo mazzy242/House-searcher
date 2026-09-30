@@ -57,19 +57,22 @@
       {
         "name": "Future Property Auctions",
         "start_urls": ["https://www.futurepropertyauctions.co.uk/catalogue_area.asp?search=Edinburgh%2CLothian%2CBorders"],
-        "lot_link_regex": "(?i)^(?!.*catalogue).*(\\.asp\\?(?:[^\"']*&)?(?:id|lotid|propertyid|pid)=\\d+|/lots?/\\d+|/property/\\d+)"
+        "lot_link_regex": "(?i)/property_details\\.asp\\?(?:[^\"']*&)?id=\\d+"
       },
       {
         "name": "Auction House Scotland",
         "start_urls": ["https://www.auctionhouse.co.uk/scotland/auction/search-results"],
-        "lot_link_regex": "(?i)/(?:lot|lots|property)/[\\w-]*\\d+"
+        "lot_link_regex": "(?i)/scotland/auction/lot/\\d+"
       }
     ]
   },
 
   "epc": {
-    "_comment": "Scottish domestic EPC open data (OGL). The zip link is found on the dataset page; set download_url to override.",
-    "dataset_page": "https://statistics.gov.scot/data/domestic-energy-performance-certificates",
+    "_comment": "Scottish domestic EPC open data (OGL). The zip link is found on the first dataset page that works; set download_url to override.",
+    "dataset_pages": [
+      "https://statistics.gov.scot/data/domestic-energy-performance-certificates",
+      "https://www.scottishepcregister.org.uk/CustomerFacingPortal/DataExtract"
+    ],
     "download_url": ""
   },
 

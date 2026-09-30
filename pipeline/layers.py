@@ -323,8 +323,8 @@ def _merged(lines: list[list[list[float]]], tolerance: float = 0.00003) -> dict 
     return {**mapping(merged), "coordinates": round_coords(mapping(merged)["coordinates"])}
 
 
-def fetch_transit() -> tuple[dict, dict]:
-    """Return (tram FeatureCollection incl. stops, bus FeatureCollection)."""
+def fetch_transit() -> tuple[dict, dict, dict]:
+    """Return (tram FeatureCollection incl. stops, bus FeatureCollection, rail lines FeatureCollection)."""
     b = SETTINGS["bbox"]
     bb = f"{b['south']},{b['west']},{b['north']},{b['east']}"
     op = SETTINGS["bus"]["operator_regex"]
@@ -332,12 +332,14 @@ def fetch_transit() -> tuple[dict, dict]:
 (
   relation["route"="tram"]({bb});
   relation["route"="bus"]["operator"~"{op}"]({bb});
+  relation["route"="train"]["service"!~"freight"]({bb});
 );
 out geom;
 node["railway"="tram_stop"]({bb});
 out;"""
     data = _overpass(q)
     tram_lines: list = []
+    rail_lines: list = []
     bus: dict[str, dict] = {}
     stops = []
     for el in data.get("elements", []):
@@ -347,6 +349,8 @@ out;"""
                           "geometry": {"type": "Point", "coordinates": [round(el["lon"], 5), round(el["lat"], 5)]}})
         elif tags.get("route") == "tram":
             tram_lines += _relation_lines(el)
+        elif tags.get("route") == "train":
+            rail_lines += _relation_lines(el)
         elif tags.get("route") == "bus":
             ref = tags.get("ref") or tags.get("name", "?")
             entry = bus.setdefault(ref, {"lines": [], "name": tags.get("name", ""), "colour": tags.get("colour")})
@@ -364,11 +368,24 @@ out;"""
             bus_feats.append({"type": "Feature", "geometry": g, "properties": {
                 "ref": ref, "name": _route_label(ref, e["name"]), "colour": e["colour"], "main": ref in main}})
     bus_feats.sort(key=lambda f: _route_sort_key(f["properties"]["ref"]))
-    log.info("OSM: tram %d features, bus %d routes", len(tram_feats), len(bus_feats))
+    rail_feats = []
+    g = _merged(rail_lines, 0.00008)
+    if g:
+        rail_feats.append({"type": "Feature", "properties": {"kind": "line", "name": "Railway"}, "geometry": g})
+    log.info("OSM: tram %d features, bus %d routes, rail %d ways", len(tram_feats), len(bus_feats), len(rail_lines))
     if not tram_lines:
         raise RuntimeError("Overpass returned no tram route")
     return ({"type": "FeatureCollection", "features": tram_feats},
-            {"type": "FeatureCollection", "features": bus_feats})
+            {"type": "FeatureCollection", "features": bus_feats},
+            {"type": "FeatureCollection", "features": rail_feats})
+
+
+def rail_stations() -> dict:
+    """Stations with a direct train to Waverley (the same list the journey times use)."""
+    return {"type": "FeatureCollection", "features": [
+        {"type": "Feature", "geometry": {"type": "Point", "coordinates": [s["lng"], s["lat"]]},
+         "properties": {"kind": "station", "name": s["name"], "minutes": s["minutes"], "per_hour": s["trains_per_hour"]}}
+        for s in load_config("rail_stations.json")["stations"]]}
 
 
 def _route_label(ref: str, name: str) -> str:

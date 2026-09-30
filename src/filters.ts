@@ -4,7 +4,8 @@ export type ColourBy = "price" | "time" | "vs";
 export type SortBy = "price_asc" | "price_desc" | "time" | "newest" | "value" | "soonest";
 
 /** The date something happens: auction day, or a closing date for offers. */
-export const deadline = (l: Listing): string | undefined => l.auction?.date ?? l.closing_date;
+export const deadline = (l: Listing): string | undefined =>
+  l.auction?.date ?? l.closing_date ?? l.also_auction?.[0]?.date;
 
 export interface Filters {
   minPrice: number;
@@ -50,7 +51,7 @@ export const DEFAULTS: Filters = {
   reduced: false,
   colourBy: "price",
   sort: "time",
-  layers: { simd: false, tram: true, tramProposed: true, bus: false, catchTop: true, catchAll: false, areas: false },
+  layers: { simd: false, tram: true, rail: true, tramProposed: true, bus: false, catchTop: true, catchAll: false, areas: false },
   simdDomain: "decile",
   allBus: false,
   basemap: "light",
@@ -97,7 +98,8 @@ export function matches(l: Listing, f: Filters): boolean {
   if (f.region && l.region !== f.region) return false;
   if (f.minSimd && (l.simd?.decile ?? 0) < f.minSimd) return false;
   if (f.newOnly && !isNew(l)) return false;
-  if (f.saleType === "auction" && l.source !== "auction") return false;
+  const atAuction = l.source === "auction" || !!l.also_auction?.length;
+  if (f.saleType === "auction" && !atAuction) return false;
   if (f.saleType === "private" && l.source === "auction") return false;
   if (f.motivated && !l.flags?.includes("motivated")) return false;
   if (f.needsWork && !l.flags?.includes("needs_work")) return false;

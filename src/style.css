@@ -78,6 +78,7 @@ a { color: var(--accent); }
 .sw-catch-all { border: 1px dashed #6b6b6b; }
 .sw-simd { background: linear-gradient(90deg, #b2182b, #fee8a8, #1b7837); }
 .sw-tram { height: 4px; background: #b5121b; }
+.sw-rail { height: 4px; background: repeating-linear-gradient(90deg, #555 0 5px, #fff 5px 8px); border: 1px solid #555; }
 .sw-tram-p { height: 0; border-top: 3px dashed #e4007c; }
 .sw-bus { height: 3px; background: #8c6bb1; }
 .sw-area { width: 12px; height: 12px; border-radius: 50%; background: #3182bd; }
@@ -161,6 +162,12 @@ table.areas td.bar i { display: block; height: 8px; background: #9ecae1; border-
 .badge.epc-a { background: #008054; } .badge.epc-b { background: #19b459; } .badge.epc-c { background: #8dce46; color: #1d2426; }
 .badge.epc-d { background: #ffd500; color: #1d2426; } .badge.epc-e { background: #fcaa65; color: #1d2426; }
 .badge.epc-f { background: #ef8023; } .badge.epc-g { background: #e9153b; }
+.xref { margin-top: 8px; padding: 8px 10px; background: #f8fafc; border: 1px solid var(--line); border-radius: 8px; font-size: 12px; line-height: 1.5; }
+.xref a, .xref .link-btn { font-size: 12px; margin-left: 4px; }
+.picker { display: flex; flex-direction: column; gap: 2px; min-width: 220px; max-height: 260px; overflow-y: auto; }
+.picker b { margin-bottom: 4px; }
+.picker button { display: flex; justify-content: space-between; gap: 10px; text-align: left; border: 0; background: none; padding: 5px 4px; border-radius: 6px; cursor: pointer; font-size: 13px; }
+.picker button:hover { background: #f0f5f4; }
 .auction-note { margin-top: 10px; padding: 10px 12px; background: #fff7ed; border: 1px solid #fed7aa; border-radius: var(--radius); font-size: 12px; line-height: 1.5; color: #7c2d12; }
 .auction-note b { display: block; font-size: 13px; margin-bottom: 2px; }
 

@@ -106,6 +106,7 @@ export const colourExpr = (by: ColourBy): unknown[] =>
 
 export interface MapHandlers {
   onSelect: (id: string) => void;
+  onMany: (ids: string[], lngLat: [number, number]) => void;
   onBackgroundClick: (lngLat: [number, number]) => void;
   onBasemap: (b: Basemap) => void;
 }
@@ -179,6 +180,8 @@ export class HouseMap {
     src("bus", "data/bus.geojson");
     src("tram", "data/tram.geojson");
     src("tramProposed", "data/tram_proposed.geojson");
+    src("rail", "data/rail.geojson");
+    src("railStations", "data/rail_stations.geojson");
     src("areas", EMPTY);
     src("listings", EMPTY, { cluster: true, clusterRadius: 38, clusterMaxZoom: 12 });
     src("selected", EMPTY);
@@ -199,12 +202,22 @@ export class HouseMap {
 
     m.addLayer({ id: "bus-line", type: "line", source: "bus", layout: { "line-cap": "round", "line-join": "round" },
       paint: { "line-color": ["coalesce", ["get", "colour"], "#8c6bb1"] as never, "line-width": ["interpolate", ["linear"], ["zoom"], 10, 1.2, 15, 3] as never, "line-opacity": 0.75 } });
+    // Railway: grey line with white dashes (the usual map convention), stations as labelled squares.
+    m.addLayer({ id: "rail-line", type: "line", source: "rail", paint: { "line-color": "#555", "line-width": ["interpolate", ["linear"], ["zoom"], 9, 2, 15, 4] as never } });
+    m.addLayer({ id: "rail-line-dash", type: "line", source: "rail",
+      paint: { "line-color": "#fff", "line-width": ["interpolate", ["linear"], ["zoom"], 9, 1, 15, 2] as never, "line-dasharray": [3, 3] } });
     m.addLayer({ id: "tram-proposed", type: "line", source: "tramProposed", layout: { "line-cap": "round" },
       paint: { "line-color": "#e4007c", "line-width": 3.5, "line-dasharray": [1.2, 1.2], "line-opacity": 0.85 } });
     m.addLayer({ id: "tram-line", type: "line", source: "tram", filter: ["==", ["get", "kind"], "line"], layout: { "line-cap": "round", "line-join": "round" },
       paint: { "line-color": "#b5121b", "line-width": ["interpolate", ["linear"], ["zoom"], 10, 3, 15, 6] as never } });
     m.addLayer({ id: "tram-stops", type: "circle", source: "tram", filter: ["==", ["get", "kind"], "stop"], minzoom: 11.5,
       paint: { "circle-radius": 4, "circle-color": "#fff", "circle-stroke-color": "#b5121b", "circle-stroke-width": 2 } });
+    m.addLayer({ id: "rail-stations", type: "circle", source: "railStations",
+      paint: { "circle-radius": ["interpolate", ["linear"], ["zoom"], 9, 4, 15, 7] as never, "circle-color": "#1d2426", "circle-stroke-color": "#fff", "circle-stroke-width": 2 } });
+    m.addLayer({ id: "rail-station-labels", type: "symbol", source: "railStations", minzoom: 10.5,
+      layout: { "text-field": ["concat", ["get", "name"], " · ", ["to-string", ["get", "minutes"]], " min"] as never,
+        "text-font": FONT_BOLD, "text-size": 11, "text-offset": [0, 1.1], "text-anchor": "top" },
+      paint: { "text-color": "#1d2426", "text-halo-color": "#fff", "text-halo-width": 1.5 } });
 
     m.addLayer({ id: "areas-circle", type: "circle", source: "areas",
       paint: { "circle-radius": ["interpolate", ["linear"], ["get", "count"], 1, 14, 60, 30] as never, "circle-color": step(["get", "median"], PRICE_STOPS) as never,
@@ -241,8 +254,12 @@ export class HouseMap {
   private bind(h: MapHandlers): void {
     const m = this.map;
     m.on("click", "pins", (e) => {
-      const id = e.features?.[0]?.properties?.id;
-      if (id) h.onSelect(String(id));
+      // Several homes can share one spot (ESPC puts every plot of a development on the same point):
+      // offer a choice instead of silently opening whichever pin is drawn on top.
+      const box: [maplibregl.PointLike, maplibregl.PointLike] = [[e.point.x - 6, e.point.y - 6], [e.point.x + 6, e.point.y + 6]];
+      const ids = [...new Set(m.queryRenderedFeatures(box, { layers: ["pins"] }).map((f) => String(f.properties?.id)))];
+      if (ids.length > 1) h.onMany(ids, [e.lngLat.lng, e.lngLat.lat]);
+      else if (ids.length === 1) h.onSelect(ids[0]);
     });
     m.on("click", "clusters", async (e) => {
       const f = e.features?.[0];
@@ -302,6 +319,7 @@ export class HouseMap {
     vis("simd-fill", f.layers.simd);
     vis("tram-line", f.layers.tram);
     vis("tram-stops", f.layers.tram);
+    for (const id of ["rail-line", "rail-line-dash", "rail-stations", "rail-station-labels"]) vis(id, f.layers.rail);
     vis("tram-proposed", f.layers.tramProposed);
     vis("bus-line", f.layers.bus);
     vis("catch-top-fill", f.layers.catchTop);

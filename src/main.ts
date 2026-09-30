@@ -3,7 +3,7 @@ import { DEFAULTS, type Filters, fromHash, isNew, isReduced, matches, sortListin
 import { PRICE_STOPS, SIMD_COLOURS, TIME_STOPS, VS_STOPS, daysAgo, esc, gbp, gbpFull, mins } from "./format";
 import { PolygonIndex } from "./geo";
 import { HouseMap } from "./map";
-import type { Area, Listing, Meta, Simd, TopSchool, TopSchools } from "./types";
+import type { Area, AuctionRef, Listing, Meta, Simd, TopSchool, TopSchools } from "./types";
 
 const $ = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T;
 
@@ -45,6 +45,7 @@ async function main(): Promise<void> {
   renderAbout();
   await map.init($("map"), meta, {
     onSelect: (id) => select(listings.find((l) => l.id === id) ?? null),
+    onMany: showPicker,
     onBackgroundClick: showPointInfo,
     onBasemap: (basemap) => set({ basemap }),
   }, filters.basemap);
@@ -284,12 +285,30 @@ function renderAreas(): void {
     : `<tbody><tr><td class="muted">No listings yet</td></tr></tbody>`;
 }
 
+/** Links between an ESPC listing and auction lots for the same home (ESPC is the main record). */
+function crossRefs(l: Listing): string {
+  const lot = (a: AuctionRef, what: string) => `<div class="xref">🔨 <b>${what}</b> ${esc(a.house)}${a.date ? `, ${shortDate(a.date)}` : ""} ·
+    ${esc(a.basis ?? "Guide price")} ${gbpFull(a.price)}${a.address ? `<div class="muted small">Lot: ${esc(a.address)}</div>` : ""}
+    <a href="${esc(a.url)}" target="_blank" rel="noopener">View lot ↗</a></div>`;
+  return [
+    ...(l.also_auction ?? []).map((a) => lot(a, "Also for sale at auction:")),
+    ...(l.in_auction_lot ?? []).map((a) => lot(a, "Also included in a larger auction lot:")),
+    ...(l.overlaps_espc ?? []).map((e) => `<div class="xref">🏠 <b>Part of this lot is also on ESPC:</b> ${esc(e.address)} · ${gbpFull(e.price)}
+      <button class="link-btn" data-pick="${esc(e.id)}">Show it</button> <a href="${esc(e.url)}" target="_blank" rel="noopener">ESPC ↗</a></div>`),
+    l.relisted ? `<div class="xref">↻ <b>Re-listed:</b> this home was on ESPC before under another listing; the price history below includes it.</div>` : "",
+  ].join("");
+}
+
 const shortDate = (iso: string): string =>
   new Date(`${iso}T12:00:00`).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" });
 
 function badges(l: Listing): string {
   const b: string[] = [];
   if (l.auction) b.push(`<span class="badge auction">🔨 Auction${l.auction.date ? ` ${shortDate(l.auction.date)}` : ""}</span>`);
+  for (const a of l.also_auction ?? []) b.push(`<span class="badge auction">🔨 Also at auction${a.date ? ` ${shortDate(a.date)}` : ""}</span>`);
+  if (l.in_auction_lot?.length) b.push(`<span class="badge auction">🔨 Part of an auction lot</span>`);
+  if (l.overlaps_espc?.length) b.push(`<span class="badge">Also on ESPC</span>`);
+  if (l.relisted) b.push(`<span class="badge reduced">Re-listed</span>`);
   if (l.closing_date) b.push(`<span class="badge closing">⏱ Closing date ${shortDate(l.closing_date)}</span>`);
   if (l.flags?.includes("motivated")) b.push(`<span class="badge motivated">Motivated seller</span>`);
   if (l.flags?.includes("needs_work")) b.push(`<span class="badge work">Needs work</span>`);
@@ -324,6 +343,7 @@ function renderDetail(l: Listing): void {
       <h3>${esc(l.title || `${l.bedrooms ?? "?"} bedroom ${l.property_type ?? "home"}`)}</h3>
       <div class="addr">${esc(l.address)}${l.region && l.region !== "Edinburgh" ? ` · ${esc(l.region)}` : ""}${l.approx_location ? ` <span class="muted">(location approximate)</span>` : ""}</div>
       <div class="badges">${badges(l)}</div>
+      ${crossRefs(l)}
       ${l.auction ? `<div class="auction-note">
         <b>${esc(l.auction.house)}${l.auction.date ? ` · auction ${shortDate(l.auction.date)}` : ""}</b>
         The ${esc(l.auction.basis.toLowerCase())} is where bidding starts, not the likely price. The winning bidder usually pays a
@@ -396,6 +416,20 @@ function renderList(): void {
     c.addEventListener("keydown", (e) => e.key === "Enter" && c.click()),
   );
 }
+
+/** Several homes on one spot: list them in a popup to choose from. */
+function showPicker(ids: string[], lngLat: [number, number]): void {
+  const ls = ids.map((id) => listings.find((l) => l.id === id)).filter((l): l is Listing => !!l)
+    .sort((a, b) => a.price - b.price);
+  map.showPopup(lngLat, `<div class="picker"><b>${ls.length} homes here</b>${ls.map((l) => `
+    <button data-pick="${esc(l.id)}"><span>${esc((l.address ?? "").split(",")[0])}</span>
+      <span class="muted">${l.bedrooms ?? "?"} bed · ${l.auction ? "🔨 " : ""}${gbp(l.price)}</span></button>`).join("")}</div>`);
+}
+
+document.addEventListener("click", (e) => {
+  const b = (e.target as HTMLElement).closest<HTMLElement>("[data-pick]");
+  if (b) select(listings.find((l) => l.id === b.dataset.pick) ?? null);
+});
 
 function showPointInfo([lng, lat]: [number, number]): void {
   if (selected) return select(null);

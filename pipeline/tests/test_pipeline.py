@@ -189,7 +189,7 @@ def test_fetch_transit_parsing(monkeypatch):
         {"type": "node", "lat": 55.9546, "lon": -3.1925, "tags": {"name": "St Andrew Square"}},
     ]}
     monkeypatch.setattr(layers, "_overpass", lambda q: payload)
-    tram, bus = layers.fetch_transit()
+    tram, bus, rail = layers.fetch_transit()
     assert tram["features"][0]["geometry"]["type"] == "LineString"   # the two ways merge
     assert any(f["properties"].get("name") == "St Andrew Square" for f in tram["features"])
     refs = [f["properties"]["ref"] for f in bus["features"]]

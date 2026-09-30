@@ -21,6 +21,7 @@ from shapely.geometry import Point
 from shapely.strtree import STRtree
 
 import auctions
+import dedupe
 import epc
 import espc
 import layers
@@ -59,14 +60,26 @@ def refresh_layers(run: Run) -> None:
         fc, src = res
         write_json(OUT / "catchments.geojson", fc)
         run.meta["sources"]["catchments"]["detail"] = src
-    tb = run.step("osm_transit", layers.fetch_transit)
-    if tb:
-        write_json(OUT / "tram.geojson", tb[0])
-        write_json(OUT / "bus.geojson", tb[1])
+    # OpenStreetMap routes barely change and the public Overpass servers are often overloaded:
+    # fetch them once a week (or when a file is missing), otherwise keep last week's.
+    last = (run.meta["sources"].get("osm_transit") or {}).get("updated", "")
+    week_ago = (dt.datetime.now(dt.timezone.utc) - dt.timedelta(days=7)).isoformat(timespec="minutes")
+    have_all = all((OUT / f).exists() for f in ("tram.geojson", "bus.geojson", "rail.geojson"))
+    if have_all and last > week_ago:
+        log.info("== osm_transit: last fetched %s, next after a week", last)
+    else:
+        tb = run.step("osm_transit", layers.fetch_transit)
+        if tb:
+            write_json(OUT / "tram.geojson", tb[0])
+            write_json(OUT / "bus.geojson", tb[1])
+            write_json(OUT / "rail.geojson", tb[2])
+    write_json(OUT / "rail_stations.geojson", layers.rail_stations())
     write_json(OUT / "tram_proposed.geojson", layers.load_proposed_tram())
     top = load_config("top_schools.json")
     write_json(OUT / "top_schools.json", {k: v for k, v in top.items() if not k.startswith("_")})
 
+
+LAST_DUPLICATES: list[str] = []  # dedupe decisions of the last enrich(), written to meta.json
 
 REGION_OF = {d: name.split(":")[0].split(" (")[0]
              for name, ds in SETTINGS["espc"]["allowed_postcode_districts"].items() for d in ds}
@@ -120,6 +133,8 @@ def enrich(listings: list[dict], net, profiles, previous: dict | None = None,
             "id", "url", "title", "address", "postcode", "district", "lat", "lng", "price", "price_qualifier",
             "bedrooms", "bathrooms", "floor_area_m2", "property_type", "detached", "garage", "image", "first_seen", "price_history",
             "approx_location", "flags", "closing_date", "source", "auction")}
+        if rec.get("source") == "auction":
+            rec["address"] = dedupe.NOISE.sub("", rec.get("address") or "")
         if rec.get("closing_date") and rec["closing_date"] < dt.date.today().isoformat():
             rec.pop("closing_date")
         if epc_index:
@@ -149,6 +164,8 @@ def enrich(listings: list[dict], net, profiles, previous: dict | None = None,
             if old["pt_min"] < rec["travel"]["best_min"]:
                 rec["travel"]["best_min"], rec["travel"]["best_how"] = old["pt_min"], old["pt_how"]
         out.append({k: v for k, v in rec.items() if v not in (None, "", [], False) or k in ("detached", "garage")})
+    global LAST_DUPLICATES
+    out, LAST_DUPLICATES = dedupe.dedupe(out)
     # Auction opening bids aren't asking prices, so they don't feed the area averages.
     areas = area_stats([r for r in out if r.get("source") != "auction"])
     lookup = {a["district"]: a for a in areas}
@@ -213,6 +230,7 @@ def main() -> int:
 
     previous = {l["id"]: l.get("travel") for l in read_json(OUT / "listings.json", []) or []}
     listings = enrich(active, net, profiles, previous, epc_index)
+    run.meta["duplicates"] = LAST_DUPLICATES
     matched = sum(1 for l in listings if l.get("epc"))
     if epc_index is not None:
         run.meta["sources"]["epc"]["detail"] = f"matched {matched} of {len(listings)} homes"

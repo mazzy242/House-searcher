@@ -17,6 +17,7 @@ from pathlib import Path
 from urllib.parse import urljoin
 
 from common import CACHE, SETTINGS, get, log, session
+from layers import BROWSER_UA
 
 CFG = SETTINGS["epc"]
 ZIP_PATH = CACHE / "epc.zip"
@@ -25,18 +26,25 @@ BANDS = set("ABCDEFG")
 
 
 def find_download_url(s) -> str:
-    """The domestic EPC zip linked from the dataset page (its file name changes each quarter)."""
+    """The domestic EPC zip linked from the dataset page (its file name changes each quarter).
+    Tries the statistics.gov.scot dataset page, then the EPC register's own data-extract page."""
     if CFG.get("download_url"):
         return CFG["download_url"]
-    page = CFG["dataset_page"]
-    html = get(s, page, timeout=60).text
-    links = [urljoin(page, h) for h in re.findall(r"""href=["']([^"']+)["']""", html)]
-    zips = [u for u in links if re.search(r"\.zip(\?|$)", u, re.I)]
-    domestic = [u for u in zips if not re.search(r"non[-_ ]?dom", u, re.I)]
-    log.info("EPC: zip links on dataset page: %s", zips[:10])
-    if not domestic:
-        raise RuntimeError(f"no domestic EPC zip link found on {page}")
-    return domestic[0]
+    problems = []
+    for page in CFG["dataset_pages"]:
+        try:
+            html = get(s, page, timeout=60).text
+        except Exception as e:  # noqa: BLE001
+            problems.append(f"{page}: {e}")
+            continue
+        links = [urljoin(page, h.replace("&amp;", "&")) for h in re.findall(r"""href=["']([^"']+)["']""", html)]
+        zips = [u for u in links if re.search(r"\.zip(\?|$)|download", u, re.I)]
+        domestic = [u for u in zips if re.search(r"\.zip", u, re.I) and not re.search(r"non[-_ ]?dom", u, re.I)]
+        log.info("EPC: download-looking links on %s: %s", page, zips[:12])
+        if domestic:
+            return domestic[0]
+        problems.append(f"{page}: no domestic .zip link")
+    raise RuntimeError("EPC download link not found: " + " | ".join(problems)[:600])
 
 
 def download() -> Path:
@@ -44,7 +52,7 @@ def download() -> Path:
     fresh = ZIP_PATH.exists() and (dt.datetime.now().timestamp() - ZIP_PATH.stat().st_mtime) < 30 * 86400
     if fresh:
         return ZIP_PATH
-    s = session()
+    s = session(BROWSER_UA)  # the government sites drop connections from non-browser clients
     url = find_download_url(s)
     log.info("EPC: downloading %s", url)
     with get(s, url, stream=True, timeout=900) as r:

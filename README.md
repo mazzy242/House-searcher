@@ -33,11 +33,12 @@ GitHub Actions (daily 05:17 UTC)
   pipeline/build.py
     ├─ SIMD 2020 data zones ......... maps.gov.scot ArcGIS service
     ├─ Secondary school catchments .. City of Edinburgh Council ArcGIS (bundled c.2014 copy as fallback)
-    ├─ Tram + Lothian bus routes .... OpenStreetMap (Overpass API)
+    ├─ Tram, bus + rail lines ....... OpenStreetMap (Overpass API), refreshed weekly
     ├─ Bus/tram timetable ........... BODS Scotland GTFS → travel time to Waverley
     ├─ Listings ..................... espc.com (polite scrape, new/changed listings only)
     ├─ Auction lots ................. Future Property Auctions, Auction House Scotland catalogues
     ├─ EPC certificates ............. statistics.gov.scot domestic EPC extract (cached 30 days)
+    ├─ duplicate check .............. pipeline/dedupe.py (ESPC is always the main record)
     └─ enrich + write public/data/*.json
   commit data → vite build → GitHub Pages
 ```
@@ -85,6 +86,19 @@ In `pipeline/config/settings.json` under `espc`:
 - `exclude_types_regex` sets which property types are dropped: flats, apartments, maisonettes, penthouses, duplexes, studios and retirement flats.
 
 Most unwanted listings are skipped straight from the search results (ESPC's URLs end in the postcode, and each result card says e.g. "2 bed first floor flat"), so they never cost a page fetch. School catchments cover the City of Edinburgh only.
+
+## Duplicates
+
+The same home can turn up twice: re-listed on ESPC under a new number, or sold at auction as well as through an agent. `pipeline/dedupe.py` treats two listings as the same home when they share a postcode, the same house number(s) and the same street (or, for named houses, the same name). House numbers are exact: 70 and 70a are different homes.
+
+- **Same home on ESPC twice:** the newest listing is kept, with the older price history and a "Re-listed" badge.
+- **Same home on ESPC and at auction:** the ESPC listing is kept, with "Also at auction" and a link to the lot; the auction pin is removed.
+- **Auction lot covering more than the ESPC home** (e.g. a lot of "70 and 70a" where 70 is on ESPC): both stay on the map, each linking to the other.
+- **Same lot at two auction houses:** one pin, showing the earliest auction.
+
+New-build house types at one development ("The Fulton, Edgelaw View") are never merged. Every decision is listed under `duplicates` in `public/data/meta.json`.
+
+Several homes can share one map point (ESPC puts every plot of a development on the same spot); clicking there lists them all.
 
 ## Garage / detached detection
 
