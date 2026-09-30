@@ -226,7 +226,7 @@ def main() -> int:
     active += [r for r in lots.values() if r.get("active")]
 
     districts = {d for ds in SETTINGS["espc"]["allowed_postcode_districts"].values() for d in ds}
-    epc_index = run.step("epc", epc.load_index, districts)
+    epc_index = run.step("epc", epc.load_index, districts) if SETTINGS["epc"].get("enabled", True) else None
 
     previous = {l["id"]: l.get("travel") for l in read_json(OUT / "listings.json", []) or []}
     listings = enrich(active, net, profiles, previous, epc_index)

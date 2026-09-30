@@ -68,6 +68,8 @@
   },
 
   "epc": {
+    "enabled": false,
+    "_enabled_comment": "Off for now: statistics.gov.scot drops connections from GitHub's servers. Set to true (and optionally download_url) to turn EPC bands and floor areas back on.",
     "_comment": "Scottish domestic EPC open data (OGL). The zip link is found on the first dataset page that works; set download_url to override.",
     "dataset_pages": [
       "https://statistics.gov.scot/data/domestic-energy-performance-certificates",
