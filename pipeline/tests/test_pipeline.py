@@ -252,7 +252,9 @@ def test_rejection_rules():
     assert r("1 bed retirement property for sale", "", 1, "EH10") == "flat"
     assert r("1 bed terraced house for sale", "terraced", 1, "EH6") == "1 bedroom"
     assert r("3 bed detached house for sale in Bathgate", "detached", 3, "EH48") == "district EH48"
-    assert r("Plot for sale", "", None, "EH26") == "bedrooms unknown"
+    assert r("Plot for sale", "", None, "EH26") is None            # plots are kept (as their own kind)
+    assert r("Plot for sale", "", None, "EH48") == "district EH48"
+    assert r("Detached house for sale", "", None, "EH4") == "bedrooms unknown"
     assert r("3 bed house to rent", "house", 3, "EH4") == "rental"
 
 

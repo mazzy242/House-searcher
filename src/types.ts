@@ -61,6 +61,9 @@ export interface Listing {
   auction?: { house: string; date?: string; basis: string };
   epc?: { band?: string; floor_area_m2?: number; date?: string };
   floor_area_source?: "EPC";
+  /** "plot" = a building plot or land for sale rather than a home. */
+  kind?: "plot";
+  plot_acres?: number;
   /** The same home was listed on ESPC before (merged; price history carried over). */
   relisted?: boolean;
   /** The same home is also being auctioned. */

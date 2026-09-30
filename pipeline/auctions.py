@@ -44,10 +44,8 @@ def lot_id(url: str) -> str:
     return "auc-" + hashlib.sha1(url.encode()).hexdigest()[:12]
 
 
-# Auction lots that aren't a home to live in: building plots, land, sites, garages, ground rent.
-NOT_A_HOME = re.compile(
-    r"\b(?:plot|plots|land|site|sites|development with|development opportunity|planning permission|"
-    r"lock-?up|ground rent|feu duty|woodland|paddock|retail unit)\b", re.I)
+# Lots that are neither a home nor a plot to build on (plots and land are kept, as their own kind).
+NOT_A_HOME = re.compile(r"\b(?:lock-?up|garage site|ground rent|feu duty|retail unit|shop unit|office)\b", re.I)
 # Page furniture the auction sites put around the address in titles.
 TITLE_NOISE = re.compile(
     r"^(?:future\s+)?auction details\s*-\s*|^property for auction in scotland\s*-\s*|"
@@ -146,7 +144,7 @@ def prefilter(hint: str | None) -> str | None:
     wm = espc.BEDS_WORD.search(hint)
     beds = int(bm.group(1)) if bm else espc.WORD_NUMS[wm.group(1).lower()] if wm else None
     if NOT_A_HOME.search(hint[:200]):
-        return "land/plot/site"
+        return "not a home or plot"
     return espc.rejection(hint[:300], beds=beds, district=district, beds_required=False)
 
 
@@ -171,6 +169,11 @@ def parse_lot(html: str, url: str, house: str) -> dict:
         tag.decompose()
     body = re.sub(r"\s+", " ", soup.get_text(" "))
     flags = [f for f, rx in (("motivated", espc.MOTIVATED), ("needs_work", espc.NEEDS_WORK)) if rx.search(body)]
+    ps = espc.PLOT_SIZE.search(body)
+    if ps and not rec.get("plot_acres"):
+        acres = float(ps.group(1)) * (2.471 if ps.group(2).lower().startswith("h") else 1)
+        if 0.01 <= acres <= 500:
+            rec["plot_acres"] = round(acres, 2)
     if flags:
         rec["flags"] = flags
     # Type: the headline often is just the address, so also look at the start of the description.
@@ -183,8 +186,11 @@ def parse_lot(html: str, url: str, house: str) -> dict:
     address = rec.get("address") or rec.get("title") or ""
     if NOT_A_HOME.search(address):
         rec["not_a_home"] = True
+    if espc.is_plot(address, rec.get("bedrooms")):
+        rec["kind"] = "plot"
     beds = f"{rec['bedrooms']} bed " if rec.get("bedrooms") else ""
-    rec["title"] = f"{beds}{rec.get('property_type') or 'property'} at auction".strip()
+    what = "Plot / land" if rec.get("kind") == "plot" else f"{beds}{rec.get('property_type') or 'property'}"
+    rec["title"] = f"{what} at auction".strip()
     return rec
 
 
@@ -275,9 +281,10 @@ def scrape(state: dict[str, dict]) -> dict[str, dict]:
         elif date and date < today:
             why = "auction passed"
         elif rec.get("not_a_home"):
-            why = "land/plot/site"
+            why = "not a home or plot"
         else:
-            why = espc.rejection(rec.get("title", ""), rec.get("property_type", ""), rec.get("bedrooms"), rec.get("district"))
+            text = f"{rec.get('title', '')} {rec.get('address', '')}" if rec.get("kind") == "plot" else rec.get("title", "")
+            why = espc.rejection(text, rec.get("property_type", ""), rec.get("bedrooms"), rec.get("district"))
         rec["active"] = not why
         rec["excluded"] = why
         if why in ("no longer listed", "auction passed"):

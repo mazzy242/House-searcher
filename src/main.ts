@@ -87,6 +87,10 @@ function buildControls(): void {
   for (const id of CHECKS) {
     $<HTMLInputElement>(id).addEventListener("change", (e) => set({ [id]: (e.target as HTMLInputElement).checked }));
   }
+  $("show").addEventListener("click", (e) => {
+    const v = (e.target as HTMLElement).dataset.show as Filters["show"] | undefined;
+    if (v) set({ show: v });
+  });
   $("minBeds").addEventListener("click", (e) => {
     const b = (e.target as HTMLElement).dataset.beds;
     if (b != null) set({ minBeds: Number(b) });
@@ -145,6 +149,9 @@ function syncControls(): void {
     $<HTMLSelectElement>(id).value = String(f[id]);
   }
   for (const id of CHECKS) $<HTMLInputElement>(id).checked = f[id];
+  document.querySelectorAll<HTMLButtonElement>("#show button").forEach((b) =>
+    b.setAttribute("aria-checked", String(b.dataset.show === f.show)),
+  );
   document.querySelectorAll<HTMLButtonElement>("#minBeds button").forEach((b) =>
     b.setAttribute("aria-checked", String(Number(b.dataset.beds) === f.minBeds)),
   );
@@ -266,7 +273,7 @@ function renderLegend(): void {
   if (f.layers.simd) {
     simd = `<div class="simd-scale"><span>Most deprived</span>${SIMD_COLOURS.map((c, i) => `<i title="Decile ${i + 1}" style="background:${c}"></i>`).join("")}<span>Least</span></div>`;
   }
-  $("legend").innerHTML = `<div class="legend-items">${items.join("")}</div>${simd}<div class="muted small">Purple ring = in a top-10 school catchment. Thick orange ring = auction lot. Orange dashed outline = St Thomas of Aquin's (RC) catchment.</div>`;
+  $("legend").innerHTML = `<div class="legend-items">${items.join("")}</div>${simd}<div class="muted small">Purple ring = in a top-10 school catchment. Thick orange ring = auction lot. Green ring = plot / land. Orange dashed outline = St Thomas of Aquin's (RC) catchment.</div>`;
 }
 
 function renderAreas(): void {
@@ -304,6 +311,7 @@ const shortDate = (iso: string): string =>
 
 function badges(l: Listing): string {
   const b: string[] = [];
+  if (l.kind === "plot") b.push(`<span class="badge plot">🌱 Plot / land${l.plot_acres ? ` · ${l.plot_acres} acres` : ""}</span>`);
   if (l.auction) b.push(`<span class="badge auction">🔨 Auction${l.auction.date ? ` ${shortDate(l.auction.date)}` : ""}</span>`);
   for (const a of l.also_auction ?? []) b.push(`<span class="badge auction">🔨 Also at auction${a.date ? ` ${shortDate(a.date)}` : ""}</span>`);
   if (l.in_auction_lot?.length) b.push(`<span class="badge auction">🔨 Part of an auction lot</span>`);
@@ -363,11 +371,12 @@ function renderDetail(l: Listing): void {
       </div>
 
       <dl class="facts">
-        <div><dt>Rooms</dt><dd>${l.bedrooms ?? "–"} bed · ${l.bathrooms ?? "–"} bath</dd></div>
-        <div><dt>Floor area</dt><dd>${l.floor_area_m2 ? `${l.floor_area_m2} m² <span class="muted">· ${gbpFull(Math.round(l.price / l.floor_area_m2))}/m²${l.floor_area_source === "EPC" ? " · from the EPC" : ""}</span>` : `<span class="muted">Not listed</span>`}</dd></div>
+        ${l.kind === "plot" ? `<div><dt>Plot size</dt><dd>${l.plot_acres ? `${l.plot_acres} acres <span class="muted">(${Math.round(l.plot_acres * 4047).toLocaleString("en-GB")} m²) · ${gbpFull(Math.round(l.price / l.plot_acres))}/acre</span>` : `<span class="muted">Not stated – see the listing</span>`}</dd></div>` : ""}
+        <div${l.kind === "plot" ? " hidden" : ""}><dt>Rooms</dt><dd>${l.bedrooms ?? "–"} bed · ${l.bathrooms ?? "–"} bath</dd></div>
+        <div${l.kind === "plot" ? " hidden" : ""}><dt>Floor area</dt><dd>${l.floor_area_m2 ? `${l.floor_area_m2} m² <span class="muted">· ${gbpFull(Math.round(l.price / l.floor_area_m2))}/m²${l.floor_area_source === "EPC" ? " · from the EPC" : ""}</span>` : `<span class="muted">Not listed</span>`}</dd></div>
         ${l.epc?.band ? `<div><dt>EPC</dt><dd><span class="badge epc epc-${l.epc.band.toLowerCase()}">${l.epc.band}</span>${l.epc.date ? ` <span class="muted small">certificate ${esc(l.epc.date.slice(0, 7))}</span>` : ""}</dd></div>` : ""}
         ${l.closing_date ? `<div><dt>Closing date</dt><dd>${esc(shortDate(l.closing_date))} <span class="muted small">– offers by then, usually at noon</span></dd></div>` : ""}
-        <div><dt>Type</dt><dd>${esc(l.property_type ?? "–")}</dd></div>
+        <div><dt>Type</dt><dd>${l.kind === "plot" ? "Plot / land" : esc(l.property_type ?? "–")}</dd></div>
         <div><dt>SIMD</dt><dd>${simdBar(l.simd?.decile)}${l.simd?.name ? `<div class="muted small">${esc(l.simd.name)}</div>` : ""}${domains ? `<div class="domains">${domains}</div>` : ""}</dd></div>
         <div><dt>Catchment</dt><dd>${l.catchment || l.catchment_rc ? "" : `<span class="muted">Outside Edinburgh – check with ${esc(l.region ?? "the local")} council</span>`}${esc(l.catchment ?? "")}${topFor(l.catchment) ? ` <b class="rank">#${topFor(l.catchment)!.rank}</b>` : ""}${l.catchment_rc ? `<div class="small">RC: ${esc(l.catchment_rc)}${topFor(l.catchment_rc) ? ` <b class="rank">#${topFor(l.catchment_rc)!.rank}</b>` : ""}</div>` : ""}${[topFor(l.catchment), topFor(l.catchment_rc)].filter((t): t is TopSchool => !!t).map(schoolStats).join("")}</dd></div>
         ${vs ? `<div><dt>vs area</dt><dd><b class="${vs.vs_pct > 5 ? "up" : vs.vs_pct < -5 ? "down" : ""}">${vs.vs_pct > 0 ? "+" : ""}${vs.vs_pct}%</b> vs ${esc(l.district)} ${vs.basis === "all" ? "" : `${esc(vs.basis)} `}median ${gbp(vs.median)}</dd></div>` : ""}

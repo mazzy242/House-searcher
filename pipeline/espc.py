@@ -172,12 +172,32 @@ def slug_district(url: str) -> str | None:
     return m.group(1).upper() if m else None
 
 
+# Building plots and land for sale (to build on). A new-build *house* advertised as "Plot 13, The
+# Hopetoun" is a home: its title says "4 bed detached house for sale", so it isn't caught here.
+PLOT_WORDS = re.compile(
+    r"\b(?:building plots?|plots? of land|plots?|land|site|development (?:site|opportunity|plot|with)|"
+    r"planning (?:permission|consent)|self[- ]build|woodland|paddock)\b", re.I)
+PLOT_FOR_SALE = re.compile(
+    r"\b(?:plots?|land|site)\s+for sale|building plot|plots? of land|with (?:full |outline |detailed )?planning|self[- ]build",
+    re.I)
+PLOT_SIZE = re.compile(r"(\d+(?:\.\d+)?)\s*(acres?|hectares?|ha)\b", re.I)
+
+
+def is_plot(text: str, beds: int | None = None) -> bool:
+    """Land or a building plot rather than a home. With a bedroom count it must say so outright
+    (a plot "with planning for a 4 bed house" is still a plot)."""
+    return bool(PLOT_WORDS.search(text)) and (beds is None or bool(PLOT_FOR_SALE.search(text)))
+
+
 def rejection(title: str = "", ptype: str = "", beds: int | None = None, district: str | None = None,
               beds_required: bool = True) -> str | None:
-    """Why a listing isn't wanted (None = keep): houses for sale, 2+ bedrooms, commutable districts."""
+    """Why a listing isn't wanted (None = keep): houses for sale, 2+ bedrooms, commutable districts.
+    Plots and land are kept too (as their own kind); only the district rule applies to them."""
     text = f"{title} {ptype}"
     if re.search(r"\bto (rent|let)\b", text, re.I):
         return "rental"
+    if is_plot(text, beds):
+        return f"district {district}" if district and district not in ALLOWED_DISTRICTS else None
     if EXCLUDE_TYPES.search(text):
         return "flat"
     if beds is None and beds_required:
@@ -574,6 +594,12 @@ def parse_property(html: str, url: str) -> dict:
     cd = closing_date(f"{own} {text}")
     if cd:
         out["closing_date"] = cd
+    ps = PLOT_SIZE.search(own)
+    if ps:
+        acres = float(ps.group(1)) * (2.471 if ps.group(2).lower().startswith("h") else 1)
+        if 0.01 <= acres <= 500:
+            out["plot_acres"] = round(acres, 2)
+    out["plot_parsed"] = True
     out["parser_version"] = PARSER_VERSION
     garage_text = f"{head} {feats_text} {out.get('description') or ''}"
     out["garage"] = bool(GARAGE.search(garage_text)) and not NOT_GARAGE.search(garage_text)
@@ -631,6 +657,8 @@ def scrape(state: dict[str, dict]) -> dict[str, dict]:
         why = rec.get("excluded") or ""
         if why.startswith(permanent) or re.match(r"\d+ bedroom$", why):
             return False
+        if why == "bedrooms unknown" and not rec.get("plot_parsed"):
+            return True  # possibly a plot: read it again for the plot size
         return rec.get("fetched", "") < stale_before or rec.get("parser_version", 1) < PARSER_VERSION
     todo = [pid for pid in urls if not pre[pid] and needs_fetch(pid)]
     todo = todo[:CFG["max_detail_fetches_per_run"]]
@@ -682,6 +710,10 @@ def scrape(state: dict[str, dict]) -> dict[str, dict]:
             why = "no longer listed"
         if not why:
             why = rejection(rec.get("title", ""), rec.get("property_type", ""), rec.get("bedrooms"), rec.get("district"))
+        if is_plot(f"{rec.get('title', '')} {rec.get('property_type', '')}", rec.get("bedrooms")):
+            rec["kind"] = "plot"
+        else:
+            rec.pop("kind", None)
         rec["active"] = not why
         if why:
             rec["excluded"] = why

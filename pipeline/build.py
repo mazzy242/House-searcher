@@ -132,7 +132,7 @@ def enrich(listings: list[dict], net, profiles, previous: dict | None = None,
         rec = {k: l.get(k) for k in (
             "id", "url", "title", "address", "postcode", "district", "lat", "lng", "price", "price_qualifier",
             "bedrooms", "bathrooms", "floor_area_m2", "property_type", "detached", "garage", "image", "first_seen", "price_history",
-            "approx_location", "flags", "closing_date", "source", "auction")}
+            "approx_location", "flags", "closing_date", "source", "auction", "kind", "plot_acres")}
         if rec.get("source") == "auction":
             rec["address"] = dedupe.NOISE.sub("", rec.get("address") or "")
         if rec.get("closing_date") and rec["closing_date"] < dt.date.today().isoformat():
@@ -167,11 +167,11 @@ def enrich(listings: list[dict], net, profiles, previous: dict | None = None,
     global LAST_DUPLICATES
     out, LAST_DUPLICATES = dedupe.dedupe(out)
     # Auction opening bids aren't asking prices, so they don't feed the area averages.
-    areas = area_stats([r for r in out if r.get("source") != "auction"])
+    areas = area_stats([r for r in out if r.get("source") != "auction" and r.get("kind") != "plot"])
     lookup = {a["district"]: a for a in areas}
     for rec in out:
         a = lookup.get(rec.get("district"))
-        if not a:
+        if not a or rec.get("kind") == "plot":  # house-price averages say nothing about land
             continue
         same = a["by_beds"].get(str(min(rec.get("bedrooms") or 0, 5)))
         base, basis = (same["median"], f"{min(rec['bedrooms'], 5)}-bed") if same and same["count"] >= 3 and rec.get("bedrooms") else (a["median"], "all")

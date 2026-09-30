@@ -8,6 +8,7 @@ A map of the **houses** (not flats) with **2 or more bedrooms** for sale on ESPC
 - **How the price compares** to the median asking price in its postcode district.
 - **Auction lots** from Future Property Auctions and Auction House Scotland, alongside the ESPC listings (orange-ringed pins, with opening bid / guide price and auction date).
 - **Seller situation**: "Motivated seller" (repossession/heritable creditor, executry, trustee, cash buyers), "Needs work", "Closing date set" and "Price reduced".
+- **Plots & land**: building plots and land for sale (ESPC and auctions) are kept separately; a Homes / Plots & land / Both switch shows them, with plot size in acres where given.
 - **EPC band and floor area** from the Scottish Government's EPC open data, filling in m² where the listing doesn't give it.
 
 Filter by price, bedrooms, detached, garage, time to Waverley, school catchment, SIMD, sale type (estate agents / auctions) and seller situation. Overlay tram lines (existing and proposed), main bus routes, school catchments and SIMD.

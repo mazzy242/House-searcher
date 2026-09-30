@@ -173,6 +173,27 @@ def test_one_id_per_lot_and_land_is_dropped():
     assert auctions.lot_id("https://www.auctionhouse.co.uk/scotland/auction/lot/152411") == "auc-auctionhouse-152411"
     assert auctions.clean_title("Auction Details - 70 and 70a Kingston Avenue, Edinburgh -   GUIDE PRICE  £0") == \
         "70 and 70a Kingston Avenue, Edinburgh"
-    assert auctions.prefilter("Plot 1 at Station Road, Broxburn EH52 5QR - Guide £112,000") == "land/plot/site"
-    assert auctions.prefilter("3 Harelaw, Development with Full Planning, Danderhall EH22 1SB £247,000") == "land/plot/site"
+    assert auctions.prefilter("Plot 1 at Station Road, Broxburn EH52 5QR - Guide £112,000") is None      # plot: kept
+    assert auctions.prefilter("Plot 6 Hartside Wood, Lauder TD2 6AA - Guide £4,000") == "district TD2"
+    assert auctions.prefilter("Lock-up garage, Dalkeith EH22 1AA - Guide £9,000") == "not a home or plot"
     assert auctions.prefilter("12 Elm Row EH21 7AA - three bedroom detached house with garage. Guide £250,000") is None
+
+
+def test_plots_are_their_own_kind():
+    assert espc.is_plot("Plot for sale in Balerno")
+    assert espc.is_plot("Building plot for sale in Gullane")
+    assert espc.is_plot("3 Harelaw, Development with Full Planning, Danderhall", beds=4)
+    # A new-build home advertised with its plot number is a home, not a plot.
+    assert not espc.is_plot("4 bed detached house for sale in South Queensferry", beds=4)
+    assert not espc.is_plot("3 bed detached house for sale in Colinton")
+    html = ("<title>Plot for sale in Balerno</title><h1>Plot 2, Mansfield Road, Balerno EH14 7JZ</h1>"
+            "<meta name='description' content='A building plot of approximately 0.35 acres with outline planning consent.'>"
+            "<div>Offers over £180,000</div>")
+    rec = espc.parse_property(html, "https://espc.com/property/plot-2-mansfield-road-balerno-eh14-7jz/36400099")
+    assert rec["plot_acres"] == 0.35 and "bedrooms" not in rec
+    assert espc.rejection(rec["title"], rec.get("property_type", ""), None, rec["district"]) is None
+    lot_html = LOT.replace("14 Craiglockhart Road", "Plot 1 at Craiglockhart Road").replace(
+        "A three bedroom semi-detached house requiring modernisation, sold on behalf of the heritable creditor.",
+        "A building plot of 0.2 hectares with planning permission for a detached house.")
+    lot = auctions.parse_lot(lot_html, "https://x/property_details.asp?id=77", "FPA")
+    assert lot["kind"] == "plot" and lot["title"] == "Plot / land at auction" and lot["plot_acres"] == 0.49

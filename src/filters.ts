@@ -20,6 +20,7 @@ export interface Filters {
   minSimd: number; // 0 = any
   newOnly: boolean;
   saleType: "" | "private" | "auction";
+  show: "homes" | "plots" | "all";
   motivated: boolean;
   needsWork: boolean;
   closingDate: boolean;
@@ -45,6 +46,7 @@ export const DEFAULTS: Filters = {
   minSimd: 0,
   newOnly: false,
   saleType: "",
+  show: "homes",
   motivated: false,
   needsWork: false,
   closingDate: false,
@@ -59,7 +61,7 @@ export const DEFAULTS: Filters = {
 
 const NUM = ["minPrice", "maxPrice", "minBeds", "maxMins", "minSimd"] as const;
 const BOOL = ["detached", "garage", "topSchool", "newOnly", "allBus", "motivated", "needsWork", "closingDate", "reduced"] as const;
-const STR = ["school", "region", "saleType", "colourBy", "sort", "simdDomain", "basemap"] as const;
+const STR = ["show", "school", "region", "saleType", "colourBy", "sort", "simdDomain", "basemap"] as const;
 
 /** Filters live in the URL hash so a search can be bookmarked or shared. */
 export function toHash(f: Filters): string {
@@ -98,6 +100,8 @@ export function matches(l: Listing, f: Filters): boolean {
   if (f.region && l.region !== f.region) return false;
   if (f.minSimd && (l.simd?.decile ?? 0) < f.minSimd) return false;
   if (f.newOnly && !isNew(l)) return false;
+  if (f.show === "homes" && l.kind === "plot") return false;
+  if (f.show === "plots" && l.kind !== "plot") return false;
   const atAuction = l.source === "auction" || !!l.also_auction?.length;
   if (f.saleType === "auction" && !atAuction) return false;
   if (f.saleType === "private" && l.source === "auction") return false;
