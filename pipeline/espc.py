@@ -289,7 +289,7 @@ def discover(f: Fetcher, hints: dict[str, str] | None = None) -> tuple[dict[str,
             hints.update(extract_card_hints(html))
             if page == 1:
                 (DEBUG / f"search_{n_search}_page_1.html").write_text(html)
-                if not recognised_location(html):
+                if "orgid=" not in start and not recognised_location(html):
                     log.warning("%s: ESPC doesn't seem to recognise this location (page title %r) - skipping",
                                 start, page_title(html))
                     break

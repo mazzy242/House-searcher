@@ -363,3 +363,16 @@ def test_excluded_flats_are_not_refetched(monkeypatch, tmp_path):
                           "fetched": old, "active": True}}
     espc.scrape(state)
     assert fetched == ["36000022"]
+
+
+def test_agent_search_is_not_skipped_as_unrecognised_location(monkeypatch, tmp_path):
+    monkeypatch.setattr(espc, "DEBUG", tmp_path)
+    page = "<title>Properties for Sale | ESPC</title><a href='/property/1-a-road-edinburgh-eh4-1aa/36000011'>x</a>"
+
+    class F:
+        count = 0
+        def html(self, url):
+            return page if "p=2" not in url and "page=2" not in url else ""
+    monkeypatch.setitem(espc.CFG, "search_urls", ["https://espc.com/properties?orgid=1560"])
+    urls, complete = espc.discover(F())
+    assert "36000011" in urls
