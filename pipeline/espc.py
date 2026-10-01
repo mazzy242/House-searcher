@@ -47,7 +47,9 @@ AREA_NUM = r"(?<![\d,.])(\d{1,3}(?:,\d{3})+|\d{2,5})(?:\.\d+)?"  # 112, 1,076, 9
 AREA_LABELLED = re.compile(r"(?:floor\s*area|internal\s*area|total\s*area|living\s*area|floor\s*space|size)"
                            r"[^\d]{0,40}?" + AREA_NUM + r"\s*" + AREA_UNIT, re.I)
 AREA_ANY = re.compile(AREA_NUM + r"\s*" + AREA_UNIT, re.I)
-PARSER_VERSION = 3  # bump when the parser learns new fields, so kept houses are re-read once
+PARSER_VERSION = 4  # bump when the parser learns new fields, so kept houses are re-read once
+EPC_BAND = re.compile(r"^\s*(?:band\s*)?([A-G])\b", re.I)
+EPC_TEXT = re.compile(r"\bEPC(?:\s+(?i:rating))?\s*[:\-]?\s*(?:(?i:band)\s*)?([A-G])\b(?![\w'])")
 
 WORD_NUMS = {"one": 1, "two": 2, "three": 3, "four": 4, "five": 5, "six": 6, "seven": 7, "eight": 8}
 BEDS_WORD = re.compile(r"\b(one|two|three|four|five|six|seven|eight)[\s-]+bed(?:room)?s?\b", re.I)
@@ -456,6 +458,11 @@ def parse_property(html: str, url: str) -> dict:
                 img = img.get("url")
             if isinstance(img, str):
                 out["image"] = img
+        for prop in (d.get("additionalProperty") or []) if isinstance(d.get("additionalProperty"), list) else []:
+            if isinstance(prop, dict) and re.search(r"\bepc\b|energy", str(prop.get("name", "")), re.I) and not out.get("epc"):
+                band = EPC_BAND.search(str(prop.get("value", "")))
+                if band:
+                    out["epc"] = {"band": band.group(1).upper()}
         if not out.get("title") and isinstance(d.get("name"), str):
             out["title"] = d["name"]
         if not out.get("description") and isinstance(d.get("description"), str):
@@ -582,6 +589,10 @@ def parse_property(html: str, url: str) -> dict:
                 break
     if not out.get("floor_area_m2"):
         out.pop("floor_area_m2", None)
+    if not out.get("epc"):  # the page's own summary: "EPC rating C" / "EPC: Band D"
+        m = EPC_TEXT.search(text)
+        if m:
+            out["epc"] = {"band": m.group(1).upper()}
     # Seller situation and sale stage, from the listing's own words (not site-wide boilerplate).
     own = f"{head} {feats_text} {desc}"
     flags = []

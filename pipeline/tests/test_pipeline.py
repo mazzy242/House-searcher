@@ -130,6 +130,17 @@ def test_parse_text_only_semi_detached():
     assert rec["postcode"] == "EH12 5XX" and "lat" in rec and rec["lat"] > 55
     assert rec["bathrooms"] == 2                        # the listing's own, not the "similar homes" one
     assert rec["floor_area_m2"] == 100                  # 1,076 sq ft -> 100 m²
+    assert rec["epc"] == {"band": "C"}                  # "EPC rating C." in the page text
+
+
+def test_epc_band_from_jsonld_and_text():
+    rec = espc.parse_property((FIX / "espc_property_jsonld.html").read_text(),
+                              "https://espc.com/property/12-barnton-avenue-edinburgh-eh4-6aa/36111111")
+    assert rec["epc"] == {"band": "D"}                  # JSON-LD, not the council tax band G
+    for txt, band in (("EPC rating C", "C"), ("EPC: Band E", "E"), ("EPC Rating b", None),
+                      ("EPC A", "A"), ("Ask for the EPC a copy", None), ("EPCs available", None)):
+        m = espc.EPC_TEXT.search(txt)
+        assert (m.group(1) if m else None) == band, txt
 
 
 # ------------------------------------------------------------------ layers / enrichment

@@ -132,7 +132,7 @@ def enrich(listings: list[dict], net, profiles, previous: dict | None = None,
         rec = {k: l.get(k) for k in (
             "id", "url", "title", "address", "postcode", "district", "lat", "lng", "price", "price_qualifier",
             "bedrooms", "bathrooms", "floor_area_m2", "property_type", "detached", "garage", "image", "first_seen", "price_history",
-            "approx_location", "flags", "closing_date", "source", "auction", "kind", "plot_acres")}
+            "approx_location", "flags", "closing_date", "source", "auction", "kind", "plot_acres", "epc")}
         if rec.get("source") == "auction":
             rec["address"] = dedupe.NOISE.sub("", rec.get("address") or "")
         if rec.get("closing_date") and rec["closing_date"] < dt.date.today().isoformat():

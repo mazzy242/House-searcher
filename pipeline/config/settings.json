@@ -12,9 +12,6 @@
       "https://espc.com/properties?locations=midlothian",
       "https://espc.com/properties?locations=east-lothian",
       "https://espc.com/properties?locations=west-lothian",
-      "https://espc.com/properties?locations=south-queensferry",
-      "https://espc.com/properties?locations=west-fife",
-      "https://espc.com/properties?locations=dunfermline",
       "https://espc.com/properties?orgid=1560"
     ],
     "_agent_search_comment": "orgid=... searches list one ESPC member firm's homes (1560 = Ralph Sayer). They go through the same rules and duplicate check; the postcode rule keeps them to our areas.",
