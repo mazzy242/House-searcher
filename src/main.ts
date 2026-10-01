@@ -1,5 +1,5 @@
 import "./style.css";
-import { DEFAULTS, type Filters, fromHash, isNew, isReduced, matches, sortListings, toHash } from "./filters";
+import { DEFAULTS, type Filters, HOUSE_TYPES, activeCount, fromHash, isNew, isReduced, listOf, matches, pricePerM2, sortListings, toHash, toggleIn } from "./filters";
 import { PRICE_STOPS, SIMD_COLOURS, TIME_STOPS, VS_STOPS, daysAgo, esc, gbp, gbpFull, mins } from "./format";
 import { PolygonIndex } from "./geo";
 import { HouseMap } from "./map";
@@ -16,8 +16,9 @@ const load = async <T>(path: string, fallback: T): Promise<T> => {
   }
 };
 
-const SELECTS = ["school", "region", "saleType", "colourBy", "sort", "simdDomain"] as const;
-const CHECKS = ["detached", "garage", "topSchool", "newOnly", "allBus", "motivated", "needsWork", "closingDate", "reduced"] as const;
+const NUM_SELECTS = ["minPrice", "maxPrice", "maxBeds", "minBaths", "minArea", "maxMins", "minSimd"] as const;
+const SELECTS = ["saleType", "colourBy", "sort", "simdDomain"] as const;
+const CHECKS = ["garage", "topSchool", "newOnly", "allBus", "motivated", "needsWork", "closingDate", "reduced"] as const;
 
 const PRICES = [100, 150, 200, 250, 300, 350, 400, 450, 500, 600, 700, 800, 1000, 1250, 1500, 2000].map((k) => k * 1000);
 
@@ -69,16 +70,17 @@ function buildControls(): void {
   // Every listing already has 2+ bedrooms (the scraper only keeps houses with 2 or more).
   $("minBeds").innerHTML = [0, 3, 4, 5]
     .map((b) => `<button role="radio" data-beds="${b}">${b ? `${b}+` : "2+"}</button>`).join("");
+  $("types").innerHTML = HOUSE_TYPES.map((t) => `<button type="button" aria-pressed="false" data-type="${t.id}">${t.label}</button>`).join("");
   const regions = [...new Set(listings.map((l) => l.region).filter(Boolean) as string[])];
   const order = ["Edinburgh", "Midlothian", "East Lothian", "West Lothian", "Fife"];
   regions.sort((a, b) => (order.indexOf(a) + 99) % 99 - (order.indexOf(b) + 99) % 99 || a.localeCompare(b));
-  $("region").innerHTML += regions
-    .map((r) => `<option value="${esc(r)}">${esc(r)} (${listings.filter((l) => l.region === r).length})</option>`).join("");
+  $("region").innerHTML = regions
+    .map((r) => `<button type="button" aria-pressed="false" data-region="${esc(r)}">${esc(r)} <span class="muted">${listings.filter((l) => l.region === r).length}</span></button>`).join("");
   const schools = [...new Set(listings.flatMap((l) => [l.catchment, l.catchment_rc]).filter(Boolean) as string[])].sort();
   const rank = (s: string) => topFor(s)?.rank;
-  $("school").innerHTML += schools.map((s) => `<option value="${esc(s)}">${esc(s)}${rank(s) ? ` (#${rank(s)})` : ""}</option>`).join("");
+  $("school").innerHTML = schools.map((s) => `<label class="check"><input type="checkbox" value="${esc(s)}" /> ${esc(s)}${rank(s) ? ` <b class="rank">#${rank(s)}</b>` : ""}</label>`).join("");
 
-  for (const id of ["minPrice", "maxPrice", "maxMins", "minSimd"] as const) {
+  for (const id of NUM_SELECTS) {
     $<HTMLSelectElement>(id).addEventListener("change", (e) => set({ [id]: Number((e.target as HTMLSelectElement).value) }));
   }
   for (const id of SELECTS) {
@@ -90,6 +92,20 @@ function buildControls(): void {
   $("show").addEventListener("click", (e) => {
     const v = (e.target as HTMLElement).dataset.show as Filters["show"] | undefined;
     if (v) set({ show: v });
+  });
+  $("types").addEventListener("click", (e) => {
+    const t = (e.target as HTMLElement).closest<HTMLElement>("[data-type]")?.dataset.type;
+    if (t) set({ types: toggleIn(filters.types, t) });
+  });
+  $("region").addEventListener("click", (e) => {
+    const r = (e.target as HTMLElement).closest<HTMLElement>("[data-region]")?.dataset.region;
+    if (r) set({ region: toggleIn(filters.region, r) });
+  });
+  $("school").addEventListener("change", (e) => set({ school: toggleIn(filters.school, (e.target as HTMLInputElement).value) }));
+  let typing = 0;
+  $("q").addEventListener("input", (e) => {
+    clearTimeout(typing);
+    typing = window.setTimeout(() => set({ q: (e.target as HTMLInputElement).value.trim() }), 200);
   });
   $("minBeds").addEventListener("click", (e) => {
     const b = (e.target as HTMLElement).dataset.beds;
@@ -113,7 +129,7 @@ function buildControls(): void {
   const pickSchool = (e: Event) => {
     const li = (e.target as HTMLElement).closest<HTMLElement>("[data-school]");
     if (!li?.dataset.school) return;
-    set({ school: filters.school === li.dataset.school ? "" : li.dataset.school });
+    set({ school: toggleIn(filters.school, li.dataset.school) });
   };
   $("tops").addEventListener("click", pickSchool);
   $("tops").addEventListener("keydown", (e) => (e.key === "Enter" || e.key === " ") && (e.preventDefault(), pickSchool(e)));
@@ -145,8 +161,23 @@ function set(patch: Partial<Filters>): void {
 
 function syncControls(): void {
   const f = filters;
-  for (const id of [...(["minPrice", "maxPrice", "maxMins", "minSimd"] as const), ...SELECTS]) {
+  for (const id of [...NUM_SELECTS, ...SELECTS]) {
     $<HTMLSelectElement>(id).value = String(f[id]);
+  }
+  const q = $<HTMLInputElement>("q");
+  if (document.activeElement !== q) q.value = f.q;
+  const pressed = (sel: string, attr: string, on: string[]) =>
+    document.querySelectorAll<HTMLElement>(sel).forEach((b) => b.setAttribute("aria-pressed", String(on.includes(b.dataset[attr]!))));
+  pressed("#types [data-type]", "type", listOf(f.types));
+  pressed("#region [data-region]", "region", listOf(f.region));
+  const schools = listOf(f.school);
+  document.querySelectorAll<HTMLInputElement>("#school input").forEach((el) => (el.checked = schools.includes(el.value)));
+  $("school-summary").textContent = schools.length ? (schools.length === 1 ? schools[0] : `${schools.length} schools`) : "any school";
+  $("missing-hint").hidden = !f.minBaths && !f.minArea;
+  const n = activeCount(f);
+  for (const id of ["active-count", "panel-count"]) {
+    $(id).textContent = String(n);
+    $(id).hidden = !n;
   }
   for (const id of CHECKS) $<HTMLInputElement>(id).checked = f[id];
   document.querySelectorAll<HTMLButtonElement>("#show button").forEach((b) =>
@@ -252,7 +283,7 @@ function renderTops(): void {
     .map((t) => {
       const cn = councilName(t);
       const n = cn ? counts.get(cn) ?? 0 : 0;
-      return `<li tabindex="0" role="button" data-school="${esc(cn ?? "")}" aria-pressed="${!!cn && filters.school === cn}" title="${esc(t.neighbourhoods ?? "")}">
+      return `<li tabindex="0" role="button" data-school="${esc(cn ?? "")}" aria-pressed="${!!cn && listOf(filters.school).includes(cn)}" title="${esc(t.neighbourhoods ?? "")}">
         <span class="r">${t.rank}</span><span>${esc(t.name.replace(/ School$/, "").replace(" Community High", ""))}${t.sector === "RC" ? `<span class="rc">RC</span>` : ""}</span>
         <span class="n">${n} home${n === 1 ? "" : "s"}</span></li>`;
     })
@@ -409,7 +440,7 @@ function select(l: Listing | null, fly = false): void {
 
 function renderList(): void {
   const ls = sortListings(visible, filters.sort);
-  $("list-count").textContent = `${ls.length} homes`;
+  $("list-count").textContent = ls.length > 400 ? `Showing the first 400 of ${ls.length} homes` : `${ls.length} homes`;
   $("cards").innerHTML = ls.slice(0, 400).map((l) => `
     <div class="card" data-id="${esc(l.id)}" tabindex="0">
       ${l.image ? `<img src="${esc(l.image)}" alt="" loading="lazy" referrerpolicy="no-referrer">` : `<div class="noimg">🏠</div>`}
@@ -417,7 +448,7 @@ function renderList(): void {
         <div class="c-price">${gbpFull(l.price)} ${l.area ? `<span class="${l.area.vs_pct > 5 ? "up" : l.area.vs_pct < -5 ? "down" : "muted"} small">${l.area.vs_pct > 0 ? "+" : ""}${l.area.vs_pct}% vs area</span>` : ""}</div>
         <div class="c-title">${esc(l.title || "")}</div>
         <div class="muted small">${esc(l.address)}</div>
-        <div class="c-meta"><span>🚆 ${mins(l.travel.best_min)}</span><span>SIMD ${l.simd?.decile ?? "–"}</span><span>${esc(l.catchment ?? "")}</span></div>
+        <div class="c-meta"><span>🚆 ${mins(l.travel.best_min)}</span><span>SIMD ${l.simd?.decile ?? "–"}</span>${pricePerM2(l) ? `<span>${gbpFull(pricePerM2(l)!)}/m²</span>` : ""}<span>${esc(l.catchment ?? "")}</span></div>
         <div class="badges">${badges(l)}</div>
       </div>
     </div>`).join("") || `<p class="muted">No homes match these filters.</p>`;

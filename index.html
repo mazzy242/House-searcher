@@ -9,7 +9,7 @@
   </head>
   <body>
     <header class="topbar">
-      <button class="icon-btn only-narrow" id="toggle-panel" aria-controls="panel" aria-expanded="false" title="Filters">☰</button>
+      <button class="icon-btn only-narrow" id="toggle-panel" aria-controls="panel" aria-expanded="false" title="Filters">☰<span class="count" id="panel-count" hidden></span></button>
       <h1>Edinburgh House Browser</h1>
       <div class="stats" id="stats" aria-live="polite"></div>
       <div class="view-toggle" role="tablist" aria-label="View">
@@ -28,6 +28,7 @@
             <button role="radio" data-show="plots">Plots &amp; land</button>
             <button role="radio" data-show="all">Both</button>
           </div>
+          <label>Search<input type="search" id="q" placeholder="Street, town or postcode" autocomplete="off" /></label>
           <div class="row two">
             <label>Min price<select id="minPrice"></select></label>
             <label>Max price<select id="maxPrice"></select></label>
@@ -36,8 +37,19 @@
             <span class="field-label">Bedrooms</span>
             <div class="chips" id="minBeds" role="radiogroup" aria-label="Minimum bedrooms"></div>
           </div>
+          <div class="row three">
+            <label>Max beds<select id="maxBeds"><option value="0">Any</option><option value="2">2</option><option value="3">3</option>
+              <option value="4">4</option><option value="5">5</option></select></label>
+            <label>Bathrooms<select id="minBaths"><option value="0">Any</option><option value="2">2+</option><option value="3">3+</option></select></label>
+            <label>Floor area<select id="minArea"><option value="0">Any</option><option value="80">80 m²+</option><option value="100">100 m²+</option>
+              <option value="120">120 m²+</option><option value="150">150 m²+</option><option value="200">200 m²+</option></select></label>
+          </div>
+          <p class="hint" id="missing-hint" hidden>Homes whose listing doesn't give the number of bathrooms or the floor area are hidden while those filters are on.</p>
+          <div class="field">
+            <span class="field-label">Type <span class="muted">(any if none picked)</span></span>
+            <div class="chips wrap" id="types" role="group" aria-label="Property type"></div>
+          </div>
           <div class="checks">
-            <label class="check"><input type="checkbox" id="detached" /> Detached only</label>
             <label class="check"><input type="checkbox" id="garage" /> Garage</label>
             <label class="check"><input type="checkbox" id="topSchool" /> In a top-10 school catchment</label>
             <label class="check"><input type="checkbox" id="newOnly" /> New this week</label>
@@ -51,10 +63,14 @@
               <option value="0">Any</option><option value="4">4 or above</option><option value="6">6 or above</option>
               <option value="8">8 or above</option><option value="10">10 only</option></select></label>
           </div>
-          <div class="row two">
-            <label>Area<select id="region"><option value="">Everywhere</option></select></label>
-            <label>Catchment school<select id="school"><option value="">Any school</option></select></label>
+          <div class="field">
+            <span class="field-label">Area <span class="muted">(everywhere if none picked)</span></span>
+            <div class="chips wrap" id="region" role="group" aria-label="Area"></div>
           </div>
+          <details class="multi" id="school-wrap">
+            <summary>Secondary catchment: <b id="school-summary">any school</b></summary>
+            <div class="checks" id="school"></div>
+          </details>
           <label>Sale type<select id="saleType">
             <option value="">Estate agents + auctions</option><option value="private">Estate agents only</option>
             <option value="auction">Auctions only</option></select></label>
@@ -64,7 +80,7 @@
             <label class="check"><input type="checkbox" id="closingDate" /> Closing date set</label>
             <label class="check"><input type="checkbox" id="reduced" /> Price reduced</label>
           </div>
-          <button class="link-btn" id="reset">Reset filters</button>
+          <button class="link-btn" id="reset">Reset filters <span class="count" id="active-count" hidden></span></button>
         </section>
 
         <section>
@@ -110,7 +126,7 @@
             <label>Sort<select id="sort">
               <option value="time">Quickest to Waverley</option><option value="price_asc">Price: low to high</option>
               <option value="price_desc">Price: high to low</option><option value="newest">Newest</option>
-              <option value="value">Best value vs area</option>
+              <option value="value">Best value vs area</option><option value="ppsqm">Price per m²: low to high</option>
               <option value="soonest">Auction / closing date soonest</option></select></label>
           </div>
           <div id="cards" class="cards"></div>
