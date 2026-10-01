@@ -1,3 +1,4 @@
+import { REJECTED } from "./saved";
 import type { Listing } from "./types";
 
 export type ColourBy = "price" | "time" | "vs";
@@ -51,6 +52,8 @@ export interface Filters {
   minSimd: number; // 0 = any
   q: string; // words that must all appear in the address/title/postcode
   newOnly: boolean;
+  list: string; // show only homes on this saved list, "" = all
+  hideRejected: boolean;
   saleType: "" | "private" | "auction";
   show: "homes" | "plots" | "all";
   motivated: boolean;
@@ -81,6 +84,8 @@ export const DEFAULTS: Filters = {
   minSimd: 0,
   q: "",
   newOnly: false,
+  list: "",
+  hideRejected: true,
   saleType: "",
   show: "homes",
   motivated: false,
@@ -96,8 +101,8 @@ export const DEFAULTS: Filters = {
 };
 
 const NUM = ["minPrice", "maxPrice", "minBeds", "maxBeds", "minBaths", "minArea", "maxMins", "minSimd"] as const;
-const BOOL = ["garage", "topSchool", "newOnly", "allBus", "motivated", "needsWork", "closingDate", "reduced"] as const;
-const STR = ["show", "types", "school", "region", "q", "saleType", "colourBy", "sort", "simdDomain", "basemap"] as const;
+const BOOL = ["garage", "topSchool", "newOnly", "hideRejected", "allBus", "motivated", "needsWork", "closingDate", "reduced"] as const;
+const STR = ["show", "types", "school", "region", "q", "list", "saleType", "colourBy", "sort", "simdDomain", "basemap"] as const;
 /** How the map looks rather than which homes show: not counted as active filters. */
 const VIEW = new Set(["colourBy", "sort", "simdDomain", "basemap", "allBus", "show"]);
 
@@ -137,7 +142,12 @@ export function activeCount(f: Filters): number {
 
 const words = (q: string): string[] => q.toLowerCase().split(/[\s,]+/).filter(Boolean);
 
-export function matches(l: Listing, f: Filters): boolean {
+/** The saved lists a filter can refer to (filters.ts stays free of browser storage). */
+export interface ListContext { list?: Set<string>; rejected?: Set<string> }
+
+export function matches(l: Listing, f: Filters, ctx: ListContext = {}): boolean {
+  if (f.list && ctx.list && !ctx.list.has(l.id)) return false;
+  if (f.hideRejected && f.list !== REJECTED && ctx.rejected?.has(l.id)) return false;
   if (f.minPrice && l.price < f.minPrice) return false;
   if (f.maxPrice && l.price > f.maxPrice) return false;
   if (f.minBeds && (l.bedrooms ?? 0) < f.minBeds) return false;

@@ -235,8 +235,9 @@ export class HouseMap {
       layout: { "text-field": ["get", "point_count_abbreviated"], "text-font": FONT_BOLD, "text-size": 12 }, paint: { "text-color": "#fff" } });
     m.addLayer({ id: "pins", type: "circle", source: "listings", filter: ["!", ["has", "point_count"]],
       paint: { "circle-color": colourExpr("price") as never, "circle-radius": ["interpolate", ["linear"], ["zoom"], 10, 5, 15, 9] as never,
-        "circle-stroke-color": ["case", ["get", "plot"], "#15803d", ["get", "auction"], "#ea580c", ["get", "top"], "#7b3294", "#fff"] as never,
-        "circle-stroke-width": ["case", ["get", "plot"], 3.5, ["get", "auction"], 3.5, ["get", "top"], 2.5, 1.5] as never } });
+        "circle-opacity": ["case", ["get", "rejected"], 0.35, 1] as never, "circle-stroke-opacity": ["case", ["get", "rejected"], 0.35, 1] as never,
+        "circle-stroke-color": ["case", ["get", "saved"], "#eab308", ["get", "plot"], "#15803d", ["get", "auction"], "#ea580c", ["get", "top"], "#7b3294", "#fff"] as never,
+        "circle-stroke-width": ["case", ["get", "saved"], 3.5, ["get", "plot"], 3.5, ["get", "auction"], 3.5, ["get", "top"], 2.5, 1.5] as never } });
     m.addLayer({ id: "pin-labels", type: "symbol", source: "listings", filter: ["!", ["has", "point_count"]], minzoom: 13.5,
       layout: { "text-field": ["get", "label"], "text-font": FONT_BOLD, "text-size": 11, "text-offset": [0, -1.4], "text-anchor": "bottom" },
       paint: { "text-color": "#111", "text-halo-color": "#fff", "text-halo-width": 1.5 } });
@@ -281,13 +282,14 @@ export class HouseMap {
     this.popup.setLngLat(lngLat).setHTML(html).addTo(this.map);
   }
 
-  setListings(ls: Listing[], topSet = new Set<string>()): void {
+  setListings(ls: Listing[], savedIds = new Set<string>(), rejected = new Set<string>()): void {
     const fc: GeoJSON.FeatureCollection = {
       type: "FeatureCollection",
       features: ls.map((l) => ({
         type: "Feature",
         geometry: { type: "Point", coordinates: [l.lng, l.lat] },
-        properties: { id: l.id, price: l.price, mins: l.travel.best_min, vs: l.area?.vs_pct ?? 0, top: topSet.has(l.id) || !!l.top_school_rank,
+        properties: { id: l.id, price: l.price, mins: l.travel.best_min, vs: l.area?.vs_pct ?? 0, top: !!l.top_school_rank,
+          saved: savedIds.has(l.id), rejected: rejected.has(l.id),
           auction: !!l.auction, plot: l.kind === "plot",
           label: `${l.kind === "plot" ? "Plot " : l.auction ? "Auction " : ""}${gbp(l.price)}` },
       })),

@@ -76,3 +76,14 @@ it("sorts by price per m², unknown floor areas last", () => {
   const ls = [home({ id: "a" }), home({ id: "b", floor_area_m2: 100 }), home({ id: "c", price: 300_000, floor_area_m2: 100 })];
   expect(sortListings(ls, "ppsqm").map((l) => l.id)).toEqual(["c", "b", "a"]);
 });
+
+describe("saved lists", () => {
+  it("shows only the chosen list, and hides rejected homes unless asked", () => {
+    const l = home();
+    expect(matches(l, f({ list: "Shortlist" }), { list: new Set(["2"]) })).toBe(false);
+    expect(matches(l, f({ list: "Shortlist" }), { list: new Set(["1"]) })).toBe(true);
+    expect(matches(l, f(), { rejected: new Set(["1"]) })).toBe(false);
+    expect(matches(l, f({ hideRejected: false }), { rejected: new Set(["1"]) })).toBe(true);
+    expect(matches(l, f({ list: "Rejected" }), { list: new Set(["1"]), rejected: new Set(["1"]) })).toBe(true);
+  });
+});

@@ -123,6 +123,27 @@ table.areas td.bar i { display: block; height: 8px; background: #9ecae1; border-
 .school-stats b { color: var(--school); }
 .about p { font-size: 12px; color: var(--muted); line-height: 1.5; margin: 0 0 8px; }
 
+/* ---------------------------------------------------------------- saved searches + lists */
+.saved h2.gap { margin-top: 14px; }
+.saved-searches { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+.saved-searches:empty { display: none; }
+.saved-search { display: inline-flex; align-items: center; border: 1px solid var(--line); border-radius: 16px; background: #fff; overflow: hidden; }
+.saved-search button { border: 0; background: none; cursor: pointer; padding: 4px 4px 4px 11px; font-size: 13px; }
+.saved-search button.del { padding: 4px 9px 4px 5px; color: var(--muted); }
+.saved-search[aria-current="true"] { background: var(--accent); border-color: var(--accent); }
+.saved-search[aria-current="true"] button { color: #fff; font-weight: 600; }
+.saved .chips { margin-bottom: 6px; }
+.saved p.hint { margin: 8px 0 0; }
+.list-actions { font-size: 13px; color: var(--muted); margin: 2px 0 4px; }
+.save-row { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0 4px; }
+.save-row button { border: 1px solid var(--line); background: #fff; border-radius: 16px; padding: 5px 11px; cursor: pointer; font-size: 13px; }
+.save-row button[aria-pressed="true"] { background: #fef3c7; border-color: #eab308; font-weight: 600; }
+.save-row button.reject[aria-pressed="true"] { background: #fde7e4; border-color: var(--up); color: var(--up); }
+.save-row button.add { border-style: dashed; color: var(--muted); }
+.badge.saved { background: #fef3c7; color: #854d0e; }
+.card.gone { opacity: 0.6; cursor: default; }
+.card.gone .c-body .remove { align-self: flex-start; margin-top: 4px; }
+
 /* ---------------------------------------------------------------- map + list */
 .main { flex: 1; position: relative; min-width: 0; }
 #map.map { position: absolute; inset: 0; }

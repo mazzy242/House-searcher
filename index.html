@@ -21,6 +21,22 @@
 
     <div class="layout">
       <aside id="panel" class="panel" aria-label="Filters and layers">
+        <section class="saved">
+          <h2>Saved searches</h2>
+          <div class="saved-searches" id="searches"></div>
+          <button class="link-btn" id="save-search">+ Save these filters…</button>
+          <h2 class="gap">My lists</h2>
+          <div class="chips wrap" id="lists" role="group" aria-label="Show a list"></div>
+          <div class="list-actions" id="list-actions" hidden>
+            <button class="link-btn" id="rename-list">Rename</button> · <button class="link-btn" id="delete-list">Delete list</button>
+          </div>
+          <label class="check"><input type="checkbox" id="hideRejected" /> Hide homes I've rejected</label>
+          <div class="list-actions">
+            <button class="link-btn" id="new-list">+ New list</button> · <button class="link-btn" id="share-saved">Copy share link</button>
+          </div>
+          <p class="hint">Saved in this browser only. "Copy share link" sends your lists and searches to another phone or person.</p>
+        </section>
+
         <section>
           <h2>Filters</h2>
           <div class="seg" id="show" role="radiogroup" aria-label="Show">

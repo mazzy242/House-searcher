@@ -3,6 +3,7 @@ import { DEFAULTS, type Filters, HOUSE_TYPES, activeCount, fromHash, isNew, isRe
 import { PRICE_STOPS, SIMD_COLOURS, TIME_STOPS, VS_STOPS, daysAgo, esc, gbp, gbpFull, mins } from "./format";
 import { PolygonIndex } from "./geo";
 import { HouseMap } from "./map";
+import { REJECTED, Saved } from "./saved";
 import type { Area, AuctionRef, Listing, Meta, Simd, TopSchool, TopSchools } from "./types";
 
 const $ = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T;
@@ -18,7 +19,7 @@ const load = async <T>(path: string, fallback: T): Promise<T> => {
 
 const NUM_SELECTS = ["minPrice", "maxPrice", "maxBeds", "minBaths", "minArea", "maxMins", "minSimd"] as const;
 const SELECTS = ["saleType", "colourBy", "sort", "simdDomain"] as const;
-const CHECKS = ["garage", "topSchool", "newOnly", "allBus", "motivated", "needsWork", "closingDate", "reduced"] as const;
+const CHECKS = ["garage", "topSchool", "newOnly", "hideRejected", "allBus", "motivated", "needsWork", "closingDate", "reduced"] as const;
 
 const PRICES = [100, 150, 200, 250, 300, 350, 400, 450, 500, 600, 700, 800, 1000, 1250, 1500, 2000].map((k) => k * 1000);
 
@@ -32,6 +33,7 @@ let selected: Listing | null = null;
 let simdIndex: PolygonIndex<Simd>;
 let catchIndex: PolygonIndex<{ school: string; sector: string; top_rank?: number }>;
 const map = new HouseMap();
+const saved = new Saved();
 
 async function main(): Promise<void> {
   const emptyFc = { type: "FeatureCollection", features: [] } as GeoJSON.FeatureCollection;
@@ -41,6 +43,8 @@ async function main(): Promise<void> {
     load<Meta>("meta.json", { waverley: { name: "Edinburgh Waverley", lat: 55.95196, lng: -3.18992 } }),
     load<TopSchools>("top_schools.json", { verified: false, source: "", schools: [] }),
   ]);
+  saved.refresh(listings);
+  importShared();
   buildControls();
   renderBanner();
   renderAbout();
@@ -107,6 +111,57 @@ function buildControls(): void {
     clearTimeout(typing);
     typing = window.setTimeout(() => set({ q: (e.target as HTMLInputElement).value.trim() }), 200);
   });
+  $("searches").addEventListener("click", (e) => {
+    const b = (e.target as HTMLElement).closest<HTMLElement>("[data-search]");
+    if (!b) return;
+    const name = b.dataset.search!;
+    if (b.classList.contains("del")) {
+      if (confirm(`Delete the saved search "${name}"?`)) saved.deleteSearch(name);
+      return update();
+    }
+    const s = saved.state.searches.find((x) => x.name === name);
+    if (s) set({ ...fromHash(s.hash), basemap: filters.basemap });
+  });
+  $("save-search").addEventListener("click", () => {
+    const current = saved.state.searches.find((s) => s.hash === searchHash());
+    const name = prompt("Name this search (e.g. Maz, Nichelle, Other). Using an existing name replaces it.", current?.name ?? "");
+    if (name?.trim()) {
+      saved.saveSearch(name, searchHash());
+      update();
+    }
+  });
+  $("lists").addEventListener("click", (e) => {
+    const name = (e.target as HTMLElement).closest<HTMLElement>("[data-list]")?.dataset.list;
+    if (name != null) set({ list: filters.list === name ? "" : name });
+  });
+  $("new-list").addEventListener("click", () => newList());
+  $("rename-list").addEventListener("click", () => {
+    const to = prompt(`Rename "${filters.list}" to:`, filters.list);
+    if (to && saved.renameList(filters.list, to)) set({ list: to.trim() });
+  });
+  $("delete-list").addEventListener("click", () => {
+    if (confirm(`Delete the list "${filters.list}"? The homes stay on the map.`) && saved.deleteList(filters.list)) set({ list: "" });
+  });
+  $("share-saved").addEventListener("click", async () => {
+    const u = new URL(location.href);
+    u.search = "";
+    u.hash = "";
+    u.searchParams.set("import", saved.exportParam());
+    try {
+      await navigator.clipboard.writeText(u.toString());
+      alert("Link copied. Whoever opens it can add your lists and saved searches to theirs.");
+    } catch {
+      prompt("Copy this link:", u.toString());
+    }
+  });
+  $("detail").addEventListener("click", (e) => {
+    const b = (e.target as HTMLElement).closest<HTMLElement>("[data-save]");
+    if (!b || !selected) return;
+    if (b.dataset.save === "+") newList(selected);
+    else saved.toggle(b.dataset.save!, selected);
+    renderDetail(selected);
+    update();
+  });
   $("minBeds").addEventListener("click", (e) => {
     const b = (e.target as HTMLElement).dataset.beds;
     if (b != null) set({ minBeds: Number(b) });
@@ -134,6 +189,11 @@ function buildControls(): void {
   $("tops").addEventListener("click", pickSchool);
   $("tops").addEventListener("keydown", (e) => (e.key === "Enter" || e.key === " ") && (e.preventDefault(), pickSchool(e)));
   $("cards").addEventListener("click", (e) => {
+    const gone = (e.target as HTMLElement).closest<HTMLElement>("[data-remove]");
+    if (gone) {
+      saved.remove(filters.list, gone.dataset.remove!);
+      return update();
+    }
     const card = (e.target as HTMLElement).closest<HTMLElement>("[data-id]");
     if (card && !(e.target as HTMLElement).closest("a")) {
       setView("map");
@@ -151,6 +211,34 @@ function buildControls(): void {
       update();
     }
   });
+}
+
+/** The current filters as a saved search: everything except the base map. */
+const searchHash = (): string => toHash({ ...filters, basemap: DEFAULTS.basemap });
+
+function newList(add?: Listing): void {
+  const name = prompt("Name the new list:")?.trim();
+  if (!name) return;
+  if (!saved.addList(name)) return void alert(`There is already a list called "${name}".`);
+  if (add) saved.toggle(name, add);
+  update();
+}
+
+/** Someone shared their lists and searches (?import=...): offer to add them to ours. */
+function importShared(): void {
+  const u = new URL(location.href);
+  const param = u.searchParams.get("import");
+  if (!param) return;
+  u.searchParams.delete("import");
+  history.replaceState(null, "", u);
+  const other = Saved.decode(param);
+  if (!other) return void alert("That share link couldn't be read.");
+  const homes = new Set(other.lists.flatMap((l) => l.ids)).size;
+  const names = [...other.searches.map((s) => s.name), ...other.lists.filter((l) => l.ids.length).map((l) => l.name)];
+  if (confirm(`Add ${other.searches.length} saved search${other.searches.length === 1 ? "" : "es"} and ${homes} saved home${homes === 1 ? "" : "s"} (${names.join(", ")}) to this browser? Nothing you've saved is removed.`)) {
+    saved.merge(other);
+    saved.refresh(listings);
+  }
 }
 
 function set(patch: Partial<Filters>): void {
@@ -192,10 +280,13 @@ function syncControls(): void {
 
 function update(): void {
   syncControls();
-  visible = listings.filter((l) => matches(l, filters));
+  if (filters.list && !saved.list(filters.list)) filters = { ...filters, list: "" };
+  const rejected = saved.ids(REJECTED);
+  visible = listings.filter((l) => matches(l, filters, { list: filters.list ? saved.ids(filters.list) : undefined, rejected }));
   map.applyFilters(filters);
   void map.setBasemap(filters.basemap);
-  map.setListings(visible);
+  map.setListings(visible, saved.savedIds(), rejected);
+  renderSaved();
   const total = listings.length;
   const med = median(visible.map((l) => l.price));
   $("stats").innerHTML = `<b>${visible.length}</b> of ${total} homes${med ? ` · median ${gbp(med)}` : ""}`;
@@ -203,7 +294,8 @@ function update(): void {
   renderAreas();
   renderTops();
   if (!$("list").hidden) renderList();
-  if (selected && !visible.includes(selected)) select(null);
+  // Keep a home open after rejecting it, even though it now drops off the map.
+  if (selected && !visible.includes(selected) && !rejected.has(selected.id)) select(null);
 }
 
 function setView(v: "map" | "list"): void {
@@ -226,6 +318,26 @@ const median = (xs: number[]): number => {
   const s = [...xs].sort((a, b) => a - b);
   return s.length % 2 ? s[(s.length - 1) / 2] : (s[s.length / 2 - 1] + s[s.length / 2]) / 2;
 };
+
+const LIST_ICON: Record<string, string> = { Shortlist: "♥", Viewing: "📅", [REJECTED]: "✕" };
+const listIcon = (name: string): string => LIST_ICON[name] ?? "★";
+
+function renderSaved(): void {
+  const current = searchHash();
+  $("searches").innerHTML = saved.state.searches.map((s) => `
+    <span class="saved-search" aria-current="${s.hash === current}">
+      <button data-search="${esc(s.name)}" title="Show this search">${esc(s.name)}</button><button class="del" data-search="${esc(s.name)}" aria-label="Delete ${esc(s.name)}">×</button>
+    </span>`).join("");
+  $("lists").innerHTML = saved.state.lists.map((l) => `<button type="button" data-list="${esc(l.name)}" aria-pressed="${filters.list === l.name}">
+    ${listIcon(l.name)} ${esc(l.name)} <span class="muted">${l.ids.length}</span></button>`).join("");
+  $("list-actions").hidden = !filters.list || filters.list === REJECTED;
+}
+
+function saveRow(l: Listing): string {
+  const on = new Set(saved.listsFor(l.id));
+  return `<div class="save-row">${saved.state.lists.map((x) => `<button type="button" data-save="${esc(x.name)}" aria-pressed="${on.has(x.name)}"
+    ${x.name === REJECTED ? 'class="reject"' : ""}>${listIcon(x.name)} ${esc(x.name)}</button>`).join("")}<button type="button" class="add" data-save="+">+ New list</button></div>`;
+}
 
 function renderBanner(): void {
   const b = $("banner");
@@ -304,7 +416,7 @@ function renderLegend(): void {
   if (f.layers.simd) {
     simd = `<div class="simd-scale"><span>Most deprived</span>${SIMD_COLOURS.map((c, i) => `<i title="Decile ${i + 1}" style="background:${c}"></i>`).join("")}<span>Least</span></div>`;
   }
-  $("legend").innerHTML = `<div class="legend-items">${items.join("")}</div>${simd}<div class="muted small">Purple ring = in a top-10 school catchment. Thick orange ring = auction lot. Green ring = plot / land. Orange dashed outline = St Thomas of Aquin's (RC) catchment.</div>`;
+  $("legend").innerHTML = `<div class="legend-items">${items.join("")}</div>${simd}<div class="muted small">Gold ring = on one of your lists. Purple ring = in a top-10 school catchment. Thick orange ring = auction lot. Green ring = plot / land. Orange dashed outline = St Thomas of Aquin's (RC) catchment.</div>`;
 }
 
 function renderAreas(): void {
@@ -382,6 +494,7 @@ function renderDetail(l: Listing): void {
       <h3>${esc(l.title || `${l.bedrooms ?? "?"} bedroom ${l.property_type ?? "home"}`)}</h3>
       <div class="addr">${esc(l.address)}${l.region && l.region !== "Edinburgh" ? ` · ${esc(l.region)}` : ""}${l.approx_location ? ` <span class="muted">(location approximate)</span>` : ""}</div>
       <div class="badges">${badges(l)}</div>
+      ${saveRow(l)}
       ${crossRefs(l)}
       ${l.auction ? `<div class="auction-note">
         <b>${esc(l.auction.house)}${l.auction.date ? ` · auction ${shortDate(l.auction.date)}` : ""}</b>
@@ -449,12 +562,35 @@ function renderList(): void {
         <div class="c-title">${esc(l.title || "")}</div>
         <div class="muted small">${esc(l.address)}</div>
         <div class="c-meta"><span>🚆 ${mins(l.travel.best_min)}</span><span>SIMD ${l.simd?.decile ?? "–"}</span>${pricePerM2(l) ? `<span>${gbpFull(pricePerM2(l)!)}/m²</span>` : ""}<span>${esc(l.catchment ?? "")}</span></div>
-        <div class="badges">${badges(l)}</div>
+        <div class="badges">${savedBadges(l.id)}${badges(l)}</div>
       </div>
-    </div>`).join("") || `<p class="muted">No homes match these filters.</p>`;
+    </div>`).join("") + goneCards() || `<p class="muted">No homes match these filters.</p>`;
   $("cards").querySelectorAll<HTMLElement>(".card").forEach((c) =>
     c.addEventListener("keydown", (e) => e.key === "Enter" && c.click()),
   );
+}
+
+const savedBadges = (id: string): string =>
+  saved.listsFor(id).map((n) => `<span class="badge ${n === REJECTED ? "reduced" : "saved"}">${listIcon(n)} ${esc(n)}</span>`).join("");
+
+/** Homes on the chosen list that are no longer on ESPC (sold or withdrawn). */
+function goneCards(): string {
+  const list = filters.list ? saved.list(filters.list) : undefined;
+  if (!list) return "";
+  const live = new Set(listings.map((l) => l.id));
+  return list.ids.filter((id) => !live.has(id) && list.snap[id]).map((id) => {
+    const s = list.snap[id];
+    return `<div class="card gone">
+      ${s.image ? `<img src="${esc(s.image)}" alt="" loading="lazy" referrerpolicy="no-referrer">` : `<div class="noimg">🏠</div>`}
+      <div class="c-body">
+        <div class="c-price">${gbpFull(s.price)} <span class="muted small">No longer listed</span></div>
+        <div class="c-title">${esc(s.title ?? "")}</div>
+        <div class="muted small">${esc(s.address ?? "")}</div>
+        <div class="small"><a href="${esc(s.url)}" target="_blank" rel="noopener">Old listing ↗</a></div>
+        <button class="link-btn remove" data-remove="${esc(id)}">Remove from ${esc(list.name)}</button>
+      </div>
+    </div>`;
+  }).join("");
 }
 
 /** Several homes on one spot: list them in a popup to choose from. */
