@@ -224,6 +224,34 @@
       "lng": -3.2335,
       "minutes": 32,
       "trains_per_hour": 2
+    },
+    {
+      "name": "Kinghorn",
+      "lat": 56.0693,
+      "lng": -3.1743,
+      "minutes": 36,
+      "trains_per_hour": 2
+    },
+    {
+      "name": "Rosyth",
+      "lat": 56.0455,
+      "lng": -3.4272,
+      "minutes": 25,
+      "trains_per_hour": 2
+    },
+    {
+      "name": "Dunfermline City",
+      "lat": 56.0681,
+      "lng": -3.4527,
+      "minutes": 30,
+      "trains_per_hour": 2
+    },
+    {
+      "name": "Dunfermline Queen Margaret",
+      "lat": 56.0805,
+      "lng": -3.4214,
+      "minutes": 35,
+      "trains_per_hour": 2
     }
   ]
 }

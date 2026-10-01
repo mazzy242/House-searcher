@@ -1,6 +1,6 @@
 # Edinburgh House Browser
 
-A map of the **houses** (not flats) with **2 or more bedrooms** for sale on ESPC in Edinburgh and nearby commuter towns: Midlothian, East Lothian, West Lothian (Linlithgow to Livingston) and the Fife towns on the train line (North Queensferry to Burntisland). For each home it shows:
+A map of the **houses** (not flats) with **2 or more bedrooms** for sale on ESPC in Edinburgh and nearby commuter towns: Midlothian, East Lothian, West Lothian (Linlithgow to Livingston) and the Fife towns on the train line (North Queensferry to Burntisland; the KY11 postcode also takes in Rosyth and east Dunfermline). For each home it shows:
 
 - **How long it takes to get to Waverley station**, door to door (bus/tram, train, walk or cycle).
 - **Which secondary school catchment it's in**, with the top 10 schools highlighted.
@@ -71,7 +71,7 @@ Until the first successful refresh, the site shows clearly-labelled **sample dat
 
 ## Things to check after the first run
 
-- **ESPC parsing.** ESPC's markup couldn't be inspected when this was written, so the parser uses several strategies: JSON-LD, embedded app state, meta tags, then text. If a run fails with "no property links" or "could not parse", download the `espc-debug` artifact from the run. It holds the raw HTML so the parser (`pipeline/espc.py`) can be adjusted. You can also change `espc.search_urls` in `settings.json` to any ESPC search URL you like, such as one with your own filters.
+- **ESPC parsing.** ESPC's markup couldn't be inspected when this was written, so the parser uses several strategies: JSON-LD, embedded app state, meta tags, then text. If a run fails with "no property links" or "could not parse", download the `espc-debug` artifact from the run. It holds the raw HTML so the parser (`pipeline/espc.py`) can be adjusted. You can also change `espc.search_urls` in `settings.json` to any ESPC search URL you like, such as one with your own filters. A search can be given as `{"url": ..., "districts": [...]}` when it only covers those postcode districts (the Fife ones do): if ESPC fails on it, only homes there are kept as they were, and the rest of the run still drops sold homes.
 - **ESPC blocking GitHub.** If ESPC blocks requests from GitHub's servers, run the pipeline on your own machine and push:
   ```
   pip install -r pipeline/requirements.txt

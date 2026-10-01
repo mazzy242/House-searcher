@@ -423,3 +423,47 @@ def test_primary_catchments_read_council_quirks(monkeypatch):
     assert split["primary_note"] == "P1–P4 only; P5–P7 at James Gillespie's Primary"
     assert build.primary_fields(look(55.935, -3.195)) == {"primary": "Bruntsfield Primary", "primary_score": 95.0, "top_primary": True}
     assert build.primary_fields(look(50.0, 0.0)) == {}
+
+
+def test_failed_area_search_only_keeps_its_own_districts(monkeypatch, tmp_path):
+    """A Fife search that errors keeps unseen Fife homes listed, but sold Edinburgh homes still drop off."""
+    monkeypatch.setattr(espc, "DEBUG", tmp_path)
+    page = ("<title>Properties for Sale in Edinburgh | ESPC</title>"
+            "<a href='/property/4-a-road-edinburgh-eh4-1aa/36000011'>x</a>")
+
+    class F:
+        count = 0
+        robots = type("R", (), {"sitemaps": []})()
+        def html(self, url):
+            if "fife" in url:
+                raise espc.requests.HTTPError("500 Server Error")
+            if "/property/" in url:
+                return "<title>4 bed detached house for sale</title><h1>A Road EH4 1AA</h1><div>Offers over £600,000</div>"
+            return page if "page=" not in url else ""
+    monkeypatch.setattr(espc, "Fetcher", F)
+    monkeypatch.setattr(espc, "geocode_postcodes", lambda ls: None)
+    monkeypatch.setitem(espc.CFG, "search_urls", [
+        "https://espc.com/properties?locations=edinburgh",
+        {"url": "https://espc.com/properties?locations=kinross-and-west-fife", "districts": ["KY3", "KY11"]}])
+    urls, complete = espc.discover(F())
+    assert "36000011" in urls and complete == frozenset({"KY3", "KY11"})
+
+    house = {"title": "3 bed detached house for sale", "property_type": "detached", "bedrooms": 3, "active": True}
+    state = espc.scrape({"1": {**house, "district": "KY11"}, "2": {**house, "district": "EH10"}})
+    assert state["1"]["active"] is True                                   # Fife search failed: unknown, kept
+    assert state["2"]["active"] is False and state["2"]["excluded"] == "no longer listed"
+    assert state["36000011"]["active"] is True
+
+
+def test_area_searches_all_fine_is_complete(monkeypatch, tmp_path):
+    monkeypatch.setattr(espc, "DEBUG", tmp_path)
+
+    class F:
+        count = 0
+        def html(self, url):
+            return "" if "page=" in url else ("<title>Properties for Sale in Kinross &amp; West Fife | ESPC</title>"
+                                              "<a href='/property/1-b-st-inverkeithing-ky11-1aa/36000012'>x</a>")
+    monkeypatch.setitem(espc.CFG, "search_urls", [{"url": "https://espc.com/properties?locations=kinross-and-west-fife",
+                                                    "districts": ["KY11"]}])
+    urls, complete = espc.discover(F())
+    assert complete is True and "36000012" in urls

@@ -270,20 +270,32 @@ def next_page_url(html: str, current: str, page: int) -> str | None:
     return None
 
 
-def discover(f: Fetcher, hints: dict[str, str] | None = None) -> tuple[dict[str, str], bool]:
-    """(id -> URL for every listing on the search pages, whether every search ran to the end)."""
+def discover(f: Fetcher, hints: dict[str, str] | None = None) -> tuple[dict[str, str], bool | frozenset[str]]:
+    """(id -> URL for every listing on the search pages, whether every search ran to the end).
+
+    A search in settings is a URL, or {"url": ..., "districts": [...]} for one that only covers those
+    postcode districts. If such a search fails, only homes in its districts are in doubt, so the second
+    value is then the set of those districts rather than False.
+    """
     urls: dict[str, str] = {}
     hints = {} if hints is None else hints
     complete = True
-    for n_search, start in enumerate(CFG["search_urls"], 1):
+    unsure: set[str] = set()
+    for n_search, entry in enumerate(CFG["search_urls"], 1):
+        start = entry if isinstance(entry, str) else entry["url"]
+        districts = None if isinstance(entry, str) else entry.get("districts")
         url, page, seen, empty = start, 1, set(), 0
         while url and url not in seen:
             seen.add(url)
             try:
                 html = f.html(url)
             except requests.RequestException as e:
-                log.error("%s: page %d failed (%s) - moving on; listings not seen keep their status", start, page, e)
-                complete = False
+                log.error("%s: page %d failed (%s) - moving on; listings not seen%s keep their status",
+                          start, page, e, f" in {', '.join(districts)}" if districts else "")
+                if districts:
+                    unsure.update(districts)
+                else:
+                    complete = False
                 break
             if not html:
                 break
@@ -314,7 +326,7 @@ def discover(f: Fetcher, hints: dict[str, str] | None = None) -> tuple[dict[str,
             page += 1
     if not urls and CFG["use_sitemap_fallback"]:
         urls = discover_from_sitemaps(f)
-    return urls, complete
+    return urls, (frozenset(unsure) if complete and unsure else complete)
 
 
 def discover_from_sitemaps(f: Fetcher) -> dict[str, str]:
@@ -715,8 +727,8 @@ def scrape(state: dict[str, dict]) -> dict[str, dict]:
     for pid, rec in state.items():
         if pid in urls:
             why = pre.get(pid)
-        elif not complete and rec.get("active"):
-            why = None  # a search was cut short, so we can't tell whether this one has sold
+        elif rec.get("active") and (complete is False or (complete is not True and rec.get("district") in complete)):
+            why = None  # a search covering it was cut short, so we can't tell whether this one has sold
         else:
             why = "no longer listed"
         if not why:

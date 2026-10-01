@@ -12,8 +12,11 @@
       "https://espc.com/properties?locations=midlothian",
       "https://espc.com/properties?locations=east-lothian",
       "https://espc.com/properties?locations=west-lothian",
+      { "url": "https://espc.com/properties?locations=kinross-and-west-fife", "districts": ["KY3", "KY11"] },
+      { "url": "https://espc.com/properties?locations=east-fife", "districts": ["KY3", "KY11"] },
       "https://espc.com/properties?orgid=1560"
     ],
+    "_fife_comment": "ESPC's Fife locations are 'kinross-and-west-fife' (Inverkeithing, Dalgety Bay, Rosyth) and 'east-fife' (Burntisland, Kirkcaldy); 'fife', 'west-fife' and town names give a server error. 'districts' says which homes a search covers: if it fails, only homes there are kept as they were, rather than the whole run counting as incomplete.",
     "_agent_search_comment": "orgid=... searches list one ESPC member firm's homes (1560 = Ralph Sayer). They go through the same rules and duplicate check; the postcode rule keeps them to our areas.",
     "_search_comment": "No page limit: each search is followed until ESPC stops returning new listings. A search whose first page isn't titled 'for sale in <place>' (an unrecognised location) is skipped.",
     "use_sitemap_fallback": true,
