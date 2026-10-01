@@ -98,6 +98,7 @@ details.multi label.check { font-size: 13px; padding: 2px 0; }
 .sw-tram-p { height: 0; border-top: 3px dashed #e4007c; }
 .sw-bus { height: 3px; background: #8c6bb1; }
 .sw-primary { background: rgba(14, 116, 144, 0.22); border: 1.5px solid #0e7490; }
+.sw-primary-rc { background: rgba(194, 65, 12, 0.08); border: 2px dashed #c2410c; }
 .sw-area { width: 12px; height: 12px; border-radius: 50%; background: #3182bd; }
 
 .legend-items { display: flex; flex-wrap: wrap; gap: 4px 10px; font-size: 12px; margin-bottom: 6px; }

@@ -98,7 +98,7 @@ export const DEFAULTS: Filters = {
   reduced: false,
   colourBy: "price",
   sort: "time",
-  layers: { simd: false, tram: true, rail: true, tramProposed: true, bus: false, catchTop: true, catchAll: false, primary: false, areas: false },
+  layers: { simd: false, tram: true, rail: true, tramProposed: true, bus: false, catchTop: true, catchAll: false, primary: false, primaryRc: false, areas: false },
   simdDomain: "decile",
   allBus: false,
   basemap: "light",
