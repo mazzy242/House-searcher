@@ -177,6 +177,7 @@ export class HouseMap {
 
     src("simd", "data/simd.geojson");
     src("catchments", "data/catchments.geojson");
+    src("primaries", "data/primary_catchments.geojson");
     src("bus", "data/bus.geojson");
     src("tram", "data/tram.geojson");
     src("tramProposed", "data/tram_proposed.geojson");
@@ -194,6 +195,20 @@ export class HouseMap {
     const topND = ["all", isTop, ["!=", ["get", "sector"], "RC"]];
     const topRC = ["all", isTop, ["==", ["get", "sector"], "RC"]];
     m.addLayer({ id: "catch-all-line", type: "line", source: "catchments", paint: { "line-color": "#6b6b6b", "line-width": 1, "line-dasharray": [3, 2] } });
+    // Primary catchments: teal outlines, shaded where the school is in the top band. Split-by-stage areas
+    // (Canaan Lane) are drawn twice, so only the P1-P4 copy is used.
+    const primaryArea = ["!=", ["get", "stages"], "P5-P7"];
+    m.addLayer({ id: "prim-fill", type: "fill", source: "primaries", filter: ["all", primaryArea, ["==", ["get", "top"], true]] as never,
+      paint: { "fill-color": "#0e7490", "fill-opacity": 0.16 } }, firstLabel);
+    m.addLayer({ id: "prim-line", type: "line", source: "primaries", filter: ["all", primaryArea, ["==", ["get", "sector"], "ND"]] as never,
+      paint: { "line-color": "#0e7490", "line-width": 1.4, "line-opacity": 0.8 } });
+    m.addLayer({ id: "prim-rc-line", type: "line", source: "primaries", filter: ["all", primaryArea, ["==", ["get", "sector"], "RC"]] as never,
+      paint: { "line-color": "#0e7490", "line-width": 1, "line-dasharray": [2, 2], "line-opacity": 0.7 } });
+    m.addLayer({ id: "prim-label", type: "symbol", source: "primaries", minzoom: 12.5,
+      filter: ["all", primaryArea, ["==", ["get", "sector"], "ND"]] as never,
+      layout: { "text-field": ["concat", ["get", "school"], ["case", ["has", "score"], ["concat", " · ", ["to-string", ["get", "score"]], "%"], ""]] as never,
+        "text-font": FONT_BOLD, "text-size": 11 },
+      paint: { "text-color": "#0e7490", "text-halo-color": "#fff", "text-halo-width": 1.5 } });
     m.addLayer({ id: "catch-top-fill", type: "fill", source: "catchments", filter: topND as never,
       paint: { "fill-color": "#7b3294", "fill-opacity": ["interpolate", ["linear"], ["get", "top_rank"], 1, 0.24, 10, 0.08] as never } }, firstLabel);
     m.addLayer({ id: "catch-top-line", type: "line", source: "catchments", filter: topND as never, paint: { "line-color": "#7b3294", "line-width": 2 } });
@@ -329,6 +344,7 @@ export class HouseMap {
     vis("catch-top-line", f.layers.catchTop);
     vis("catch-rc-line", f.layers.catchTop);
     vis("catch-all-line", f.layers.catchAll);
+    for (const id of ["prim-fill", "prim-line", "prim-rc-line", "prim-label"]) vis(id, f.layers.primary);
     vis("areas-circle", f.layers.areas);
     vis("areas-label", f.layers.areas);
     m.setFilter("bus-line", f.allBus ? null : ["==", ["get", "main"], true]);

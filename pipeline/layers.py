@@ -271,6 +271,59 @@ def fetch_catchments() -> tuple[dict, str]:
     return {"type": "FeatureCollection", "features": feats}, "; ".join(used)
 
 
+def _school_key(name: str) -> str:
+    """'St Mary's RC P.  (Edinburgh)' and 'St Mary's (Edinburgh) RC Primary' both -> 'st mary s edinburgh'."""
+    n = name.casefold().replace("’", "'")
+    n = re.sub(r"\b(?:primary|school|rc|nd|the|ps)\b|\bp\.(?=\s|$)", " ", n)
+    return re.sub(r"[^a-z0-9]+", " ", n).strip()
+
+
+def _primary_name(attrs: dict) -> tuple[str, str | None]:
+    """The school a primary catchment polygon sends children to, and which stages if only some.
+
+    The council's layer has a few oddities, explained in EST_NAME: 'X Castleview Primary School' is an
+    outlying patch of Castleview's catchment, and while Canaan Lane fills up, the 'Canaan Lane PS Old ...'
+    areas appear twice: P1-P4 go to Canaan Lane, P5-P7 to their old school.
+    """
+    name = str(attrs.get("SCHOOL_NAM") or "Unknown").strip()
+    est = str(attrs.get("EST_NAME") or "")
+    m = re.search(r"have (.+?) as their catchment", est, re.I)
+    if m:
+        name = m.group(1)
+    m = re.match(r"For (P\d\s*-\s*P\d) Pupils Only\s*-\s*(.+)", est, re.I)
+    stages = None
+    if m:
+        stages, name = re.sub(r"\s+", "", m.group(1)).upper(), m.group(2)
+    name = re.sub(r"^X\s+", "", name)
+    name = re.sub(r"\s+School$", "", _tidy_school(name))
+    return name, stages
+
+
+def fetch_primary_catchments() -> dict:
+    """City of Edinburgh primary catchments (ND + RC), each with its school's attainment score."""
+    s = session()
+    scores = load_config("primary_scores.json")
+    by_key = {_school_key(x["name"]): x for x in scores["schools"]}
+    feats: list[dict] = []
+    for sector, url in SETTINGS["sources"]["primary_catchment_layers"].items():
+        raw = arcgis_query(s, url.rstrip("/") + "/query")
+        if not raw:
+            raise RuntimeError(f"no {sector} primary catchments from {url}")
+        for f in raw:
+            school, stages = _primary_name(f["properties"])
+            hit = by_key.get(_school_key(school))
+            props = {"school": school, "sector": sector}
+            if stages:
+                props["stages"] = stages
+            if hit and hit.get("score") is not None:
+                props["score"] = hit["score"]
+                props["top"] = hit["score"] >= scores["top_threshold"]
+            feats.append({"type": "Feature", "properties": props,
+                          "geometry": {**f["geometry"], "coordinates": round_coords(f["geometry"]["coordinates"])}})
+        log.info("Primary catchments %s: %d from %s", sector, len(raw), url)
+    return {"type": "FeatureCollection", "features": feats}
+
+
 def _catchment_feature(geometry: dict, school: str, sector: str, tops: list[dict]) -> dict:
     top = _match_top(school, tops, sector)
     return {"type": "Feature",

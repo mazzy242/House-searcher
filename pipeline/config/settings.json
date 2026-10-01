@@ -40,6 +40,10 @@
       "non_denominational": "",
       "roman_catholic": ""
     },
+    "primary_catchment_layers": {
+      "ND": "https://edinburghcouncilmaps.info/arcgis/rest/services/AdminBoundaries/MiscBoundaries/MapServer/4",
+      "RC": "https://edinburghcouncilmaps.info/arcgis/rest/services/AdminBoundaries/MiscBoundaries/MapServer/5"
+    },
     "catchment_search_titles": {
       "non_denominational": "Secondary School Catchments (Non Denominational)",
       "roman_catholic": "Secondary School Catchments (Roman Catholic)"

@@ -387,3 +387,39 @@ def test_agent_search_is_not_skipped_as_unrecognised_location(monkeypatch, tmp_p
     monkeypatch.setitem(espc.CFG, "search_urls", ["https://espc.com/properties?orgid=1560"])
     urls, complete = espc.discover(F())
     assert "36000011" in urls
+
+
+def _square(lng: float, lat: float, d: float = 0.01) -> dict:
+    return {"type": "Polygon", "coordinates": [[[lng, lat], [lng + d, lat], [lng + d, lat + d], [lng, lat + d], [lng, lat]]]}
+
+
+def test_primary_catchments_read_council_quirks(monkeypatch):
+    """Outlying 'X' patches and Canaan Lane's split-by-stage areas resolve to real schools with scores."""
+    nd = [
+        {"type": "Feature", "geometry": _square(-3.2, 55.93), "properties": {
+            "SCHOOL_NAM": "Bruntsfield Primary School", "EST_NAME": "Bruntsfield Primary School"}},
+        {"type": "Feature", "geometry": _square(-3.3, 55.93), "properties": {
+            "SCHOOL_NAM": "X Castleview Primary School",
+            "EST_NAME": "Properties in this area have Castleview Primary as their catchment school"}},
+        {"type": "Feature", "geometry": _square(-3.25, 55.93), "properties": {
+            "SCHOOL_NAM": "Canaan Lane PS Old JGPS", "EST_NAME": "For P1-P4 Pupils Only - Canaan Lane Primary School"}},
+        {"type": "Feature", "geometry": _square(-3.25, 55.93), "properties": {
+            "SCHOOL_NAM": "Canaan Lane PS Old JGPS", "EST_NAME": "For P5-P7 Pupils Only - James Gillespie's Primary School"}},
+    ]
+    rc = [{"type": "Feature", "geometry": _square(-3.25, 55.93), "properties": {
+        "SCHOOL_NAM": "St Mary's (Edinburgh) RC Primary", "EST_NAME": "St Mary's RC Primary School"}}]
+    monkeypatch.setattr(layers, "arcgis_query", lambda s, url, extra=None: rc if url.endswith("/5/query") else nd)
+    fc = layers.fetch_primary_catchments()
+    props = [f["properties"] for f in fc["features"]]
+    assert props[0] == {"school": "Bruntsfield Primary", "sector": "ND", "score": 95.0, "top": True}
+    assert props[1]["school"] == "Castleview Primary" and props[1]["score"]
+    assert (props[2]["school"], props[2]["stages"]) == ("Canaan Lane Primary", "P1-P4")
+    assert (props[3]["school"], props[3]["stages"]) == ("James Gillespie's Primary", "P5-P7")
+    assert props[4]["school"] == "St Mary's (Edinburgh) RC Primary" and props[4]["sector"] == "RC" and "score" in props[4]
+
+    look = build.polygon_lookup(fc)
+    split = build.primary_fields(look(55.935, -3.245))
+    assert split["primary"] == "Canaan Lane Primary" and split["primary_rc"].startswith("St Mary's")
+    assert split["primary_note"] == "P1–P4 only; P5–P7 at James Gillespie's Primary"
+    assert build.primary_fields(look(55.935, -3.195)) == {"primary": "Bruntsfield Primary", "primary_score": 95.0, "top_primary": True}
+    assert build.primary_fields(look(50.0, 0.0)) == {}

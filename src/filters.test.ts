@@ -87,3 +87,12 @@ describe("saved lists", () => {
     expect(matches(l, f({ list: "Rejected" }), { list: new Set(["1"]), rejected: new Set(["1"]) })).toBe(true);
   });
 });
+
+it("filters by catchment primary and top primaries", () => {
+  const l = home({ primary: "Bruntsfield Primary", primary_rc: "St Peter's RC Primary", top_primary: true });
+  expect(matches(l, f({ primary: "Sciennes Primary,Bruntsfield Primary" }))).toBe(true);
+  expect(matches(l, f({ primary: "St Peter's RC Primary" }))).toBe(true);
+  expect(matches(l, f({ primary: "Sciennes Primary" }))).toBe(false);
+  expect(matches(l, f({ topPrimary: true }))).toBe(true);
+  expect(matches(home(), f({ topPrimary: true }))).toBe(false);
+});

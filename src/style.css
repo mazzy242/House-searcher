@@ -97,6 +97,7 @@ details.multi label.check { font-size: 13px; padding: 2px 0; }
 .sw-rail { height: 4px; background: repeating-linear-gradient(90deg, #555 0 5px, #fff 5px 8px); border: 1px solid #555; }
 .sw-tram-p { height: 0; border-top: 3px dashed #e4007c; }
 .sw-bus { height: 3px; background: #8c6bb1; }
+.sw-primary { background: rgba(14, 116, 144, 0.22); border: 1.5px solid #0e7490; }
 .sw-area { width: 12px; height: 12px; border-radius: 50%; background: #3182bd; }
 
 .legend-items { display: flex; flex-wrap: wrap; gap: 4px 10px; font-size: 12px; margin-bottom: 6px; }
@@ -119,6 +120,19 @@ table.areas td.bar i { display: block; height: 8px; background: #9ecae1; border-
 .tops .r { color: var(--school); font-weight: 700; }
 .tops .rc { font-size: 10px; color: #c2410c; font-weight: 700; margin-left: 4px; }
 .tops .n { color: var(--muted); font-size: 12px; }
+details.primaries summary { cursor: pointer; list-style: none; }
+details.primaries summary::-webkit-details-marker { display: none; }
+details.primaries summary h2 { display: inline; }
+details.primaries summary::after { content: " ▸"; color: var(--muted); font-size: 12px; }
+details.primaries[open] summary::after { content: " ▾"; }
+details.primaries p.hint { margin: 8px 0; }
+.tops.prim { max-height: 320px; overflow-y: auto; }
+.tops.prim .r { color: #0e7490; font-weight: 700; min-width: 30px; }
+.tops.prim li { grid-template-columns: 46px 1fr auto; }
+.tops.prim li:hover, .tops.prim li:focus-visible { background: #e6f3f6; }
+.tops.prim li[aria-pressed="true"] { background: #cfe8ee; }
+.badge.primary { background: #dff1f5; color: #0e7490; }
+.prim-score { color: #0e7490; font-weight: 700; }
 .school-stats { margin-top: 6px; padding: 8px 10px; background: #f7f2fa; border-radius: 8px; font-size: 12px; line-height: 1.5; }
 .school-stats b { color: var(--school); }
 .about p { font-size: 12px; color: var(--muted); line-height: 1.5; margin: 0 0 8px; }

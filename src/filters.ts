@@ -48,6 +48,8 @@ export interface Filters {
   maxMins: number; // 0 = any
   topSchool: boolean;
   school: string; // comma list, "" = any
+  topPrimary: boolean;
+  primary: string; // comma list of catchment primaries, "" = any
   region: string; // comma list, "" = any
   minSimd: number; // 0 = any
   q: string; // words that must all appear in the address/title/postcode
@@ -80,6 +82,8 @@ export const DEFAULTS: Filters = {
   maxMins: 0,
   topSchool: false,
   school: "",
+  topPrimary: false,
+  primary: "",
   region: "",
   minSimd: 0,
   q: "",
@@ -94,15 +98,15 @@ export const DEFAULTS: Filters = {
   reduced: false,
   colourBy: "price",
   sort: "time",
-  layers: { simd: false, tram: true, rail: true, tramProposed: true, bus: false, catchTop: true, catchAll: false, areas: false },
+  layers: { simd: false, tram: true, rail: true, tramProposed: true, bus: false, catchTop: true, catchAll: false, primary: false, areas: false },
   simdDomain: "decile",
   allBus: false,
   basemap: "light",
 };
 
 const NUM = ["minPrice", "maxPrice", "minBeds", "maxBeds", "minBaths", "minArea", "maxMins", "minSimd"] as const;
-const BOOL = ["garage", "topSchool", "newOnly", "hideRejected", "allBus", "motivated", "needsWork", "closingDate", "reduced"] as const;
-const STR = ["show", "types", "school", "region", "q", "list", "saleType", "colourBy", "sort", "simdDomain", "basemap"] as const;
+const BOOL = ["garage", "topSchool", "topPrimary", "newOnly", "hideRejected", "allBus", "motivated", "needsWork", "closingDate", "reduced"] as const;
+const STR = ["show", "types", "school", "primary", "region", "q", "list", "saleType", "colourBy", "sort", "simdDomain", "basemap"] as const;
 /** How the map looks rather than which homes show: not counted as active filters. */
 const VIEW = new Set(["colourBy", "sort", "simdDomain", "basemap", "allBus", "show"]);
 
@@ -161,6 +165,11 @@ export function matches(l: Listing, f: Filters, ctx: ListContext = {}): boolean 
   if (f.school) {
     const want = listOf(f.school);
     if (!want.includes(l.catchment ?? "") && !want.includes(l.catchment_rc ?? "")) return false;
+  }
+  if (f.topPrimary && !l.top_primary) return false;
+  if (f.primary) {
+    const want = listOf(f.primary);
+    if (!want.includes(l.primary ?? "") && !want.includes(l.primary_rc ?? "")) return false;
   }
   if (f.region && !listOf(f.region).includes(l.region ?? "")) return false;
   if (f.minSimd && (l.simd?.decile ?? 0) < f.minSimd) return false;

@@ -52,6 +52,14 @@ export interface Listing {
   catchment_rank?: number;
   catchment_rc_rank?: number;
   top_school_rank?: number;
+  /** Catchment primary (City of Edinburgh only), its attainment score, and a note when split by stage. */
+  primary?: string;
+  primary_score?: number;
+  primary_note?: string;
+  primary_rc?: string;
+  primary_rc_score?: number;
+  primary_rc_note?: string;
+  top_primary?: boolean;
   travel: Travel;
   area?: { median: number; basis: string; vs_pct: number };
   /** "motivated" (lender/executor/trustee sale, cash buyers...) and/or "needs_work". */
@@ -112,6 +120,22 @@ export interface TopSchool {
   avg_price?: number;
   days_to_offer?: number;
   home_report_pct?: number;
+}
+
+export interface PrimarySchool {
+  name: string;
+  score: number | null;
+  history: Record<string, number>;
+}
+
+export interface PrimaryScores {
+  year: string;
+  source: string;
+  data: string;
+  scotland_average: number;
+  edinburgh_average: number;
+  top_threshold: number;
+  schools: PrimarySchool[];
 }
 
 export interface TopSchools {

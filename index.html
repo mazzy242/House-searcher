@@ -67,7 +67,8 @@
           </div>
           <div class="checks">
             <label class="check"><input type="checkbox" id="garage" /> Garage</label>
-            <label class="check"><input type="checkbox" id="topSchool" /> In a top-10 school catchment</label>
+            <label class="check"><input type="checkbox" id="topSchool" /> In a top-10 secondary catchment</label>
+            <label class="check"><input type="checkbox" id="topPrimary" /><span>In a top primary catchment<small class="hint">Edinburgh primaries where 95%+ of pupils meet the expected level</small></span></label>
             <label class="check"><input type="checkbox" id="newOnly" /> New this week</label>
           </div>
           <div class="row two">
@@ -87,6 +88,10 @@
             <summary>Secondary catchment: <b id="school-summary">any school</b></summary>
             <div class="checks" id="school"></div>
           </details>
+          <details class="multi" id="primary-wrap">
+            <summary>Primary catchment: <b id="primary-summary">any school</b></summary>
+            <div class="checks" id="primary"></div>
+          </details>
           <label>Sale type<select id="saleType">
             <option value="">Estate agents + auctions</option><option value="private">Estate agents only</option>
             <option value="auction">Auctions only</option></select></label>
@@ -104,6 +109,7 @@
           <div class="checks layers">
             <label class="check"><input type="checkbox" data-layer="catchTop" /><i class="sw sw-catch"></i> Top-10 school catchments</label>
             <label class="check"><input type="checkbox" data-layer="catchAll" /><i class="sw sw-catch-all"></i> All secondary catchments</label>
+            <label class="check"><input type="checkbox" data-layer="primary" /><i class="sw sw-primary"></i><span>Primary catchments<small class="hint">Shaded = top primary (95%+)</small></span></label>
             <label class="check"><input type="checkbox" data-layer="simd" /><i class="sw sw-simd"></i> SIMD deprivation</label>
             <label class="sub" id="simd-domain-wrap">Show<select id="simdDomain">
               <option value="decile">Overall SIMD</option><option value="income">Income</option><option value="employment">Employment</option>
@@ -124,6 +130,14 @@
         <section>
           <h2>Top 10 state schools <span class="muted" id="tops-note"></span></h2>
           <ol class="tops" id="tops"></ol>
+        </section>
+
+        <section>
+          <details class="primaries">
+            <summary><h2>Primary schools <span class="muted" id="primaries-note"></span></h2></summary>
+            <p class="hint" id="primaries-about"></p>
+            <ol class="tops prim" id="primaries"></ol>
+          </details>
         </section>
 
         <section>

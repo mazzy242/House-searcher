@@ -4,6 +4,7 @@ A map of the **houses** (not flats) with **2 or more bedrooms** for sale on ESPC
 
 - **How long it takes to get to Waverley station**, door to door (bus/tram, train, walk or cycle).
 - **Which secondary school catchment it's in**, with the top 10 schools highlighted.
+- **Which primary school catchment it's in** (City of Edinburgh), with each primary's attainment score.
 - **SIMD deprivation decile** of the neighbourhood.
 - **How the price compares** to the median asking price in its postcode district.
 - **Auction lots** from Future Property Auctions and Auction House Scotland, alongside the ESPC listings (orange-ringed pins, with opening bid / guide price and auction date).
@@ -11,7 +12,9 @@ A map of the **houses** (not flats) with **2 or more bedrooms** for sale on ESPC
 - **Plots & land**: building plots and land for sale (ESPC and auctions) are kept separately; a Homes / Plots & land / Both switch shows them, with plot size in acres where given.
 - **EPC band** from the ESPC listing itself (shown when the agent gives it). The Scottish Government's EPC open data can also fill in bands and m² (`epc.enabled` in settings; off for now because that site blocks GitHub's servers).
 
-Filter by price, bedrooms, detached, garage, time to Waverley, school catchment, SIMD, sale type (estate agents / auctions) and seller situation. Overlay tram lines (existing and proposed), main bus routes, school catchments and SIMD.
+Filter by price, bedrooms (min and max), bathrooms, floor area, house type (detached, semi, terraced...), garage, time to Waverley, area, secondary and primary catchment, SIMD, sale type (estate agents / auctions), seller situation, or search for a street, town or postcode.
+
+**Saved searches and lists.** Save the current filters under a name (e.g. "Maz", "Nichelle") and switch between them with one tap. Put homes on Shortlist, Viewing, Rejected or your own lists from the detail panel; rejected homes are hidden unless you ask for them, and homes that leave ESPC stay on your lists as "no longer listed". These live in the browser (localStorage), so each phone or laptop has its own; **Copy share link** packs them into a link that adds them to another browser. Overlay tram lines (existing and proposed), main bus routes, school catchments and SIMD.
 
 ```
 ┌────────────────────────────────────────────────────────────────────────────┐
@@ -34,6 +37,7 @@ GitHub Actions (daily 05:17 UTC)
   pipeline/build.py
     ├─ SIMD 2020 data zones ......... maps.gov.scot ArcGIS service
     ├─ Secondary school catchments .. City of Edinburgh Council ArcGIS (bundled c.2014 copy as fallback)
+    ├─ Primary school catchments .... City of Edinburgh Council ArcGIS + pipeline/config/primary_scores.json
     ├─ Tram, bus + rail lines ....... OpenStreetMap (Overpass API), refreshed weekly
     ├─ Bus/tram timetable ........... BODS Scotland GTFS → travel time to Waverley
     ├─ Listings ..................... espc.com (polite scrape, new/changed listings only)
@@ -75,6 +79,7 @@ Until the first successful refresh, the site shows clearly-labelled **sample dat
   git add public/data state && git commit -m "Data refresh" && git push
   ```
 - **Top-10 schools** come from the [ESPC article](https://espc.com/news/post/top-10-secondary-schools-in-edinburgh-and-their-catchment-areas) (31 Aug 2026, Sunday Times league tables), including ESPC's price stats per catchment. #4 St Thomas of Aquin's is Roman Catholic, so its catchment is drawn as an orange dashed outline. Update `pipeline/config/top_schools.json` when ESPC publishes a new list.
+- **Primary schools.** Catchments come live from the council (`sources.primary_catchment_layers`). Scores are in `pipeline/config/primary_scores.json`: the average share of P1, P4 and P7 pupils meeting the expected level in reading, writing, numeracy and listening & talking (Scottish Government ACEL data, via [datamap-scotland](https://datamap-scotland.co.uk/primary-school-league-tables-by-local-authority/edinburgh-city-primary-schools-ranks/)). Schools at 95% or more count as "top primaries". Update it each December when the new figures come out. The Sunday Times primary league table (out of 400) uses the P7 figures from the same data, weighted for deprivation, but is paywalled.
 - **Proposed tram routes.** `pipeline/config/tram_proposed.geojson` is hand-traced and indicative. Edit it as plans firm up.
 - **Main bus routes.** `bus.main_routes` in `settings.json` controls which routes show by default.
 
@@ -114,6 +119,7 @@ Always check the listing itself.
 npm install && npm run dev                           # site on http://localhost:5173
 python pipeline/make_sample.py                        # regenerate sample data
 python -m pytest -q pipeline/tests                    # pipeline tests
+npm test                                              # website tests (filters, saved lists)
 python pipeline/build.py --skip-espc                  # refresh layers + journey times only
 ```
 
@@ -122,6 +128,7 @@ python pipeline/build.py --skip-espc                  # refresh layers + journey
 - Listings © ESPC, scraped once a day for personal use. The scraper honours robots.txt and spaces its requests out.
 - SIMD 2020 © Scottish Government (OGL).
 - Catchments © City of Edinburgh Council (OGL). Confirm with the council before relying on them.
+- Primary attainment: Scottish Government, Achievement of Curriculum for Excellence Levels (OGL).
 - Timetables: Bus Open Data Service (OGL).
 - Routes © OpenStreetMap contributors (ODbL).
 - Base maps © OpenFreeMap / OpenMapTiles / OSM. Satellite imagery © Esri, Maxar, Earthstar Geographics (Esri's terms allow non-commercial use with attribution).

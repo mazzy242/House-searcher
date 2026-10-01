@@ -60,6 +60,9 @@ def refresh_layers(run: Run) -> None:
         fc, src = res
         write_json(OUT / "catchments.geojson", fc)
         run.meta["sources"]["catchments"]["detail"] = src
+    prim = run.step("primary_catchments", layers.fetch_primary_catchments)
+    if prim:
+        write_json(OUT / "primary_catchments.geojson", prim)
     # OpenStreetMap routes barely change and the public Overpass servers are often overloaded:
     # fetch them once a week (or when a file is missing), otherwise keep last week's.
     last = (run.meta["sources"].get("osm_transit") or {}).get("updated", "")
@@ -77,6 +80,8 @@ def refresh_layers(run: Run) -> None:
     write_json(OUT / "tram_proposed.geojson", layers.load_proposed_tram())
     top = load_config("top_schools.json")
     write_json(OUT / "top_schools.json", {k: v for k, v in top.items() if not k.startswith("_")})
+    scores = load_config("primary_scores.json")
+    write_json(OUT / "primary_scores.json", {k: v for k, v in scores.items() if not k.startswith("_")})
 
 
 LAST_DUPLICATES: list[str] = []  # dedupe decisions of the last enrich(), written to meta.json
@@ -120,10 +125,35 @@ def area_stats(listings: list[dict]) -> list[dict]:
     return out
 
 
+def primary_fields(hits: list[dict]) -> dict:
+    """Catchment primary (and RC primary) for a home, from the primary catchment polygons it falls in.
+
+    Where an area is split by stage (Canaan Lane takes P1-P4 while P5-P7 stay at the old school), the
+    school taking the youngest children is the catchment school and the other is noted.
+    """
+    out: dict = {}
+    for sector, key in (("ND", "primary"), ("RC", "primary_rc")):
+        hs = sorted({(h.get("stages") or "", h["school"]): h for h in hits if h.get("sector") == sector}.values(),
+                    key=lambda h: h.get("stages") or "")
+        if not hs:
+            continue
+        first = hs[0]
+        out[key] = first["school"]
+        if first.get("score") is not None:
+            out[f"{key}_score"] = first["score"]
+        if first.get("top"):
+            out["top_primary"] = True
+        later = [f"{h['stages'].replace('-', '–')} at {h['school']}" for h in hs[1:] if h.get("stages")]
+        if later and first.get("stages"):
+            out[f"{key}_note"] = f"{first['stages'].replace('-', '–')} only; " + ", ".join(later)
+    return out
+
+
 def enrich(listings: list[dict], net, profiles, previous: dict | None = None,
            epc_index: dict | None = None) -> list[dict]:
     simd_at = polygon_lookup(read_json(OUT / "simd.geojson"))
     catch_at = polygon_lookup(read_json(OUT / "catchments.geojson"))
+    primary_at = polygon_lookup(read_json(OUT / "primary_catchments.geojson"))
     index = transit.StopIndex(net) if net else None
     out = []
     for l in listings:
@@ -155,6 +185,7 @@ def enrich(listings: list[dict], net, profiles, previous: dict | None = None,
             if c.get("top_rank"):
                 rec[f"{key}_rank"] = c["top_rank"]
                 rec["top_school_rank"] = min(c["top_rank"], rec.get("top_school_rank") or 99)
+        rec.update(primary_fields(primary_at(l["lat"], l["lng"])))
         rec["travel"] = transit.journey(l["lat"], l["lng"], net, profiles, index)
         old = (previous or {}).get(l["id"])
         if net is None and old and "pt_min" in old:

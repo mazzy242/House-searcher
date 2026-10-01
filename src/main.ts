@@ -4,7 +4,7 @@ import { PRICE_STOPS, SIMD_COLOURS, TIME_STOPS, VS_STOPS, daysAgo, esc, gbp, gbp
 import { PolygonIndex } from "./geo";
 import { HouseMap } from "./map";
 import { REJECTED, Saved } from "./saved";
-import type { Area, AuctionRef, Listing, Meta, Simd, TopSchool, TopSchools } from "./types";
+import type { Area, AuctionRef, Listing, Meta, PrimaryScores, Simd, TopSchool, TopSchools } from "./types";
 
 const $ = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T;
 
@@ -19,7 +19,7 @@ const load = async <T>(path: string, fallback: T): Promise<T> => {
 
 const NUM_SELECTS = ["minPrice", "maxPrice", "maxBeds", "minBaths", "minArea", "maxMins", "minSimd"] as const;
 const SELECTS = ["saleType", "colourBy", "sort", "simdDomain"] as const;
-const CHECKS = ["garage", "topSchool", "newOnly", "hideRejected", "allBus", "motivated", "needsWork", "closingDate", "reduced"] as const;
+const CHECKS = ["garage", "topSchool", "topPrimary", "newOnly", "hideRejected", "allBus", "motivated", "needsWork", "closingDate", "reduced"] as const;
 
 const PRICES = [100, 150, 200, 250, 300, 350, 400, 450, 500, 600, 700, 800, 1000, 1250, 1500, 2000].map((k) => k * 1000);
 
@@ -29,19 +29,22 @@ let visible: Listing[] = [];
 let areas: Area[] = [];
 let meta: Meta;
 let tops: TopSchools;
+let primaries: PrimaryScores | null;
 let selected: Listing | null = null;
 let simdIndex: PolygonIndex<Simd>;
 let catchIndex: PolygonIndex<{ school: string; sector: string; top_rank?: number }>;
+let primaryIndex: PolygonIndex<{ school: string; sector: string; stages?: string; score?: number }>;
 const map = new HouseMap();
 const saved = new Saved();
 
 async function main(): Promise<void> {
   const emptyFc = { type: "FeatureCollection", features: [] } as GeoJSON.FeatureCollection;
-  [listings, areas, meta, tops] = await Promise.all([
+  [listings, areas, meta, tops, primaries] = await Promise.all([
     load<Listing[]>("listings.json", []),
     load<Area[]>("areas.json", []),
     load<Meta>("meta.json", { waverley: { name: "Edinburgh Waverley", lat: 55.95196, lng: -3.18992 } }),
     load<TopSchools>("top_schools.json", { verified: false, source: "", schools: [] }),
+    load<PrimaryScores | null>("primary_scores.json", null),
   ]);
   saved.refresh(listings);
   importShared();
@@ -55,9 +58,10 @@ async function main(): Promise<void> {
     onBasemap: (basemap) => set({ basemap }),
   }, filters.basemap);
   // Lazy-load polygons for click-anywhere info (the map fetches its own copy).
-  Promise.all([load("simd.geojson", emptyFc), load("catchments.geojson", emptyFc)]).then(([s, c]) => {
+  Promise.all([load("simd.geojson", emptyFc), load("catchments.geojson", emptyFc), load("primary_catchments.geojson", emptyFc)]).then(([s, c, p]) => {
     simdIndex = new PolygonIndex<Simd>(s);
     catchIndex = new PolygonIndex(c);
+    primaryIndex = new PolygonIndex(p);
   });
   map.setAreas(areas);
   update();
@@ -83,6 +87,17 @@ function buildControls(): void {
   const schools = [...new Set(listings.flatMap((l) => [l.catchment, l.catchment_rc]).filter(Boolean) as string[])].sort();
   const rank = (s: string) => topFor(s)?.rank;
   $("school").innerHTML = schools.map((s) => `<label class="check"><input type="checkbox" value="${esc(s)}" /> ${esc(s)}${rank(s) ? ` <b class="rank">#${rank(s)}</b>` : ""}</label>`).join("");
+
+  const prims = [...new Set(listings.flatMap((l) => [l.primary, l.primary_rc]).filter(Boolean) as string[])].sort();
+  $("primary").innerHTML = prims.map((s) => `<label class="check"><input type="checkbox" value="${esc(s)}" /> ${esc(s)}${primaryScore(s) != null ? ` <span class="prim-score">${primaryScore(s)}%</span>` : ""}</label>`).join("");
+  $("primary-wrap").hidden = !prims.length;
+  $("primary").addEventListener("change", (e) => set({ primary: toggleIn(filters.primary, (e.target as HTMLInputElement).value) }));
+  const pickPrimary = (e: Event) => {
+    const li = (e.target as HTMLElement).closest<HTMLElement>("[data-primary]");
+    if (li?.dataset.primary) set({ primary: toggleIn(filters.primary, li.dataset.primary) });
+  };
+  $("primaries").addEventListener("click", pickPrimary);
+  $("primaries").addEventListener("keydown", (e) => (e.key === "Enter" || e.key === " ") && (e.preventDefault(), pickPrimary(e)));
 
   for (const id of NUM_SELECTS) {
     $<HTMLSelectElement>(id).addEventListener("change", (e) => set({ [id]: Number((e.target as HTMLSelectElement).value) }));
@@ -261,6 +276,9 @@ function syncControls(): void {
   const schools = listOf(f.school);
   document.querySelectorAll<HTMLInputElement>("#school input").forEach((el) => (el.checked = schools.includes(el.value)));
   $("school-summary").textContent = schools.length ? (schools.length === 1 ? schools[0] : `${schools.length} schools`) : "any school";
+  const prim = listOf(f.primary);
+  document.querySelectorAll<HTMLInputElement>("#primary input").forEach((el) => (el.checked = prim.includes(el.value)));
+  $("primary-summary").textContent = prim.length ? (prim.length === 1 ? prim[0] : `${prim.length} schools`) : "any school";
   $("missing-hint").hidden = !f.minBaths && !f.minArea;
   const n = activeCount(f);
   for (const id of ["active-count", "panel-count"]) {
@@ -293,6 +311,7 @@ function update(): void {
   renderLegend();
   renderAreas();
   renderTops();
+  renderPrimaries();
   if (!$("list").hidden) renderList();
   // Keep a home open after rejecting it, even though it now drops off the map.
   if (selected && !visible.includes(selected) && !rejected.has(selected.id)) select(null);
@@ -402,6 +421,40 @@ function renderTops(): void {
     .join("");
 }
 
+let scoreByPrimary: Map<string, number> | undefined;
+
+/** Attainment score for a primary school, by the name used in the catchment data. */
+function primaryScore(name?: string): number | undefined {
+  if (!scoreByPrimary) {
+    scoreByPrimary = new Map();
+    for (const l of listings) {
+      if (l.primary && l.primary_score != null) scoreByPrimary.set(l.primary, l.primary_score);
+      if (l.primary_rc && l.primary_rc_score != null) scoreByPrimary.set(l.primary_rc, l.primary_rc_score);
+    }
+  }
+  return name ? scoreByPrimary.get(name) : undefined;
+}
+
+function renderPrimaries(): void {
+  if (!primaries) return void ($("primaries").closest("section")!.hidden = true);
+  const p = primaries;
+  $("primaries-note").textContent = `(${p.year})`;
+  $("primaries-about").innerHTML = `Share of P1, P4 and P7 pupils meeting the expected level in reading, writing, numeracy and listening &amp; talking
+    (<a href="${esc(p.source)}" target="_blank" rel="noopener">${esc(p.data)}</a>). Edinburgh average ${p.edinburgh_average}%, Scotland ${p.scotland_average}%.
+    Figures are rounded, so 5 points either way isn't a real difference. Tap a school to show homes in its catchment.`;
+  const counts = new Map<string, number>();
+  for (const l of visible) for (const s of [l.primary, l.primary_rc]) if (s) counts.set(s, (counts.get(s) ?? 0) + 1);
+  const inData = new Set(listings.flatMap((l) => [l.primary, l.primary_rc]).filter(Boolean) as string[]);
+  const want = listOf(filters.primary);
+  const rows = [...inData].map((name) => ({ name, score: primaryScore(name) })).sort((a, b) => (b.score ?? -1) - (a.score ?? -1) || a.name.localeCompare(b.name));
+  $("primaries").innerHTML = rows.map((r) => {
+    const n = counts.get(r.name) ?? 0;
+    return `<li tabindex="0" role="button" data-primary="${esc(r.name)}" aria-pressed="${want.includes(r.name)}">
+      <span class="r">${r.score != null ? `${r.score}%` : "–"}</span><span>${esc(r.name.replace(/ Primary$/, ""))}</span>
+      <span class="n">${n} home${n === 1 ? "" : "s"}</span></li>`;
+  }).join("");
+}
+
 function renderLegend(): void {
   const f = filters;
   const stops = f.colourBy === "time" ? TIME_STOPS : f.colourBy === "vs" ? VS_STOPS : PRICE_STOPS;
@@ -416,7 +469,7 @@ function renderLegend(): void {
   if (f.layers.simd) {
     simd = `<div class="simd-scale"><span>Most deprived</span>${SIMD_COLOURS.map((c, i) => `<i title="Decile ${i + 1}" style="background:${c}"></i>`).join("")}<span>Least</span></div>`;
   }
-  $("legend").innerHTML = `<div class="legend-items">${items.join("")}</div>${simd}<div class="muted small">Gold ring = on one of your lists. Purple ring = in a top-10 school catchment. Thick orange ring = auction lot. Green ring = plot / land. Orange dashed outline = St Thomas of Aquin's (RC) catchment.</div>`;
+  $("legend").innerHTML = `<div class="legend-items">${items.join("")}</div>${simd}<div class="muted small">Gold ring = on one of your lists. Purple ring = in a top-10 secondary catchment. Thick orange ring = auction lot. Green ring = plot / land. Orange dashed outline = St Thomas of Aquin's (RC) catchment.</div>`;
 }
 
 function renderAreas(): void {
@@ -469,6 +522,7 @@ function badges(l: Listing): string {
   if (l.detached) b.push(`<span class="badge">Detached</span>`);
   if (l.garage) b.push(`<span class="badge">Garage</span>`);
   if (l.top_school_rank) b.push(`<span class="badge school">Top-10 school #${l.top_school_rank}</span>`);
+  if (l.top_primary) b.push(`<span class="badge primary">Top primary</span>`);
   if (isNew(l)) b.push(`<span class="badge new">New</span>`);
   if (isReduced(l)) b.push(`<span class="badge reduced">Reduced</span>`);
   return b.join("");
@@ -523,12 +577,19 @@ function renderDetail(l: Listing): void {
         <div><dt>Type</dt><dd>${l.kind === "plot" ? "Plot / land" : esc(l.property_type ?? "–")}</dd></div>
         <div><dt>SIMD</dt><dd>${simdBar(l.simd?.decile)}${l.simd?.name ? `<div class="muted small">${esc(l.simd.name)}</div>` : ""}${domains ? `<div class="domains">${domains}</div>` : ""}</dd></div>
         <div><dt>Catchment</dt><dd>${l.catchment || l.catchment_rc ? "" : `<span class="muted">Outside Edinburgh – check with ${esc(l.region ?? "the local")} council</span>`}${esc(l.catchment ?? "")}${topFor(l.catchment) ? ` <b class="rank">#${topFor(l.catchment)!.rank}</b>` : ""}${l.catchment_rc ? `<div class="small">RC: ${esc(l.catchment_rc)}${topFor(l.catchment_rc) ? ` <b class="rank">#${topFor(l.catchment_rc)!.rank}</b>` : ""}</div>` : ""}${[topFor(l.catchment), topFor(l.catchment_rc)].filter((t): t is TopSchool => !!t).map(schoolStats).join("")}</dd></div>
+        ${l.primary || l.primary_rc ? `<div><dt>Primary</dt><dd>${primaryLine(l.primary, l.primary_score, l.primary_note)}${l.primary_rc ? `<div class="small">RC: ${primaryLine(l.primary_rc, l.primary_rc_score, l.primary_rc_note)}</div>` : ""}</dd></div>` : ""}
         ${vs ? `<div><dt>vs area</dt><dd><b class="${vs.vs_pct > 5 ? "up" : vs.vs_pct < -5 ? "down" : ""}">${vs.vs_pct > 0 ? "+" : ""}${vs.vs_pct}%</b> vs ${esc(l.district)} ${vs.basis === "all" ? "" : `${esc(vs.basis)} `}median ${gbp(vs.median)}</dd></div>` : ""}
         ${hist.length > 1 ? `<div><dt>History</dt><dd>${hist.map(([d, p]) => `${gbp(p)} <span class="muted small">${esc(d)}</span>`).join(" → ")}</dd></div>` : ""}
         ${age != null ? `<div><dt>Listed</dt><dd>${age === 0 ? "today" : `${age} day${age === 1 ? "" : "s"} ago`}</dd></div>` : ""}
       </dl>
       <a class="cta" href="${esc(l.url)}" target="_blank" rel="noopener">View on ${esc(l.auction?.house ?? "ESPC")} ↗</a>
     </div>`;
+}
+
+function primaryLine(name?: string, score?: number, note?: string): string {
+  if (!name) return "";
+  const avg = primaries?.edinburgh_average;
+  return `${esc(name)}${score != null ? ` <span class="prim-score" title="Pupils meeting the expected level${avg ? `; Edinburgh average ${avg}%` : ""}">${score}%</span>` : ""}${note ? `<div class="muted small">${esc(note)}</div>` : ""}`;
 }
 
 function select(l: Listing | null, fly = false): void {
@@ -617,6 +678,10 @@ function showPointInfo([lng, lat]: [number, number]): void {
     parts.push(`${s.sector === "RC" ? "RC catchment" : "Catchment"}: <b>${esc(s.school)}</b>${s.top_rank ? ` (#${s.top_rank})` : ""}`);
     const t = topFor(s.school);
     if (t) parts.push(schoolStats(t));
+  }
+  const prim = (primaryIndex?.at(lng, lat) ?? []).sort((a, b) => (a.stages ?? "").localeCompare(b.stages ?? ""));
+  for (const p of prim) {
+    parts.push(`${p.sector === "RC" ? "RC primary" : "Primary"}${p.stages ? ` (${esc(p.stages)})` : ""}: <b>${esc(p.school)}</b>${p.score != null ? ` <span class="prim-score">${p.score}%</span>` : ""}`);
   }
   if (parts.length) map.showPopup([lng, lat], parts.join("<br>"));
 }
