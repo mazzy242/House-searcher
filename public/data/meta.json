@@ -1,6 +1,6 @@
 {
- "generated_at": "2026-10-01T19:30+00:00",
- "listing_count": 777,
+ "generated_at": "2026-10-02T11:14+00:00",
+ "listing_count": 778,
  "waverley": {
   "name": "Edinburgh Waverley",
   "lat": 55.95196,
@@ -10,27 +10,27 @@
  "sources": {
   "catchments": {
    "detail": "ND: https://edinburghcouncilmaps.info/arcgis/rest/services/AdminBoundaries/MiscBoundaries/MapServer/6; RC: https://edinburghcouncilmaps.info/arcgis/rest/services/AdminBoundaries/MiscBoundaries/MapServer/7",
-   "updated": "2026-10-01T19:04+00:00"
+   "updated": "2026-10-02T11:06+00:00"
   },
   "osm_transit": {
    "updated": "2026-09-30T11:36+00:00"
   },
   "gtfs": {
-   "updated": "2026-10-01T19:04+00:00",
+   "updated": "2026-10-02T11:07+00:00",
    "service_date": "2026-10-07"
   },
   "espc": {
-   "updated": "2026-10-01T19:29+00:00"
+   "updated": "2026-10-02T11:13+00:00"
   },
   "simd": {
-   "updated": "2026-10-01T19:03+00:00",
+   "updated": "2026-10-02T11:06+00:00",
    "detail": "https://services.arcgis.com/XSeYKQzfXnEgju9o/arcgis/rest/services/SG_SIMD_2020/FeatureServer/0/query"
   },
   "auctions": {
-   "updated": "2026-10-01T19:30+00:00"
+   "updated": "2026-10-02T11:14+00:00"
   },
   "primary_catchments": {
-   "updated": "2026-10-01T19:04+00:00"
+   "updated": "2026-10-02T11:06+00:00"
   }
  },
  "travel_assumptions": {
@@ -44,7 +44,5 @@
   "walk_kmh": 4.8,
   "cycle_kmh": 15
  },
- "duplicates": [
-  "auction lot auc-futurepropertyauctions-14511302 (70 and 70a Kingston Avenue, Edinburgh) includes ESPC 36376882 (70 Kingston Avenue, Edinburgh, EH16 5SW): both kept"
- ]
+ "duplicates": []
 }
