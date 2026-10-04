@@ -5,7 +5,7 @@
   "data": "Scottish Government, Achievement of Curriculum for Excellence Levels (ACEL) 2024/25",
   "scotland_average": 81,
   "edinburgh_average": 85,
-  "top_threshold": 95,
+  "top_threshold": 90,
   "schools": [
     {"name": "Abbeyhill Primary", "score": 87.5, "history": {"2020/21": 95.0, "2021/22": 85.0, "2022/23": 85.0, "2023/24": 80.0, "2024/25": 87.5}},
     {"name": "Balgreen Primary", "score": 75.0, "history": {"2020/21": 57.5, "2021/22": 75.0, "2022/23": 77.5, "2023/24": 80.0, "2024/25": 75.0}},
