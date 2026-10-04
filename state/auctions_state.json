@@ -20,33 +20,7 @@
    "basis": "Opening bid"
   },
   "kind": "plot",
-  "fetched": "2026-10-03",
-  "first_seen": "2026-09-30",
-  "active": false,
-  "excluded": "district TD2"
- },
- "auc-futurepropertyauctions-14485649": {
-  "id": "auc-futurepropertyauctions-14485649",
-  "url": "https://www.futurepropertyauctions.co.uk/property_details.asp?id=14485649",
-  "title": "Plot / land at auction",
-  "lat": 55.773325,
-  "lng": -2.8491394,
-  "price": 2000,
-  "postcode": "TD2 6PU",
-  "address": "Plot 8 Hartside Wood, Lauder, Scottish Borders",
-  "detached": false,
-  "plot_parsed": true,
-  "parser_version": 4,
-  "garage": false,
-  "district": "TD2",
-  "source": "auction",
-  "auction": {
-   "house": "Future Property Auctions",
-   "date": "2026-10-08",
-   "basis": "Guide price"
-  },
-  "kind": "plot",
-  "fetched": "2026-10-03",
+  "fetched": "2026-10-04",
   "first_seen": "2026-09-30",
   "active": false,
   "excluded": "district TD2"
@@ -76,7 +50,7 @@
   "flags": [
    "needs_work"
   ],
-  "fetched": "2026-10-03",
+  "fetched": "2026-10-04",
   "first_seen": "2026-09-30",
   "active": false,
   "excluded": "1 bedroom",
@@ -105,7 +79,7 @@
    "basis": "Guide price"
   },
   "kind": "plot",
-  "fetched": "2026-10-03",
+  "fetched": "2026-10-04",
   "first_seen": "2026-09-30",
   "active": false,
   "excluded": "district TD2"
@@ -131,7 +105,7 @@
    "date": "2026-10-08",
    "basis": "Guide price"
   },
-  "fetched": "2026-10-03",
+  "fetched": "2026-10-04",
   "first_seen": "2026-09-30",
   "active": false,
   "excluded": "bedrooms unknown"
@@ -157,37 +131,10 @@
    "basis": "Guide price"
   },
   "kind": "plot",
-  "fetched": "2026-10-03",
+  "fetched": "2026-10-04",
   "first_seen": "2026-09-30",
   "active": false,
   "excluded": "district TD2"
- },
- "auc-futurepropertyauctions-14494302": {
-  "id": "auc-futurepropertyauctions-14494302",
-  "url": "https://www.futurepropertyauctions.co.uk/property_details.asp?id=14494302",
-  "title": "3 bed detached at auction",
-  "lat": 55.471725,
-  "lng": -2.5480171,
-  "price": 73000,
-  "bedrooms": 3,
-  "postcode": "TD8 6JY",
-  "address": "15 Howden Crescent, Jedburgh, Scottish Borders",
-  "detached": false,
-  "plot_parsed": true,
-  "parser_version": 4,
-  "garage": false,
-  "district": "TD8",
-  "source": "auction",
-  "auction": {
-   "house": "Future Property Auctions",
-   "date": "2026-10-08",
-   "basis": "Guide price"
-  },
-  "property_type": "detached",
-  "fetched": "2026-10-03",
-  "first_seen": "2026-09-30",
-  "active": false,
-  "excluded": "district TD8"
  },
  "auc-futurepropertyauctions-14466014": {
   "id": "auc-futurepropertyauctions-14466014",
@@ -210,36 +157,10 @@
    "basis": "Opening bid"
   },
   "kind": "plot",
-  "fetched": "2026-10-03",
+  "fetched": "2026-10-04",
   "first_seen": "2026-09-30",
   "active": true,
   "excluded": null
- },
- "auc-futurepropertyauctions-14287956": {
-  "id": "auc-futurepropertyauctions-14287956",
-  "url": "https://www.futurepropertyauctions.co.uk/property_details.asp?id=14287956",
-  "title": "Plot / land at auction",
-  "lat": 55.773325,
-  "lng": -2.8491394,
-  "price": 4000,
-  "postcode": "TD2 6PU",
-  "address": "Plot 5 Hartside Wood, Lauder, Scottish Borders",
-  "detached": false,
-  "plot_parsed": true,
-  "parser_version": 4,
-  "garage": false,
-  "district": "TD2",
-  "source": "auction",
-  "auction": {
-   "house": "Future Property Auctions",
-   "date": "2026-10-08",
-   "basis": "Guide price"
-  },
-  "kind": "plot",
-  "fetched": "2026-10-03",
-  "first_seen": "2026-09-30",
-  "active": false,
-  "excluded": "district TD2"
  },
  "auc-futurepropertyauctions-14513971": {
   "id": "auc-futurepropertyauctions-14513971",
@@ -262,42 +183,10 @@
    "date": "2026-10-08",
    "basis": "Opening bid"
   },
-  "fetched": "2026-10-03",
+  "fetched": "2026-10-04",
   "first_seen": "2026-09-30",
   "active": false,
   "excluded": "bedrooms unknown"
- },
- "auc-futurepropertyauctions-14478815": {
-  "id": "auc-futurepropertyauctions-14478815",
-  "url": "https://www.futurepropertyauctions.co.uk/property_details.asp?id=14478815",
-  "title": "Plot / land at auction",
-  "lat": 55.91535,
-  "lng": -3.0884243,
-  "price": 247000,
-  "bedrooms": 4,
-  "postcode": "EH22 1SB",
-  "address": "3 Harelaw, Development with Full Planning, Shawfair, Danderhall, Edinburgh",
-  "detached": false,
-  "floor_area_m2": 275,
-  "plot_parsed": true,
-  "parser_version": 4,
-  "garage": false,
-  "district": "EH22",
-  "source": "auction",
-  "auction": {
-   "house": "Future Property Auctions",
-   "date": "2026-10-08",
-   "basis": "Opening bid"
-  },
-  "flags": [
-   "needs_work"
-  ],
-  "property_type": "house",
-  "kind": "plot",
-  "fetched": "2026-10-03",
-  "first_seen": "2026-09-30",
-  "active": true,
-  "excluded": null
  },
  "auc-auctionhouse-152358": {
   "id": "auc-auctionhouse-152358",
@@ -322,7 +211,7 @@
    "needs_work"
   ],
   "property_type": "semi-detached",
-  "fetched": "2026-10-03",
+  "fetched": "2026-10-04",
   "first_seen": "2026-09-30",
   "active": false,
   "excluded": "district PA34"
@@ -349,7 +238,7 @@
    "basis": "Guide price"
   },
   "property_type": "house",
-  "fetched": "2026-10-03",
+  "fetched": "2026-10-04",
   "first_seen": "2026-09-30",
   "active": false,
   "excluded": "bedrooms unknown"
@@ -379,7 +268,7 @@
    "needs_work"
   ],
   "kind": "plot",
-  "fetched": "2026-10-03",
+  "fetched": "2026-10-04",
   "first_seen": "2026-09-30",
   "active": true,
   "excluded": null,
@@ -408,7 +297,7 @@
    "basis": "Guide price"
   },
   "property_type": "house",
-  "fetched": "2026-10-03",
+  "fetched": "2026-10-04",
   "first_seen": "2026-09-30",
   "active": false,
   "excluded": "bedrooms unknown"
@@ -434,7 +323,7 @@
    "basis": "Guide price"
   },
   "property_type": "terraced",
-  "fetched": "2026-10-03",
+  "fetched": "2026-10-04",
   "first_seen": "2026-09-30",
   "active": true,
   "excluded": null,
@@ -462,7 +351,7 @@
    "basis": "Guide price"
   },
   "property_type": "house",
-  "fetched": "2026-10-03",
+  "fetched": "2026-10-04",
   "first_seen": "2026-09-30",
   "active": false,
   "excluded": "district G20"
@@ -491,7 +380,7 @@
    "needs_work"
   ],
   "property_type": "house",
-  "fetched": "2026-10-03",
+  "fetched": "2026-10-04",
   "first_seen": "2026-09-30",
   "active": true,
   "excluded": null,
@@ -520,7 +409,7 @@
    "basis": "Guide price"
   },
   "property_type": "house",
-  "fetched": "2026-10-03",
+  "fetched": "2026-10-04",
   "first_seen": "2026-09-30",
   "active": false,
   "excluded": "bedrooms unknown"
@@ -545,7 +434,7 @@
    "basis": "Guide price"
   },
   "property_type": "flat",
-  "fetched": "2026-10-03",
+  "fetched": "2026-10-04",
   "first_seen": "2026-09-30",
   "active": false,
   "excluded": "flat",
@@ -573,7 +462,7 @@
   },
   "property_type": "house",
   "kind": "plot",
-  "fetched": "2026-10-03",
+  "fetched": "2026-10-04",
   "first_seen": "2026-09-30",
   "active": false,
   "excluded": "district G44"
@@ -602,7 +491,7 @@
    "needs_work"
   ],
   "property_type": "house",
-  "fetched": "2026-10-03",
+  "fetched": "2026-10-04",
   "first_seen": "2026-09-30",
   "active": false,
   "excluded": "district DD3"
@@ -628,7 +517,7 @@
    "date": null,
    "basis": "Guide price"
   },
-  "fetched": "2026-10-03",
+  "fetched": "2026-10-04",
   "first_seen": "2026-09-30",
   "active": false,
   "excluded": "flat"
@@ -653,7 +542,7 @@
    "basis": "Guide price"
   },
   "property_type": "house",
-  "fetched": "2026-10-03",
+  "fetched": "2026-10-04",
   "first_seen": "2026-09-30",
   "active": false,
   "excluded": "bedrooms unknown"
@@ -679,7 +568,7 @@
    "date": null,
    "basis": "Guide price"
   },
-  "fetched": "2026-10-03",
+  "fetched": "2026-10-04",
   "first_seen": "2026-09-30",
   "active": false,
   "excluded": "flat"
@@ -705,7 +594,7 @@
    "basis": "Guide price"
   },
   "property_type": "semi-detached",
-  "fetched": "2026-10-03",
+  "fetched": "2026-10-04",
   "first_seen": "2026-09-30",
   "active": false,
   "excluded": "district AB15"
@@ -730,7 +619,7 @@
    "basis": "Guide price"
   },
   "property_type": "house",
-  "fetched": "2026-10-03",
+  "fetched": "2026-10-04",
   "first_seen": "2026-09-30",
   "active": false,
   "excluded": "bedrooms unknown"
@@ -755,7 +644,7 @@
    "basis": "Guide price"
   },
   "property_type": "flat",
-  "fetched": "2026-10-03",
+  "fetched": "2026-10-04",
   "first_seen": "2026-09-30",
   "active": false,
   "excluded": "flat"
@@ -781,7 +670,7 @@
    "basis": "Guide price"
   },
   "property_type": "terraced",
-  "fetched": "2026-10-03",
+  "fetched": "2026-10-04",
   "first_seen": "2026-09-30",
   "active": false,
   "excluded": "district ML7"
@@ -806,7 +695,7 @@
    "basis": "Guide price"
   },
   "property_type": "flat",
-  "fetched": "2026-10-03",
+  "fetched": "2026-10-04",
   "first_seen": "2026-09-30",
   "active": false,
   "excluded": "flat",
@@ -835,7 +724,7 @@
    "basis": "Guide price"
   },
   "property_type": "flat",
-  "fetched": "2026-10-03",
+  "fetched": "2026-10-04",
   "first_seen": "2026-09-30",
   "active": false,
   "excluded": "flat"
@@ -861,7 +750,7 @@
    "basis": "Guide price"
   },
   "property_type": "flat",
-  "fetched": "2026-10-03",
+  "fetched": "2026-10-04",
   "first_seen": "2026-09-30",
   "active": false,
   "excluded": "flat"
@@ -889,7 +778,7 @@
    "needs_work"
   ],
   "property_type": "house",
-  "fetched": "2026-10-03",
+  "fetched": "2026-10-04",
   "first_seen": "2026-09-30",
   "active": false,
   "excluded": "bedrooms unknown"
@@ -919,40 +808,10 @@
    "needs_work"
   ],
   "kind": "plot",
-  "fetched": "2026-10-03",
+  "fetched": "2026-10-04",
   "first_seen": "2026-10-01",
   "active": false,
   "excluded": "district EH47"
- },
- "auc-futurepropertyauctions-14500405": {
-  "id": "auc-futurepropertyauctions-14500405",
-  "url": "https://www.futurepropertyauctions.co.uk/property_details.asp?id=14500405",
-  "title": "Plot / land at auction",
-  "lat": 55.917213158891435,
-  "lng": -3.483016064001465,
-  "price": 150000,
-  "postcode": "EH53 0LQ",
-  "address": "24.5 Acre Site at Roman Camp, Broxburn, West Lothian",
-  "detached": false,
-  "plot_acres": 24.5,
-  "plot_parsed": true,
-  "parser_version": 4,
-  "garage": false,
-  "district": "EH53",
-  "source": "auction",
-  "auction": {
-   "house": "Future Property Auctions",
-   "date": "2026-10-08",
-   "basis": "Guide price"
-  },
-  "flags": [
-   "needs_work"
-  ],
-  "kind": "plot",
-  "fetched": "2026-10-03",
-  "first_seen": "2026-10-01",
-  "active": true,
-  "excluded": null
  },
  "auc-futurepropertyauctions-14478764": {
   "id": "auc-futurepropertyauctions-14478764",
@@ -981,7 +840,7 @@
   ],
   "property_type": "detached",
   "kind": "plot",
-  "fetched": "2026-10-03",
+  "fetched": "2026-10-04",
   "first_seen": "2026-10-01",
   "active": true,
   "excluded": null
@@ -1007,7 +866,7 @@
    "basis": "Guide price"
   },
   "property_type": "house",
-  "fetched": "2026-10-03",
+  "fetched": "2026-10-04",
   "first_seen": "2026-10-01",
   "active": false,
   "excluded": "bedrooms unknown"
@@ -1033,7 +892,7 @@
    "basis": "Guide price"
   },
   "property_type": "semi-detached",
-  "fetched": "2026-10-03",
+  "fetched": "2026-10-04",
   "first_seen": "2026-10-01",
   "active": false,
   "excluded": "district AB11"
@@ -1065,7 +924,7 @@
   ],
   "property_type": "detached",
   "kind": "plot",
-  "fetched": "2026-10-03",
+  "fetched": "2026-10-04",
   "first_seen": "2026-10-01",
   "active": true,
   "excluded": null
@@ -1089,7 +948,7 @@
    "date": "2026-10-15",
    "basis": "Guide price"
   },
-  "fetched": "2026-10-03",
+  "fetched": "2026-10-04",
   "first_seen": "2026-10-01",
   "active": false,
   "excluded": "bedrooms unknown"
@@ -1119,7 +978,7 @@
   "flags": [
    "needs_work"
   ],
-  "fetched": "2026-10-03",
+  "fetched": "2026-10-04",
   "first_seen": "2026-10-01",
   "active": false,
   "excluded": "bedrooms unknown"
@@ -1146,42 +1005,10 @@
   "flags": [
    "needs_work"
   ],
-  "fetched": "2026-10-03",
+  "fetched": "2026-10-04",
   "first_seen": "2026-10-01",
   "active": false,
   "excluded": "bedrooms unknown"
- },
- "auc-futurepropertyauctions-14498399": {
-  "id": "auc-futurepropertyauctions-14498399",
-  "url": "https://www.futurepropertyauctions.co.uk/property_details.asp?id=14498399",
-  "title": "Plot / land at auction",
-  "lat": 55.932712,
-  "lng": -3.4698424,
-  "price": 112000,
-  "bedrooms": 4,
-  "postcode": "EH52 5QR",
-  "address": "Plot 1 at Station Road, Broxburn, West Lothian",
-  "detached": false,
-  "floor_area_m2": 478,
-  "plot_parsed": true,
-  "parser_version": 4,
-  "garage": false,
-  "district": "EH52",
-  "source": "auction",
-  "auction": {
-   "house": "Future Property Auctions",
-   "date": "2026-10-08",
-   "basis": "Guide price"
-  },
-  "flags": [
-   "needs_work"
-  ],
-  "property_type": "detached",
-  "kind": "plot",
-  "fetched": "2026-10-03",
-  "first_seen": "2026-10-01",
-  "active": true,
-  "excluded": null
  },
  "auc-futurepropertyauctions-14478730": {
   "id": "auc-futurepropertyauctions-14478730",
@@ -1208,38 +1035,8 @@
   ],
   "property_type": "detached",
   "kind": "plot",
-  "fetched": "2026-10-03",
+  "fetched": "2026-10-04",
   "first_seen": "2026-10-01",
-  "active": true,
-  "excluded": null
- },
- "auc-futurepropertyauctions-14520261": {
-  "id": "auc-futurepropertyauctions-14520261",
-  "url": "https://www.futurepropertyauctions.co.uk/property_details.asp?id=14520261",
-  "title": "Plot / land at auction",
-  "lat": 55.965539,
-  "lng": -2.5536176,
-  "price": 220000,
-  "bedrooms": 3,
-  "postcode": "EH42 1XY",
-  "address": "Plots 7-10 Little Spott Development Site with Planning, Dunbar",
-  "detached": false,
-  "plot_parsed": true,
-  "parser_version": 4,
-  "garage": false,
-  "district": "EH42",
-  "source": "auction",
-  "auction": {
-   "house": "Future Property Auctions",
-   "date": "2026-10-08",
-   "basis": "Opening bid"
-  },
-  "flags": [
-   "needs_work"
-  ],
-  "kind": "plot",
-  "fetched": "2026-10-03",
-  "first_seen": "2026-10-02",
   "active": true,
   "excluded": null
  },
@@ -1264,7 +1061,7 @@
    "basis": "Opening bid"
   },
   "kind": "plot",
-  "fetched": "2026-10-03",
+  "fetched": "2026-10-04",
   "first_seen": "2026-10-02",
   "active": true,
   "excluded": null
@@ -1290,7 +1087,7 @@
    "date": "2026-10-08",
    "basis": "Guide price"
   },
-  "fetched": "2026-10-03",
+  "fetched": "2026-10-04",
   "first_seen": "2026-10-02",
   "active": false,
   "excluded": "bedrooms unknown"
@@ -1321,7 +1118,7 @@
    "needs_work"
   ],
   "kind": "plot",
-  "fetched": "2026-10-03",
+  "fetched": "2026-10-04",
   "first_seen": "2026-10-03",
   "active": false,
   "excluded": "district TD1"
@@ -1347,7 +1144,7 @@
    "basis": "Opening bid"
   },
   "kind": "plot",
-  "fetched": "2026-10-03",
+  "fetched": "2026-10-04",
   "first_seen": "2026-10-03",
   "active": true,
   "excluded": null
@@ -1374,7 +1171,7 @@
    "basis": "Guide price"
   },
   "property_type": "house",
-  "fetched": "2026-10-03",
+  "fetched": "2026-10-04",
   "first_seen": "2026-10-03",
   "active": false,
   "excluded": "bedrooms unknown"
@@ -1400,7 +1197,7 @@
    "basis": "Opening bid"
   },
   "kind": "plot",
-  "fetched": "2026-10-03",
+  "fetched": "2026-10-04",
   "first_seen": "2026-10-03",
   "active": true,
   "excluded": null
@@ -1424,7 +1221,7 @@
    "date": "2026-10-08",
    "basis": "Opening bid"
   },
-  "fetched": "2026-10-03",
+  "fetched": "2026-10-04",
   "first_seen": "2026-10-03",
   "active": true,
   "excluded": null,
@@ -1454,35 +1251,10 @@
   },
   "plot_acres": 1.18,
   "kind": "plot",
-  "fetched": "2026-10-03",
+  "fetched": "2026-10-04",
   "first_seen": "2026-10-03",
   "active": true,
   "excluded": null
- },
- "auc-futurepropertyauctions-14491990": {
-  "id": "auc-futurepropertyauctions-14491990",
-  "url": "https://www.futurepropertyauctions.co.uk/property_details.asp?id=14491990",
-  "title": "property at auction",
-  "lat": 55.770167,
-  "lng": -2.0039112,
-  "price": 213000,
-  "postcode": "TD15 1BN",
-  "address": "72-74 Marygate, Let Portfolio Investment, Berwick-upon-Tweed",
-  "detached": false,
-  "plot_parsed": true,
-  "parser_version": 4,
-  "garage": false,
-  "district": "TD15",
-  "source": "auction",
-  "auction": {
-   "house": "Future Property Auctions",
-   "date": "2026-10-15",
-   "basis": "Guide price"
-  },
-  "fetched": "2026-10-03",
-  "first_seen": "2026-10-03",
-  "active": false,
-  "excluded": "bedrooms unknown"
  },
  "auc-futurepropertyauctions-14514855": {
   "id": "auc-futurepropertyauctions-14514855",
@@ -1509,7 +1281,7 @@
    "needs_work"
   ],
   "property_type": "apartment",
-  "fetched": "2026-10-03",
+  "fetched": "2026-10-04",
   "first_seen": "2026-10-03",
   "active": false,
   "excluded": "flat"
@@ -1534,7 +1306,7 @@
    "basis": "Opening bid"
   },
   "kind": "plot",
-  "fetched": "2026-10-03",
+  "fetched": "2026-10-04",
   "first_seen": "2026-10-03",
   "active": true,
   "excluded": null,
@@ -1562,7 +1334,7 @@
    "basis": "Guide price"
   },
   "property_type": "house",
-  "fetched": "2026-10-03",
+  "fetched": "2026-10-04",
   "first_seen": "2026-10-03",
   "active": false,
   "excluded": "bedrooms unknown"
@@ -1588,9 +1360,183 @@
    "basis": "Guide price"
   },
   "property_type": "flat",
-  "fetched": "2026-10-03",
+  "fetched": "2026-10-04",
   "first_seen": "2026-10-03",
   "active": false,
   "excluded": "flat"
+ },
+ "auc-futurepropertyauctions-14495832": {
+  "id": "auc-futurepropertyauctions-14495832",
+  "url": "https://www.futurepropertyauctions.co.uk/property_details.asp?id=14495832",
+  "title": "Plot / land at auction",
+  "lat": 55.773325,
+  "lng": -2.8491394,
+  "price": 30000,
+  "postcode": "TD2 6PU",
+  "address": "Forestry Land, Hartside Wood, Lauder, Scottish Borders",
+  "detached": false,
+  "plot_parsed": true,
+  "parser_version": 4,
+  "garage": false,
+  "district": "TD2",
+  "source": "auction",
+  "auction": {
+   "house": "Future Property Auctions",
+   "date": "2026-10-08",
+   "basis": "Guide price"
+  },
+  "plot_acres": 12.0,
+  "kind": "plot",
+  "fetched": "2026-10-04",
+  "first_seen": "2026-10-04",
+  "active": false,
+  "excluded": "district TD2"
+ },
+ "auc-futurepropertyauctions-14504434": {
+  "id": "auc-futurepropertyauctions-14504434",
+  "url": "https://www.futurepropertyauctions.co.uk/property_details.asp?id=14504434",
+  "title": "Plot / land at auction",
+  "lat": 55.773325,
+  "lng": -2.8491394,
+  "price": 120000,
+  "postcode": "TD2 6PU",
+  "address": "Forestry Land, Hartside Wood, Lauder, Scottish Borders",
+  "detached": false,
+  "plot_parsed": true,
+  "parser_version": 4,
+  "garage": false,
+  "district": "TD2",
+  "source": "auction",
+  "auction": {
+   "house": "Future Property Auctions",
+   "date": "2026-10-08",
+   "basis": "Guide price"
+  },
+  "plot_acres": 22.0,
+  "kind": "plot",
+  "fetched": "2026-10-04",
+  "first_seen": "2026-10-04",
+  "active": false,
+  "excluded": "district TD2"
+ },
+ "auc-futurepropertyauctions-14488165": {
+  "id": "auc-futurepropertyauctions-14488165",
+  "url": "https://www.futurepropertyauctions.co.uk/property_details.asp?id=14488165",
+  "title": "Plot / land at auction",
+  "lat": 55.894172,
+  "lng": -3.1623191,
+  "price": 327000,
+  "postcode": "EH17 8BJ",
+  "address": "Site at Burdiehouse Road, Edinburgh",
+  "detached": false,
+  "plot_parsed": true,
+  "parser_version": 4,
+  "garage": false,
+  "district": "EH17",
+  "source": "auction",
+  "auction": {
+   "house": "Future Property Auctions",
+   "date": "2026-10-08",
+   "basis": "Guide price"
+  },
+  "flags": [
+   "needs_work"
+  ],
+  "property_type": "flat",
+  "kind": "plot",
+  "fetched": "2026-10-04",
+  "first_seen": "2026-10-04",
+  "active": true,
+  "excluded": null
+ },
+ "auc-futurepropertyauctions-14519309": {
+  "id": "auc-futurepropertyauctions-14519309",
+  "url": "https://www.futurepropertyauctions.co.uk/property_details.asp?id=14519309",
+  "title": "3 bed flat at auction",
+  "price": 125000,
+  "bedrooms": 3,
+  "postcode": "DG12 6DS",
+  "address": "2-4 Church Street, Annan",
+  "detached": false,
+  "floor_area_m2": 83,
+  "plot_parsed": true,
+  "parser_version": 4,
+  "garage": false,
+  "district": "DG12",
+  "source": "auction",
+  "auction": {
+   "house": "Future Property Auctions",
+   "date": "2026-10-08",
+   "basis": "Opening bid"
+  },
+  "flags": [
+   "needs_work"
+  ],
+  "property_type": "flat",
+  "fetched": "2026-10-04",
+  "first_seen": "2026-10-04",
+  "active": false,
+  "excluded": "flat"
+ },
+ "auc-futurepropertyauctions-14504587": {
+  "id": "auc-futurepropertyauctions-14504587",
+  "url": "https://www.futurepropertyauctions.co.uk/property_details.asp?id=14504587",
+  "title": "property at auction",
+  "lat": 55.422726,
+  "lng": -2.7870434,
+  "price": 80000,
+  "postcode": "TD9 9BU",
+  "address": "45 High Street, Hawick, Scottish Borders",
+  "detached": false,
+  "floor_area_m2": 88,
+  "epc": {
+   "band": "G"
+  },
+  "plot_parsed": true,
+  "parser_version": 4,
+  "garage": false,
+  "district": "TD9",
+  "source": "auction",
+  "auction": {
+   "house": "Future Property Auctions",
+   "date": "2026-10-08",
+   "basis": "Opening bid"
+  },
+  "fetched": "2026-10-04",
+  "first_seen": "2026-10-04",
+  "active": false,
+  "excluded": "bedrooms unknown"
+ },
+ "auc-futurepropertyauctions-9948621": {
+  "id": "auc-futurepropertyauctions-9948621",
+  "url": "https://www.futurepropertyauctions.co.uk/property_details.asp?id=9948621",
+  "title": "Plot / land at auction",
+  "lat": 55.932637,
+  "lng": -3.4697887,
+  "price": 91000,
+  "bedrooms": 4,
+  "postcode": "EH52 5QR",
+  "address": "Plot 2 Station Road Development Plot, Broxburn, West Lothian",
+  "detached": false,
+  "floor_area_m2": 387,
+  "plot_parsed": true,
+  "parser_version": 4,
+  "garage": false,
+  "district": "EH52",
+  "source": "auction",
+  "auction": {
+   "house": "Future Property Auctions",
+   "date": "2026-10-22",
+   "basis": "Guide price"
+  },
+  "flags": [
+   "needs_work"
+  ],
+  "property_type": "detached",
+  "kind": "plot",
+  "fetched": "2026-10-04",
+  "first_seen": "2026-10-04",
+  "active": true,
+  "excluded": null
  }
 }
