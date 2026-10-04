@@ -31691,9 +31691,9 @@
   "address": "25/1 Murieston Crescent, Edinburgh, EH11 2LL",
   "postcode": "EH11 2LL",
   "bedrooms": 2,
-  "image": "https://espc.com/images?i=https://media.scottishhomereports.com/MediaServer/PropertyMarketing/584030/MainImage/584030_0.202609041207.jpg&width=1200&height=800",
-  "price": 275000,
-  "price_qualifier": "Offers Over",
+  "image": "https://espc.com/images?i=https://media.scottishhomereports.com/MediaServer/PropertyMarketing/584030/MainImage/584030_0.202609291350.jpg&width=1200&height=800",
+  "price": 270000,
+  "price_qualifier": "Fixed Price",
   "property_type": "flat",
   "detached": false,
   "garage": false,
@@ -31702,13 +31702,24 @@
    [
     "2026-09-29",
     275000
+   ],
+   [
+    "2026-10-04",
+    270000
    ]
   ],
-  "fetched": "2026-09-29",
+  "fetched": "2026-10-04",
   "first_seen": "2026-09-29",
   "active": false,
-  "excluded": "no longer listed",
-  "last_seen": "2026-10-02"
+  "excluded": "flat",
+  "last_seen": "2026-10-04",
+  "bathrooms": 1,
+  "floor_area_m2": 67,
+  "epc": {
+   "band": "D"
+  },
+  "plot_parsed": true,
+  "parser_version": 4
  },
  "36392436": {
   "id": "36392436",
@@ -31735,7 +31746,7 @@
   "fetched": "2026-09-29",
   "first_seen": "2026-09-29",
   "active": false,
-  "excluded": "flat",
+  "excluded": "no longer listed",
   "last_seen": "2026-10-04"
  },
  "36394818": {
