@@ -40,7 +40,10 @@ jobs:
 
   refresh:
     needs: test
-    if: github.event_name != 'push'
+    # Scheduled and manual refreshes run even if a test fails: the code hasn't changed since it was
+    # pushed (and tested then), so a failure here is usually the test itself, and blocking the
+    # refresh would leave the listings going stale. The failed test still turns the run red.
+    if: ${{ !cancelled() && github.event_name != 'push' }}
     runs-on: ubuntu-latest
     timeout-minutes: 150
     outputs:
@@ -85,11 +88,12 @@ jobs:
 
   deploy:
     needs: [test, refresh]
-    # Deploy after a refresh, or after a push to the default branch.
+    # Deploy after a refresh, or after a push to the default branch once its tests pass.
     if: >-
-      always() && needs.test.result == 'success' &&
-      (needs.refresh.result == 'success' ||
-       (github.event_name == 'push' && github.ref_name == github.event.repository.default_branch))
+      !cancelled() &&
+      ((github.event_name != 'push' && needs.refresh.result == 'success') ||
+       (github.event_name == 'push' && needs.test.result == 'success' &&
+        github.ref_name == github.event.repository.default_branch))
     runs-on: ubuntu-latest
     environment:
       name: github-pages
