@@ -364,6 +364,12 @@ function renderBanner(): void {
   if (meta.sample) {
     b.innerHTML = `<p><b>Sample data.</b> These are made-up listings to preview the site. Real ESPC listings, SIMD, bus routes and timetable-based journey times appear after the first daily refresh runs.</p><button aria-label="Dismiss">×</button>`;
     b.hidden = false;
+  } else if (meta.generated_at && Date.now() - new Date(meta.generated_at).getTime() > 2 * 86400e3) {
+    // The daily refresh has stopped (a failing check blocks it): say so rather than show old listings as current.
+    const when = new Date(meta.generated_at).toLocaleDateString("en-GB", { dateStyle: "medium" });
+    b.innerHTML = `<p><b>Listings last updated ${esc(when)}.</b> The daily refresh hasn't run since, so new homes are missing and some shown may be sold.</p><button aria-label="Dismiss">×</button>`;
+    b.className = "banner warn";
+    b.hidden = false;
   } else if (errs.length) {
     b.innerHTML = `<p>Last refresh couldn't update: <b>${errs.map(esc).join(", ")}</b>. Showing the most recent data available.</p><button aria-label="Dismiss">×</button>`;
     b.className = "banner warn";

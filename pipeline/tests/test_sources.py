@@ -80,16 +80,16 @@ def test_lot_links_and_prefilter():
 
 
 def test_parse_lot():
-    rec = auctions.parse_lot(LOT, "https://www.futurepropertyauctions.co.uk/lot_details.asp?id=5001", "Future Property Auctions")
+    rec = auctions.parse_lot(LOT, "https://www.futurepropertyauctions.co.uk/lot_details.asp?id=5001", "Future Property Auctions", TODAY)
     assert rec["source"] == "auction" and rec["id"].startswith("auc-")
     assert rec["price"] == 210000 and rec["auction"]["basis"] == "Opening bid"
-    assert rec["auction"]["date"] == "2026-10-08" or rec["auction"]["date"] >= dt.date.today().isoformat()
+    assert rec["auction"]["date"] == "2026-10-08"
     assert rec["bedrooms"] == 3 and rec["district"] == "EH14"
     assert set(rec["flags"]) == {"motivated", "needs_work"}
     assert espc.rejection(rec["title"], rec.get("property_type", ""), rec["bedrooms"], rec["district"]) is None
     # The site's navigation ("Repossessions") must not flag an ordinary lot.
     plain = LOT.replace("requiring modernisation, sold on behalf of the heritable creditor", "in good order")
-    assert "flags" not in auctions.parse_lot(plain, "https://x/lot_details.asp?id=9", "FPA")
+    assert "flags" not in auctions.parse_lot(plain, "https://x/lot_details.asp?id=9", "FPA", TODAY)
 
 
 def test_auction_date_prefers_auction_context():

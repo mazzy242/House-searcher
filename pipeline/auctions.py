@@ -148,7 +148,7 @@ def prefilter(hint: str | None) -> str | None:
     return espc.rejection(hint[:300], beds=beds, district=district, beds_required=False)
 
 
-def parse_lot(html: str, url: str, house: str) -> dict:
+def parse_lot(html: str, url: str, house: str, today: dt.date | None = None) -> dict:
     rec = espc.parse_property(html, url)
     for k in ("title", "address"):
         if rec.get(k):
@@ -162,7 +162,7 @@ def parse_lot(html: str, url: str, house: str) -> dict:
     if price:
         rec["price"] = price
     rec.pop("price_qualifier", None)
-    rec["auction"] = {"house": house, "date": auction_date(text), "basis": basis or "Guide price"}
+    rec["auction"] = {"house": house, "date": auction_date(text, today), "basis": basis or "Guide price"}
     # A lot page describes one property, so its body text is the description. Drop menus,
     # headers, footers and links first: auction sites have "Repossessions" in their navigation.
     for tag in soup(["nav", "header", "footer", "a", "form"]):
