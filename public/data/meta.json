@@ -1,6 +1,6 @@
 {
- "generated_at": "2026-11-21T13:35+00:00",
- "listing_count": 732,
+ "generated_at": "2026-11-22T13:27+00:00",
+ "listing_count": 731,
  "waverley": {
   "name": "Edinburgh Waverley",
   "lat": 55.95196,
@@ -10,27 +10,27 @@
  "sources": {
   "catchments": {
    "detail": "ND: https://edinburghcouncilmaps.info/arcgis/rest/services/AdminBoundaries/MiscBoundaries/MapServer/6; RC: https://edinburghcouncilmaps.info/arcgis/rest/services/AdminBoundaries/MiscBoundaries/MapServer/7",
-   "updated": "2026-11-21T13:27+00:00"
+   "updated": "2026-11-22T13:20+00:00"
   },
   "osm_transit": {
    "updated": "2026-11-16T14:50+00:00"
   },
   "gtfs": {
-   "updated": "2026-11-21T13:28+00:00",
+   "updated": "2026-11-22T13:21+00:00",
    "service_date": "2026-11-26"
   },
   "espc": {
-   "updated": "2026-11-21T13:33+00:00"
+   "updated": "2026-11-22T13:26+00:00"
   },
   "simd": {
-   "updated": "2026-11-21T13:27+00:00",
+   "updated": "2026-11-22T13:20+00:00",
    "detail": "https://maps.gov.scot/server/rest/services/ScotGov/PeopleSociety/MapServer/7/query"
   },
   "auctions": {
-   "updated": "2026-11-21T13:35+00:00"
+   "updated": "2026-11-22T13:27+00:00"
   },
   "primary_catchments": {
-   "updated": "2026-11-21T13:27+00:00"
+   "updated": "2026-11-22T13:20+00:00"
   }
  },
  "travel_assumptions": {
