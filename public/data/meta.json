@@ -1,36 +1,38 @@
 {
- "generated_at": "2026-11-22T13:27+00:00",
- "listing_count": 731,
+ "generated_at": "2026-11-23T16:20+00:00",
+ "listing_count": 728,
  "waverley": {
   "name": "Edinburgh Waverley",
   "lat": 55.95196,
   "lng": -3.18992
  },
- "errors": {},
+ "errors": {
+  "osm_transit": "all Overpass servers failed: https://overpass-api.de/api/interpreter: 502 Server Error: Bad Gateway for url: https://overpass-api.de/api/interpreter | https://overpass-api.de/api/interpreter: 502 Server Error: Bad Gateway for url: https://overpass-api.de/api/interpreter | https://overpass.kumi.systems/api/interpreter: 502 Server Error: Bad Gateway for url: https://overpass.kumi.systems/api/interpreter | https://maps.mail.ru/osm/tools/overpass/api/interpreter: 504 Server Error: Gateway Time-out f"
+ },
  "sources": {
   "catchments": {
    "detail": "ND: https://edinburghcouncilmaps.info/arcgis/rest/services/AdminBoundaries/MiscBoundaries/MapServer/6; RC: https://edinburghcouncilmaps.info/arcgis/rest/services/AdminBoundaries/MiscBoundaries/MapServer/7",
-   "updated": "2026-11-22T13:20+00:00"
+   "updated": "2026-11-23T15:57+00:00"
   },
   "osm_transit": {
    "updated": "2026-11-16T14:50+00:00"
   },
   "gtfs": {
-   "updated": "2026-11-22T13:21+00:00",
+   "updated": "2026-11-23T16:13+00:00",
    "service_date": "2026-11-26"
   },
   "espc": {
-   "updated": "2026-11-22T13:26+00:00"
+   "updated": "2026-11-23T16:19+00:00"
   },
   "simd": {
-   "updated": "2026-11-22T13:20+00:00",
+   "updated": "2026-11-23T15:57+00:00",
    "detail": "https://maps.gov.scot/server/rest/services/ScotGov/PeopleSociety/MapServer/7/query"
   },
   "auctions": {
-   "updated": "2026-11-22T13:27+00:00"
+   "updated": "2026-11-23T16:20+00:00"
   },
   "primary_catchments": {
-   "updated": "2026-11-22T13:20+00:00"
+   "updated": "2026-11-23T15:57+00:00"
   }
  },
  "travel_assumptions": {

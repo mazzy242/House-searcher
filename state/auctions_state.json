@@ -1,58 +1,4 @@
 {
- "auc-futurepropertyauctions-14497736": {
-  "id": "auc-futurepropertyauctions-14497736",
-  "url": "https://www.futurepropertyauctions.co.uk/property_details.asp?id=14497736",
-  "title": "property at auction",
-  "price": 60000,
-  "postcode": "TD1 1RZ",
-  "address": "113-117 High Street, Galashiels",
-  "detached": false,
-  "floor_area_m2": 1100,
-  "plot_parsed": true,
-  "parser_version": 4,
-  "garage": false,
-  "district": "TD1",
-  "source": "auction",
-  "auction": {
-   "house": "Future Property Auctions",
-   "date": "2026-12-03",
-   "basis": "Guide price"
-  },
-  "flags": [
-   "needs_work"
-  ],
-  "fetched": "2026-11-22",
-  "first_seen": "2026-10-01",
-  "active": false,
-  "excluded": "bedrooms unknown"
- },
- "auc-futurepropertyauctions-14511302": {
-  "id": "auc-futurepropertyauctions-14511302",
-  "url": "https://www.futurepropertyauctions.co.uk/property_details.asp?id=14511302",
-  "title": "5 bed property at auction",
-  "price": 864000,
-  "bedrooms": 5,
-  "postcode": "EH16 5SW",
-  "address": "70 and 70a Kingston Avenue, Edinburgh",
-  "detached": false,
-  "plot_parsed": true,
-  "parser_version": 4,
-  "garage": false,
-  "district": "EH16",
-  "source": "auction",
-  "auction": {
-   "house": "Future Property Auctions",
-   "date": "2026-12-03",
-   "basis": "Guide price"
-  },
-  "fetched": "2026-11-22",
-  "first_seen": "2026-10-05",
-  "active": true,
-  "excluded": null,
-  "lat": 55.919789,
-  "lng": -3.149276,
-  "approx_location": true
- },
  "auc-futurepropertyauctions-14514855": {
   "id": "auc-futurepropertyauctions-14514855",
   "url": "https://www.futurepropertyauctions.co.uk/property_details.asp?id=14514855",
@@ -78,7 +24,7 @@
    "needs_work"
   ],
   "property_type": "apartment",
-  "fetched": "2026-11-22",
+  "fetched": "2026-11-23",
   "first_seen": "2026-10-07",
   "active": false,
   "excluded": "flat"
@@ -108,7 +54,7 @@
    "basis": "Guide price"
   },
   "property_type": "flat",
-  "fetched": "2026-11-22",
+  "fetched": "2026-11-23",
   "first_seen": "2026-11-16",
   "active": false,
   "excluded": "flat"
@@ -136,7 +82,7 @@
    "basis": "Guide price"
   },
   "property_type": "flat",
-  "fetched": "2026-11-22",
+  "fetched": "2026-11-23",
   "first_seen": "2026-11-16",
   "active": false,
   "excluded": "flat"
@@ -166,7 +112,7 @@
    "needs_work"
   ],
   "kind": "plot",
-  "fetched": "2026-11-22",
+  "fetched": "2026-11-23",
   "first_seen": "2026-11-16",
   "active": true,
   "excluded": null,
@@ -196,7 +142,7 @@
   },
   "property_type": "house",
   "kind": "plot",
-  "fetched": "2026-11-22",
+  "fetched": "2026-11-23",
   "first_seen": "2026-11-16",
   "active": true,
   "excluded": null,
@@ -224,7 +170,7 @@
    "basis": "Guide price"
   },
   "property_type": "terraced",
-  "fetched": "2026-11-22",
+  "fetched": "2026-11-23",
   "first_seen": "2026-11-16",
   "active": false,
   "excluded": "district KY14"
@@ -250,7 +196,7 @@
    "basis": "Guide price"
   },
   "property_type": "detached",
-  "fetched": "2026-11-22",
+  "fetched": "2026-11-23",
   "first_seen": "2026-11-16",
   "active": false,
   "excluded": "district AB42"
@@ -279,7 +225,7 @@
    "needs_work"
   ],
   "property_type": "semi-detached",
-  "fetched": "2026-11-22",
+  "fetched": "2026-11-23",
   "first_seen": "2026-11-16",
   "active": false,
   "excluded": "district DD8"
@@ -305,7 +251,7 @@
    "date": "2026-11-26",
    "basis": "Guide price"
   },
-  "fetched": "2026-11-22",
+  "fetched": "2026-11-23",
   "first_seen": "2026-11-16",
   "active": false,
   "excluded": "flat"
@@ -333,7 +279,7 @@
    "needs_work"
   ],
   "property_type": "flat",
-  "fetched": "2026-11-22",
+  "fetched": "2026-11-23",
   "first_seen": "2026-11-16",
   "active": false,
   "excluded": "flat"
@@ -358,7 +304,7 @@
    "basis": "Guide price"
   },
   "property_type": "flat",
-  "fetched": "2026-11-22",
+  "fetched": "2026-11-23",
   "first_seen": "2026-11-16",
   "active": false,
   "excluded": "flat"
@@ -384,7 +330,7 @@
    "date": "2026-11-26",
    "basis": "Guide price"
   },
-  "fetched": "2026-11-22",
+  "fetched": "2026-11-23",
   "first_seen": "2026-11-16",
   "active": false,
   "excluded": "flat"
@@ -413,7 +359,7 @@
    "basis": "Guide price"
   },
   "property_type": "house",
-  "fetched": "2026-11-22",
+  "fetched": "2026-11-23",
   "first_seen": "2026-11-16",
   "active": false,
   "excluded": "bedrooms unknown"
@@ -439,7 +385,7 @@
    "basis": "Guide price"
   },
   "property_type": "flat",
-  "fetched": "2026-11-22",
+  "fetched": "2026-11-23",
   "first_seen": "2026-11-16",
   "active": false,
   "excluded": "flat"
@@ -468,7 +414,7 @@
    "needs_work"
   ],
   "property_type": "cottage",
-  "fetched": "2026-11-22",
+  "fetched": "2026-11-23",
   "first_seen": "2026-11-16",
   "active": false,
   "excluded": "district G66"
@@ -494,7 +440,7 @@
    "basis": "Guide price"
   },
   "property_type": "flat",
-  "fetched": "2026-11-22",
+  "fetched": "2026-11-23",
   "first_seen": "2026-11-16",
   "active": false,
   "excluded": "flat"
@@ -519,7 +465,7 @@
    "basis": "Guide price"
   },
   "property_type": "semi-detached",
-  "fetched": "2026-11-22",
+  "fetched": "2026-11-23",
   "first_seen": "2026-11-16",
   "active": false,
   "excluded": "district PA1"
@@ -545,7 +491,7 @@
    "basis": "Guide price"
   },
   "property_type": "house",
-  "fetched": "2026-11-22",
+  "fetched": "2026-11-23",
   "first_seen": "2026-11-16",
   "active": false,
   "excluded": "bedrooms unknown"
@@ -571,7 +517,7 @@
    "basis": "Guide price"
   },
   "property_type": "terraced",
-  "fetched": "2026-11-22",
+  "fetched": "2026-11-23",
   "first_seen": "2026-11-16",
   "active": true,
   "excluded": null,
@@ -600,7 +546,7 @@
    "date": "2026-12-17",
    "basis": "Guide price"
   },
-  "fetched": "2026-11-22",
+  "fetched": "2026-11-23",
   "first_seen": "2026-11-16",
   "active": false,
   "excluded": "flat"
@@ -626,7 +572,7 @@
    "basis": "Guide price"
   },
   "property_type": "flat",
-  "fetched": "2026-11-22",
+  "fetched": "2026-11-23",
   "first_seen": "2026-11-16",
   "active": false,
   "excluded": "flat"
@@ -652,7 +598,7 @@
    "basis": "Guide price"
   },
   "property_type": "terraced",
-  "fetched": "2026-11-22",
+  "fetched": "2026-11-23",
   "first_seen": "2026-11-16",
   "active": true,
   "excluded": null,
@@ -683,7 +629,7 @@
    "needs_work"
   ],
   "property_type": "semi-detached",
-  "fetched": "2026-11-22",
+  "fetched": "2026-11-23",
   "first_seen": "2026-11-16",
   "active": false,
   "excluded": "district KY8"
@@ -712,7 +658,7 @@
    "needs_work"
   ],
   "property_type": "flat",
-  "fetched": "2026-11-22",
+  "fetched": "2026-11-23",
   "first_seen": "2026-11-16",
   "active": false,
   "excluded": "flat"
@@ -738,7 +684,7 @@
    "basis": "Guide price"
   },
   "property_type": "semi-detached",
-  "fetched": "2026-11-22",
+  "fetched": "2026-11-23",
   "first_seen": "2026-11-16",
   "active": false,
   "excluded": "1 bedroom"
@@ -764,7 +710,7 @@
    "basis": "Guide price"
   },
   "property_type": "house",
-  "fetched": "2026-11-22",
+  "fetched": "2026-11-23",
   "first_seen": "2026-11-16",
   "active": false,
   "excluded": "bedrooms unknown"
@@ -795,7 +741,7 @@
    "needs_work"
   ],
   "property_type": "house",
-  "fetched": "2026-11-22",
+  "fetched": "2026-11-23",
   "first_seen": "2026-11-17",
   "active": false,
   "excluded": "district TD9"
@@ -820,7 +766,7 @@
    "basis": "Guide price"
   },
   "property_type": "terraced",
-  "fetched": "2026-11-22",
+  "fetched": "2026-11-23",
   "first_seen": "2026-11-17",
   "active": false,
   "excluded": "1 bedroom"
@@ -847,7 +793,7 @@
    "date": "2026-11-26",
    "basis": "Guide price"
   },
-  "fetched": "2026-11-22",
+  "fetched": "2026-11-23",
   "first_seen": "2026-11-17",
   "active": false,
   "excluded": "district IV54"
@@ -873,7 +819,7 @@
    "date": "2026-11-26",
    "basis": "Guide price"
   },
-  "fetched": "2026-11-22",
+  "fetched": "2026-11-23",
   "first_seen": "2026-11-18",
   "active": false,
   "excluded": "bedrooms unknown"
@@ -903,7 +849,7 @@
   "flags": [
    "needs_work"
   ],
-  "fetched": "2026-11-22",
+  "fetched": "2026-11-23",
   "first_seen": "2026-11-18",
   "active": false,
   "excluded": "bedrooms unknown"
@@ -931,7 +877,7 @@
    "date": "2026-12-17",
    "basis": "Guide price"
   },
-  "fetched": "2026-11-22",
+  "fetched": "2026-11-23",
   "first_seen": "2026-11-18",
   "active": false,
   "excluded": "flat"
@@ -957,7 +903,7 @@
    "basis": "Guide price"
   },
   "kind": "plot",
-  "fetched": "2026-11-22",
+  "fetched": "2026-11-23",
   "first_seen": "2026-11-19",
   "active": false,
   "excluded": "district TD2"
@@ -986,37 +932,10 @@
    "needs_work"
   ],
   "property_type": "flat",
-  "fetched": "2026-11-22",
+  "fetched": "2026-11-23",
   "first_seen": "2026-11-19",
   "active": false,
   "excluded": "flat"
- },
- "auc-futurepropertyauctions-14525684": {
-  "id": "auc-futurepropertyauctions-14525684",
-  "url": "https://www.futurepropertyauctions.co.uk/property_details.asp?id=14525684",
-  "title": "Plot / land at auction",
-  "lat": 55.932205,
-  "lng": -3.4799143,
-  "price": 13250,
-  "postcode": "EH52 5LU",
-  "address": "Portfolio of Land at Blyth Road, Broxburn, West Lothian",
-  "detached": false,
-  "plot_parsed": true,
-  "parser_version": 4,
-  "garage": false,
-  "district": "EH52",
-  "source": "auction",
-  "auction": {
-   "house": "Future Property Auctions",
-   "date": "2026-12-03",
-   "basis": "Guide price"
-  },
-  "plot_acres": 1.14,
-  "kind": "plot",
-  "fetched": "2026-11-22",
-  "first_seen": "2026-11-19",
-  "active": true,
-  "excluded": null
  },
  "auc-futurepropertyauctions-14495832": {
   "id": "auc-futurepropertyauctions-14495832",
@@ -1040,37 +959,10 @@
   },
   "plot_acres": 12.0,
   "kind": "plot",
-  "fetched": "2026-11-22",
+  "fetched": "2026-11-23",
   "first_seen": "2026-11-19",
   "active": false,
   "excluded": "district TD2"
- },
- "auc-futurepropertyauctions-14463719": {
-  "id": "auc-futurepropertyauctions-14463719",
-  "url": "https://www.futurepropertyauctions.co.uk/property_details.asp?id=14463719",
-  "title": "Plot / land at auction",
-  "lat": 55.927554,
-  "lng": -3.4959505,
-  "price": 5000,
-  "postcode": "EH52 5SU",
-  "address": "Land Adjacent to A89, Uphall, Broxburn, West Lothian",
-  "detached": false,
-  "plot_parsed": true,
-  "parser_version": 4,
-  "garage": false,
-  "district": "EH52",
-  "source": "auction",
-  "auction": {
-   "house": "Future Property Auctions",
-   "date": "2026-12-03",
-   "basis": "Guide price"
-  },
-  "plot_acres": 1.18,
-  "kind": "plot",
-  "fetched": "2026-11-22",
-  "first_seen": "2026-11-19",
-  "active": true,
-  "excluded": null
  },
  "auc-auctionhouse-153619": {
   "id": "auc-auctionhouse-153619",
@@ -1095,7 +987,7 @@
    "date": "2026-11-26",
    "basis": "Guide price"
   },
-  "fetched": "2026-11-22",
+  "fetched": "2026-11-23",
   "first_seen": "2026-11-19",
   "active": false,
   "excluded": "flat"
@@ -1123,7 +1015,7 @@
   "flags": [
    "needs_work"
   ],
-  "fetched": "2026-11-22",
+  "fetched": "2026-11-23",
   "first_seen": "2026-11-19",
   "active": false,
   "excluded": "district IV2"
@@ -1147,7 +1039,7 @@
    "date": "2026-11-26",
    "basis": "Guide price"
   },
-  "fetched": "2026-11-22",
+  "fetched": "2026-11-23",
   "first_seen": "2026-11-20",
   "active": false,
   "excluded": "bedrooms unknown"
@@ -1172,7 +1064,7 @@
    "basis": "Guide price"
   },
   "kind": "plot",
-  "fetched": "2026-11-22",
+  "fetched": "2026-11-23",
   "first_seen": "2026-11-20",
   "active": true,
   "excluded": null,
@@ -1201,65 +1093,7 @@
    "date": "2026-12-03",
    "basis": "Guide price"
   },
-  "fetched": "2026-11-22",
-  "first_seen": "2026-11-20",
-  "active": false,
-  "excluded": "bedrooms unknown"
- },
- "auc-futurepropertyauctions-14478764": {
-  "id": "auc-futurepropertyauctions-14478764",
-  "url": "https://www.futurepropertyauctions.co.uk/property_details.asp?id=14478764",
-  "title": "Plot / land at auction",
-  "lat": 55.932631,
-  "lng": -3.4698263,
-  "price": 87000,
-  "bedrooms": 4,
-  "postcode": "EH52 5QR",
-  "address": "Plot 3, Station Road, Broxburn, West Lothian",
-  "detached": false,
-  "floor_area_m2": 438,
-  "plot_parsed": true,
-  "parser_version": 4,
-  "garage": false,
-  "district": "EH52",
-  "source": "auction",
-  "auction": {
-   "house": "Future Property Auctions",
-   "date": "2026-12-03",
-   "basis": "Guide price"
-  },
-  "flags": [
-   "needs_work"
-  ],
-  "property_type": "detached",
-  "kind": "plot",
-  "fetched": "2026-11-22",
-  "first_seen": "2026-11-20",
-  "active": true,
-  "excluded": null
- },
- "auc-futurepropertyauctions-14525973": {
-  "id": "auc-futurepropertyauctions-14525973",
-  "url": "https://www.futurepropertyauctions.co.uk/property_details.asp?id=14525973",
-  "title": "property at auction",
-  "lat": 55.81332,
-  "lng": -3.45433,
-  "price": 135000,
-  "postcode": "EH27 8DH",
-  "address": "Colzium Farm Steading, Kirknewton",
-  "detached": false,
-  "plot_parsed": true,
-  "parser_version": 4,
-  "garage": false,
-  "district": "EH27",
-  "source": "auction",
-  "auction": {
-   "house": "Future Property Auctions",
-   "date": "2026-12-03",
-   "basis": "Guide price"
-  },
-  "plot_acres": 10.0,
-  "fetched": "2026-11-22",
+  "fetched": "2026-11-23",
   "first_seen": "2026-11-20",
   "active": false,
   "excluded": "bedrooms unknown"
@@ -1288,7 +1122,7 @@
    "needs_work"
   ],
   "property_type": "house",
-  "fetched": "2026-11-22",
+  "fetched": "2026-11-23",
   "first_seen": "2026-11-20",
   "active": true,
   "excluded": null,
@@ -1322,7 +1156,7 @@
    "needs_work"
   ],
   "kind": "plot",
-  "fetched": "2026-11-22",
+  "fetched": "2026-11-23",
   "first_seen": "2026-11-21",
   "active": false,
   "excluded": "district TD1"
@@ -1349,7 +1183,7 @@
   },
   "plot_acres": 22.0,
   "kind": "plot",
-  "fetched": "2026-11-22",
+  "fetched": "2026-11-23",
   "first_seen": "2026-11-21",
   "active": false,
   "excluded": "district TD2"
@@ -1375,7 +1209,7 @@
    "basis": "Guide price"
   },
   "kind": "plot",
-  "fetched": "2026-11-22",
+  "fetched": "2026-11-23",
   "first_seen": "2026-11-21",
   "active": false,
   "excluded": "district TD2"
@@ -1405,7 +1239,7 @@
   ],
   "property_type": "detached",
   "kind": "plot",
-  "fetched": "2026-11-22",
+  "fetched": "2026-11-23",
   "first_seen": "2026-11-21",
   "active": true,
   "excluded": null
@@ -1433,7 +1267,7 @@
   },
   "plot_acres": 0.22,
   "kind": "plot",
-  "fetched": "2026-11-22",
+  "fetched": "2026-11-23",
   "first_seen": "2026-11-21",
   "active": false,
   "excluded": "district EH46"
@@ -1463,94 +1297,10 @@
   ],
   "property_type": "flat",
   "kind": "plot",
-  "fetched": "2026-11-22",
+  "fetched": "2026-11-23",
   "first_seen": "2026-11-22",
   "active": true,
   "excluded": null
- },
- "auc-futurepropertyauctions-9948621": {
-  "id": "auc-futurepropertyauctions-9948621",
-  "url": "https://www.futurepropertyauctions.co.uk/property_details.asp?id=9948621",
-  "title": "Plot / land at auction",
-  "lat": 55.932637,
-  "lng": -3.4697887,
-  "price": 73000,
-  "bedrooms": 4,
-  "postcode": "EH52 5QR",
-  "address": "Plot 2 Station Road Development Plot, Broxburn, West Lothian",
-  "detached": false,
-  "floor_area_m2": 387,
-  "plot_parsed": true,
-  "parser_version": 4,
-  "garage": false,
-  "district": "EH52",
-  "source": "auction",
-  "auction": {
-   "house": "Future Property Auctions",
-   "date": "2026-12-17",
-   "basis": "Guide price"
-  },
-  "flags": [
-   "needs_work"
-  ],
-  "property_type": "detached",
-  "kind": "plot",
-  "fetched": "2026-11-22",
-  "first_seen": "2026-11-22",
-  "active": true,
-  "excluded": null
- },
- "auc-futurepropertyauctions-14507919": {
-  "id": "auc-futurepropertyauctions-14507919",
-  "url": "https://www.futurepropertyauctions.co.uk/property_details.asp?id=14507919",
-  "title": "Plot / land at auction",
-  "lat": 55.773325,
-  "lng": -2.8491394,
-  "price": 2000,
-  "postcode": "TD2 6PU",
-  "address": "Plot 7 Hartside Wood, Lauder, Scottish Borders",
-  "detached": false,
-  "plot_parsed": true,
-  "parser_version": 4,
-  "garage": false,
-  "district": "TD2",
-  "source": "auction",
-  "auction": {
-   "house": "Future Property Auctions",
-   "date": "2026-12-03",
-   "basis": "Guide price"
-  },
-  "kind": "plot",
-  "fetched": "2026-11-22",
-  "first_seen": "2026-11-22",
-  "active": false,
-  "excluded": "district TD2"
- },
- "auc-futurepropertyauctions-14474310": {
-  "id": "auc-futurepropertyauctions-14474310",
-  "url": "https://www.futurepropertyauctions.co.uk/property_details.asp?id=14474310",
-  "title": "Plot / land at auction",
-  "lat": 55.773325,
-  "lng": -2.8491394,
-  "price": 2000,
-  "postcode": "TD2 6PU",
-  "address": "Plot 6 Hartside Wood, Lauder, Scottish Borders",
-  "detached": false,
-  "plot_parsed": true,
-  "parser_version": 4,
-  "garage": false,
-  "district": "TD2",
-  "source": "auction",
-  "auction": {
-   "house": "Future Property Auctions",
-   "date": "2026-12-03",
-   "basis": "Guide price"
-  },
-  "kind": "plot",
-  "fetched": "2026-11-22",
-  "first_seen": "2026-11-22",
-  "active": false,
-  "excluded": "district TD2"
  },
  "auc-futurepropertyauctions-14524171": {
   "id": "auc-futurepropertyauctions-14524171",
@@ -1574,7 +1324,7 @@
   },
   "property_type": "detached",
   "kind": "plot",
-  "fetched": "2026-11-22",
+  "fetched": "2026-11-23",
   "first_seen": "2026-11-22",
   "active": false,
   "excluded": "district EH45"
@@ -1605,7 +1355,7 @@
   ],
   "property_type": "detached",
   "kind": "plot",
-  "fetched": "2026-11-22",
+  "fetched": "2026-11-23",
   "first_seen": "2026-11-22",
   "active": true,
   "excluded": null
@@ -1635,7 +1385,7 @@
    "needs_work"
   ],
   "kind": "plot",
-  "fetched": "2026-11-22",
+  "fetched": "2026-11-23",
   "first_seen": "2026-11-22",
   "active": true,
   "excluded": null
@@ -1662,26 +1412,27 @@
    "basis": "Guide price"
   },
   "property_type": "house",
-  "fetched": "2026-11-22",
+  "fetched": "2026-11-23",
   "first_seen": "2026-11-22",
   "active": false,
   "excluded": "bedrooms unknown"
  },
- "auc-futurepropertyauctions-14520720": {
-  "id": "auc-futurepropertyauctions-14520720",
-  "url": "https://www.futurepropertyauctions.co.uk/property_details.asp?id=14520720",
-  "title": "3 bed terraced at auction",
-  "lat": 55.862401,
-  "lng": -3.5540047,
-  "price": 99000,
-  "bedrooms": 3,
-  "postcode": "EH55 8TX",
-  "address": "50 Polbeth Crescent, Polbeth, West Lothian",
+ "auc-futurepropertyauctions-14112312": {
+  "id": "auc-futurepropertyauctions-14112312",
+  "url": "https://www.futurepropertyauctions.co.uk/property_details.asp?id=14112312",
+  "title": "Plot / land at auction",
+  "lat": 55.932563,
+  "lng": -3.4699537,
+  "price": 68000,
+  "bedrooms": 4,
+  "postcode": "EH52 5QR",
+  "address": "Station Road, Plot 4, Broxburn",
   "detached": false,
+  "floor_area_m2": 324,
   "plot_parsed": true,
   "parser_version": 4,
   "garage": false,
-  "district": "EH55",
+  "district": "EH52",
   "source": "auction",
   "auction": {
    "house": "Future Property Auctions",
@@ -1691,10 +1442,274 @@
   "flags": [
    "needs_work"
   ],
-  "property_type": "terraced",
-  "fetched": "2026-11-22",
-  "first_seen": "2026-11-22",
+  "property_type": "detached",
+  "kind": "plot",
+  "fetched": "2026-11-23",
+  "first_seen": "2026-11-23",
+  "active": true,
+  "excluded": null
+ },
+ "auc-futurepropertyauctions-14526500": {
+  "id": "auc-futurepropertyauctions-14526500",
+  "url": "https://www.futurepropertyauctions.co.uk/property_details.asp?id=14526500",
+  "title": "Plot / land at auction",
+  "lat": 55.827239,
+  "lng": -3.2174411,
+  "price": 8000,
+  "postcode": "EH26 8JA",
+  "address": "Land to the East of St Mungos Church, Penicuik",
+  "detached": false,
+  "plot_parsed": true,
+  "parser_version": 4,
+  "garage": false,
+  "district": "EH26",
+  "source": "auction",
+  "auction": {
+   "house": "Future Property Auctions",
+   "date": "2026-12-03",
+   "basis": "Guide price"
+  },
+  "plot_acres": 0.68,
+  "kind": "plot",
+  "fetched": "2026-11-23",
+  "first_seen": "2026-11-23",
+  "active": true,
+  "excluded": null
+ },
+ "auc-futurepropertyauctions-14513971": {
+  "id": "auc-futurepropertyauctions-14513971",
+  "url": "https://www.futurepropertyauctions.co.uk/property_details.asp?id=14513971",
+  "title": "property at auction",
+  "lat": 55.618179,
+  "lng": -2.8118375,
+  "price": 125000,
+  "postcode": "TD1 1RZ",
+  "address": "53 High Street, Sally Beauty Investment, Galashiels",
+  "detached": false,
+  "floor_area_m2": 160,
+  "plot_parsed": true,
+  "parser_version": 4,
+  "garage": false,
+  "district": "TD1",
+  "source": "auction",
+  "auction": {
+   "house": "Future Property Auctions",
+   "date": "2026-12-03",
+   "basis": "Guide price"
+  },
+  "fetched": "2026-11-23",
+  "first_seen": "2026-11-23",
   "active": false,
-  "excluded": "district EH55"
+  "excluded": "bedrooms unknown"
+ },
+ "auc-futurepropertyauctions-14527027": {
+  "id": "auc-futurepropertyauctions-14527027",
+  "url": "https://www.futurepropertyauctions.co.uk/property_details.asp?id=14527027",
+  "title": "3 bed semi-detached at auction",
+  "price": 85000,
+  "bedrooms": 3,
+  "postcode": "TD5 8QQ",
+  "address": "Hillview, Main Street, Morebattle, Kelso",
+  "detached": false,
+  "floor_area_m2": 81,
+  "epc": {
+   "band": "F"
+  },
+  "plot_parsed": true,
+  "parser_version": 4,
+  "garage": false,
+  "district": "TD5",
+  "source": "auction",
+  "auction": {
+   "house": "Future Property Auctions",
+   "date": "2026-12-03",
+   "basis": "Guide price"
+  },
+  "property_type": "semi-detached",
+  "fetched": "2026-11-23",
+  "first_seen": "2026-11-23",
+  "active": false,
+  "excluded": "district TD5"
+ },
+ "auc-futurepropertyauctions-14498399": {
+  "id": "auc-futurepropertyauctions-14498399",
+  "url": "https://www.futurepropertyauctions.co.uk/property_details.asp?id=14498399",
+  "title": "Plot / land at auction",
+  "lat": 55.932712,
+  "lng": -3.4698424,
+  "price": 97000,
+  "bedrooms": 4,
+  "postcode": "EH52 5QR",
+  "address": "Plot 1 at Station Road, Broxburn, West Lothian",
+  "detached": false,
+  "floor_area_m2": 478,
+  "plot_parsed": true,
+  "parser_version": 4,
+  "garage": false,
+  "district": "EH52",
+  "source": "auction",
+  "auction": {
+   "house": "Future Property Auctions",
+   "date": "2026-12-03",
+   "basis": "Guide price"
+  },
+  "flags": [
+   "needs_work"
+  ],
+  "property_type": "detached",
+  "kind": "plot",
+  "fetched": "2026-11-23",
+  "first_seen": "2026-11-23",
+  "active": true,
+  "excluded": null
+ },
+ "auc-futurepropertyauctions-14478815": {
+  "id": "auc-futurepropertyauctions-14478815",
+  "url": "https://www.futurepropertyauctions.co.uk/property_details.asp?id=14478815",
+  "title": "Plot / land at auction",
+  "lat": 55.91535,
+  "lng": -3.0884243,
+  "price": 247000,
+  "bedrooms": 4,
+  "postcode": "EH22 1SB",
+  "address": "3 Harelaw, Development with Full Planning, Shawfair, Danderhall, Edinburgh",
+  "detached": false,
+  "floor_area_m2": 275,
+  "plot_parsed": true,
+  "parser_version": 4,
+  "garage": false,
+  "district": "EH22",
+  "source": "auction",
+  "auction": {
+   "house": "Future Property Auctions",
+   "date": "2026-12-03",
+   "basis": "Guide price"
+  },
+  "flags": [
+   "needs_work"
+  ],
+  "property_type": "house",
+  "kind": "plot",
+  "fetched": "2026-11-23",
+  "first_seen": "2026-11-23",
+  "active": true,
+  "excluded": null
+ },
+ "auc-futurepropertyauctions-14525106": {
+  "id": "auc-futurepropertyauctions-14525106",
+  "url": "https://www.futurepropertyauctions.co.uk/property_details.asp?id=14525106",
+  "title": "3 bed semi-detached at auction",
+  "lat": 55.471725,
+  "lng": -2.5480171,
+  "price": 55000,
+  "bedrooms": 3,
+  "postcode": "TD8 6JY",
+  "address": "15 Howden Crescent, Jedburgh, Scottish Borders",
+  "detached": false,
+  "plot_parsed": true,
+  "parser_version": 4,
+  "garage": false,
+  "district": "TD8",
+  "source": "auction",
+  "auction": {
+   "house": "Future Property Auctions",
+   "date": "2026-12-03",
+   "basis": "Guide price"
+  },
+  "property_type": "semi-detached",
+  "fetched": "2026-11-23",
+  "first_seen": "2026-11-23",
+  "active": false,
+  "excluded": "district TD8"
+ },
+ "auc-futurepropertyauctions-14115406": {
+  "id": "auc-futurepropertyauctions-14115406",
+  "url": "https://www.futurepropertyauctions.co.uk/property_details.asp?id=14115406",
+  "title": "property at auction",
+  "lat": 55.93722100240695,
+  "lng": -2.9617034399505626,
+  "price": 8000,
+  "postcode": "EH33 2LB",
+  "address": "Portfolio of Sites at West Windygoul Gardens, Tranent",
+  "detached": false,
+  "floor_area_m2": 238,
+  "plot_parsed": true,
+  "parser_version": 4,
+  "garage": false,
+  "district": "EH33",
+  "source": "auction",
+  "auction": {
+   "house": "Future Property Auctions",
+   "date": "2026-11-26",
+   "basis": "Guide price"
+  },
+  "plot_acres": 0.06,
+  "flags": [
+   "needs_work"
+  ],
+  "fetched": "2026-11-23",
+  "first_seen": "2026-11-23",
+  "active": false,
+  "excluded": "bedrooms unknown"
+ },
+ "auc-auctionhouse-154557": {
+  "id": "auc-auctionhouse-154557",
+  "url": "https://www.auctionhouse.co.uk/scotland/auction/lot/154557",
+  "title": "1 bed flat at auction",
+  "image": "https://www.auctionhouse.co.uk/lot-image/958360",
+  "price": 4487,
+  "bedrooms": 1,
+  "postcode": "KA25 7BA",
+  "address": "13 Milton Road, Kilbirnie, North Ayrshire KA25 7BA",
+  "detached": false,
+  "epc": {
+   "band": "D"
+  },
+  "plot_parsed": true,
+  "parser_version": 4,
+  "garage": false,
+  "district": "KA25",
+  "source": "auction",
+  "auction": {
+   "house": "Auction House Scotland",
+   "date": "2026-11-26",
+   "basis": "Guide price"
+  },
+  "flags": [
+   "needs_work"
+  ],
+  "property_type": "flat",
+  "fetched": "2026-11-23",
+  "first_seen": "2026-11-23",
+  "active": false,
+  "excluded": "flat"
+ },
+ "auc-auctionhouse-154697": {
+  "id": "auc-auctionhouse-154697",
+  "url": "https://www.auctionhouse.co.uk/scotland/auction/lot/154697",
+  "title": "house at auction",
+  "image": "https://www.auctionhouse.co.uk/lot-image/960561",
+  "price": 14000,
+  "postcode": "PA31 8LZ",
+  "address": "5 Argyll Street, Lochgilphead, Argyll And Bute PA31 8LZ",
+  "detached": false,
+  "plot_parsed": true,
+  "parser_version": 4,
+  "garage": false,
+  "district": "PA31",
+  "source": "auction",
+  "auction": {
+   "house": "Auction House Scotland",
+   "date": "2026-12-17",
+   "basis": "Guide price"
+  },
+  "flags": [
+   "needs_work"
+  ],
+  "property_type": "house",
+  "fetched": "2026-11-23",
+  "first_seen": "2026-11-23",
+  "active": false,
+  "excluded": "bedrooms unknown"
  }
 }
