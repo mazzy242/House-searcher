@@ -56495,12 +56495,13 @@
   ],
   "fetched": "2026-11-24",
   "first_seen": "2026-09-29",
-  "active": true,
+  "active": false,
   "last_seen": "2026-11-25",
   "epc": {
    "band": "D"
   },
-  "plot_parsed": true
+  "plot_parsed": true,
+  "excluded": "no longer listed"
  },
  "36413213": {
   "id": "36413213",
@@ -57676,7 +57677,7 @@
   "fetched": "2026-10-01",
   "first_seen": "2026-10-01",
   "active": false,
-  "excluded": "flat",
+  "excluded": "no longer listed",
   "last_seen": "2026-11-25"
  },
  "36413369": {
@@ -71827,7 +71828,7 @@
   "fetched": "2026-11-16",
   "first_seen": "2026-11-16",
   "active": false,
-  "excluded": "flat",
+  "excluded": "no longer listed",
   "last_seen": "2026-11-25"
  },
  "36422752": {
@@ -81540,7 +81541,7 @@
   "fetched": "2026-11-16",
   "first_seen": "2026-11-16",
   "active": false,
-  "excluded": "flat",
+  "excluded": "no longer listed",
   "last_seen": "2026-11-25"
  },
  "36417953": {
@@ -90606,8 +90607,9 @@
   ],
   "fetched": "2026-11-24",
   "first_seen": "2026-11-16",
-  "active": true,
-  "last_seen": "2026-11-25"
+  "active": false,
+  "last_seen": "2026-11-25",
+  "excluded": "no longer listed"
  },
  "36387685": {
   "id": "36387685",
@@ -97524,7 +97526,7 @@
   "fetched": "2026-11-18",
   "first_seen": "2026-11-18",
   "active": false,
-  "excluded": "flat",
+  "excluded": "no longer listed",
   "last_seen": "2026-11-25"
  },
  "36422484": {
@@ -97868,8 +97870,9 @@
   ],
   "fetched": "2026-11-18",
   "first_seen": "2026-11-18",
-  "active": true,
-  "last_seen": "2026-11-25"
+  "active": false,
+  "last_seen": "2026-11-25",
+  "excluded": "no longer listed"
  },
  "36382338": {
   "id": "36382338",
@@ -98698,8 +98701,9 @@
   ],
   "fetched": "2026-11-19",
   "first_seen": "2026-11-19",
-  "active": true,
-  "last_seen": "2026-11-25"
+  "active": false,
+  "last_seen": "2026-11-25",
+  "excluded": "no longer listed"
  },
  "36423221": {
   "id": "36423221",
@@ -103453,6 +103457,390 @@
    [
     "2026-11-25",
     230000
+   ]
+  ],
+  "fetched": "2026-11-25",
+  "first_seen": "2026-11-25",
+  "active": true,
+  "last_seen": "2026-11-25"
+ },
+ "36423049": {
+  "id": "36423049",
+  "url": "https://espc.com/property/2-milligan-road-edinburgh-eh16-4zd/36423049",
+  "title": "3 bed end terraced house for sale in The Wisp",
+  "lat": 55.925919,
+  "lng": -3.116794,
+  "address": "2 Milligan Road, Edinburgh, EH16 4ZD",
+  "postcode": "EH16 4ZD",
+  "price": 265000,
+  "bathrooms": 2,
+  "bedrooms": 3,
+  "image": "https://espc.com/images?i=https://media.scottishhomereports.com/MediaServer/PropertyMarketing/590071/MainImage/590071_0.202611251905.jpg&width=1200&height=800",
+  "epc": {
+   "band": "B"
+  },
+  "price_qualifier": "Offers Over",
+  "property_type": "terraced",
+  "detached": false,
+  "plot_parsed": true,
+  "parser_version": 4,
+  "garage": false,
+  "district": "EH16",
+  "price_history": [
+   [
+    "2026-11-25",
+    265000
+   ]
+  ],
+  "fetched": "2026-11-25",
+  "first_seen": "2026-11-25",
+  "active": true,
+  "last_seen": "2026-11-25"
+ },
+ "36417908": {
+  "id": "36417908",
+  "url": "https://espc.com/property/18-11-blackwood-crescent-edinburgh-eh9-1qy/36417908",
+  "title": "2 bed third floor flat for sale in Newington",
+  "lat": 55.9384,
+  "lng": -3.180101,
+  "address": "18/11 Blackwood Crescent, Edinburgh, EH9 1QY",
+  "postcode": "EH9 1QY",
+  "price": 270000,
+  "bathrooms": 2,
+  "floor_area_m2": 59,
+  "bedrooms": 2,
+  "image": "https://espc.com/images?i=https://media.scottishhomereports.com/MediaServer/PropertyMarketing/588823/MainImage/588823_0.202611251805.jpg&width=1200&height=800",
+  "epc": {
+   "band": "C"
+  },
+  "price_qualifier": "Offers Over",
+  "property_type": "flat",
+  "detached": false,
+  "plot_parsed": true,
+  "parser_version": 4,
+  "garage": false,
+  "district": "EH9",
+  "price_history": [
+   [
+    "2026-11-25",
+    270000
+   ]
+  ],
+  "fetched": "2026-11-25",
+  "first_seen": "2026-11-25",
+  "active": false,
+  "excluded": "flat",
+  "last_seen": "2026-11-25"
+ },
+ "50013259": {
+  "id": "50013259",
+  "url": "https://espc.com/property/93-7-liberton-gardens-edinburgh-eh16-6nd/50013259",
+  "title": "2 bed first floor flat for sale in Liberton",
+  "lat": 55.906376,
+  "lng": -3.164282,
+  "address": "93/7 Liberton Gardens, Edinburgh, EH16 6ND",
+  "postcode": "EH16 6ND",
+  "price": 160000,
+  "bathrooms": 1,
+  "floor_area_m2": 51,
+  "bedrooms": 2,
+  "image": "https://images.espc.com/espc/property-large/ZGFtOi8vLzAxZTVmZjc4LTNmNjMtNGJlMi04MTA3LTIxYzhhMGY1MjRmOA.webp",
+  "epc": {
+   "band": "C"
+  },
+  "price_qualifier": "Offers Over",
+  "property_type": "flat",
+  "detached": false,
+  "plot_parsed": true,
+  "parser_version": 4,
+  "garage": false,
+  "district": "EH16",
+  "price_history": [
+   [
+    "2026-11-25",
+    160000
+   ]
+  ],
+  "fetched": "2026-11-25",
+  "first_seen": "2026-11-25",
+  "active": false,
+  "excluded": "flat",
+  "last_seen": "2026-11-25"
+ },
+ "36405108": {
+  "id": "36405108",
+  "url": "https://espc.com/property/flat-8-4-friars-croft-crook-eh30-9ee/36405108",
+  "title": "2 bed flat for sale in South Queensferry",
+  "lat": 55.990092,
+  "lng": -3.419188,
+  "address": "Flat 8, 4 Friars Croft Crook, South Queensferry, EH30 9EE",
+  "postcode": "EH30 9EE",
+  "price": 275000,
+  "floor_area_m2": 73,
+  "bedrooms": 2,
+  "image": "https://images.espc.com/espc/property-large/ZGFtOi8vLzA5YTU0NDJhLWQxOWUtNDlkNy04NzMxLTAzODc5ODUyMzVlMA.webp",
+  "epc": {
+   "band": "B"
+  },
+  "price_qualifier": "Offers Over",
+  "property_type": "flat",
+  "detached": false,
+  "plot_parsed": true,
+  "parser_version": 4,
+  "garage": false,
+  "district": "EH30",
+  "price_history": [
+   [
+    "2026-11-25",
+    275000
+   ]
+  ],
+  "fetched": "2026-11-25",
+  "first_seen": "2026-11-25",
+  "active": false,
+  "excluded": "flat",
+  "last_seen": "2026-11-25"
+ },
+ "36423641": {
+  "id": "36423641",
+  "url": "https://espc.com/property/17-1-moat-drive-edinburgh-eh14-1nu/36423641",
+  "title": "2 bed ground floor flat for sale in Slateford",
+  "lat": 55.932884,
+  "lng": -3.239743,
+  "address": "17/1 Moat Drive, Edinburgh, EH14 1NU",
+  "postcode": "EH14 1NU",
+  "price": 170000,
+  "bathrooms": 1,
+  "floor_area_m2": 61,
+  "bedrooms": 2,
+  "image": "https://espc.com/images?i=https://media.scottishhomereports.com/MediaServer/PropertyMarketing/590068/MainImage/590068_0.202611251705.jpg&width=1200&height=800",
+  "epc": {
+   "band": "C"
+  },
+  "price_qualifier": "Offers Over",
+  "property_type": "flat",
+  "detached": false,
+  "plot_parsed": true,
+  "parser_version": 4,
+  "garage": false,
+  "district": "EH14",
+  "price_history": [
+   [
+    "2026-11-25",
+    170000
+   ]
+  ],
+  "fetched": "2026-11-25",
+  "first_seen": "2026-11-25",
+  "active": false,
+  "excluded": "flat",
+  "last_seen": "2026-11-25"
+ },
+ "36423640": {
+  "id": "36423640",
+  "url": "https://espc.com/property/36-5-stenhouse-gardens-north-edinburgh-eh11-3el/36423640",
+  "title": "2 bed second floor flat for sale in Stenhouse",
+  "lat": 55.93446,
+  "lng": -3.262185,
+  "address": "36/5 Stenhouse Gardens North, Edinburgh, EH11 3EL",
+  "postcode": "EH11 3EL",
+  "price": 170000,
+  "bathrooms": 1,
+  "floor_area_m2": 60,
+  "bedrooms": 2,
+  "image": "https://espc.com/images?i=https://media.scottishhomereports.com/MediaServer/PropertyMarketing/590067/MainImage/590067_0.202611251705.jpg&width=1200&height=800",
+  "epc": {
+   "band": "C"
+  },
+  "price_qualifier": "Offers Over",
+  "property_type": "flat",
+  "detached": false,
+  "plot_parsed": true,
+  "parser_version": 4,
+  "garage": false,
+  "district": "EH11",
+  "price_history": [
+   [
+    "2026-11-25",
+    170000
+   ]
+  ],
+  "fetched": "2026-11-25",
+  "first_seen": "2026-11-25",
+  "active": false,
+  "excluded": "flat",
+  "last_seen": "2026-11-25"
+ },
+ "36423638": {
+  "id": "36423638",
+  "url": "https://espc.com/property/2f4-29-springvalley-terrace-edinburgh-eh10-4pz/36423638",
+  "title": "1 bed second floor flat for sale in Morningside",
+  "lat": 55.929546,
+  "lng": -3.211793,
+  "address": "2f4 29 Springvalley Terrace, Edinburgh, EH10 4PZ",
+  "postcode": "EH10 4PZ",
+  "price": 239999,
+  "bathrooms": 1,
+  "floor_area_m2": 51,
+  "bedrooms": 1,
+  "image": "https://espc.com/images?i=https://media.scottishhomereports.com/MediaServer/PropertyMarketing/590066/MainImage/590066_0.202611251705.jpg&width=1200&height=800",
+  "epc": {
+   "band": "C"
+  },
+  "price_qualifier": "Offers Over",
+  "property_type": "flat",
+  "detached": false,
+  "flags": [
+   "motivated"
+  ],
+  "plot_parsed": true,
+  "parser_version": 4,
+  "garage": false,
+  "district": "EH10",
+  "price_history": [
+   [
+    "2026-11-25",
+    239999
+   ]
+  ],
+  "fetched": "2026-11-25",
+  "first_seen": "2026-11-25",
+  "active": false,
+  "excluded": "flat",
+  "last_seen": "2026-11-25"
+ },
+ "36423639": {
+  "id": "36423639",
+  "url": "https://espc.com/property/7-findlay-cottages-craigentinny-edinburgh-eh7-6he/36423639",
+  "title": "2 bed upper flat for sale in Craigentinny",
+  "lat": 55.964779,
+  "lng": -3.149334,
+  "address": "7 Findlay Cottages, Edinburgh, EH7 6HE",
+  "postcode": "EH7 6HE",
+  "price": 189000,
+  "bathrooms": 1,
+  "floor_area_m2": 69,
+  "bedrooms": 2,
+  "image": "https://espc.com/images?i=https://media.scottishhomereports.com/MediaServer/PropertyMarketing/590065/MainImage/590065_0.202611251810.jpg&width=1200&height=800",
+  "epc": {
+   "band": "C"
+  },
+  "price_qualifier": "Offers Over",
+  "property_type": "flat",
+  "detached": false,
+  "plot_parsed": true,
+  "parser_version": 4,
+  "garage": false,
+  "district": "EH7",
+  "price_history": [
+   [
+    "2026-11-25",
+    189000
+   ]
+  ],
+  "fetched": "2026-11-25",
+  "first_seen": "2026-11-25",
+  "active": false,
+  "excluded": "flat",
+  "last_seen": "2026-11-25"
+ },
+ "36423036": {
+  "id": "36423036",
+  "url": "https://espc.com/property/flat-14-6-arneil-drive-edinburgh-eh5-2gr/36423036",
+  "title": "1 bed third floor flat for sale in Crewe",
+  "lat": 55.971169,
+  "lng": -3.235107,
+  "address": "Flat 14, 6 Arneil Drive, Edinburgh, EH5 2GR",
+  "postcode": "EH5 2GR",
+  "price": 180000,
+  "bathrooms": 1,
+  "floor_area_m2": 47,
+  "bedrooms": 1,
+  "image": "https://espc.com/images?i=https://media.scottishhomereports.com/MediaServer/PropertyMarketing/589793/MainImage/589793_0.202611251608.jpg&width=1200&height=800",
+  "epc": {
+   "band": "B"
+  },
+  "price_qualifier": "Offers Over",
+  "property_type": "flat",
+  "detached": false,
+  "plot_parsed": true,
+  "parser_version": 4,
+  "garage": false,
+  "district": "EH5",
+  "price_history": [
+   [
+    "2026-11-25",
+    180000
+   ]
+  ],
+  "fetched": "2026-11-25",
+  "first_seen": "2026-11-25",
+  "active": false,
+  "excluded": "flat",
+  "last_seen": "2026-11-25"
+ },
+ "36423637": {
+  "id": "36423637",
+  "url": "https://espc.com/property/5-4-alan-breck-gardens-edinburgh-eh4-7jd/36423637",
+  "title": "2 bed first floor flat for sale in Clermiston",
+  "lat": 55.952614,
+  "lng": -3.288348,
+  "address": "5/4 Alan Breck Gardens, Edinburgh, EH4 7JD",
+  "postcode": "EH4 7JD",
+  "price": 170000,
+  "bathrooms": 1,
+  "floor_area_m2": 68,
+  "bedrooms": 2,
+  "image": "https://espc.com/images?i=https://media.scottishhomereports.com/MediaServer/PropertyMarketing/590064/MainImage/590064_0.202611251635.jpg&width=1200&height=800",
+  "epc": {
+   "band": "C"
+  },
+  "price_qualifier": "Offers Over",
+  "property_type": "flat",
+  "detached": false,
+  "plot_parsed": true,
+  "parser_version": 4,
+  "garage": false,
+  "district": "EH4",
+  "price_history": [
+   [
+    "2026-11-25",
+    170000
+   ]
+  ],
+  "fetched": "2026-11-25",
+  "first_seen": "2026-11-25",
+  "active": false,
+  "excluded": "flat",
+  "last_seen": "2026-11-25"
+ },
+ "36423633": {
+  "id": "36423633",
+  "url": "https://espc.com/property/8-bramble-crescent-dunfermline-ky11-8pz/36423633",
+  "title": "3 bed detached house for sale in Dunfermline",
+  "lat": 56.073528,
+  "lng": -3.403247,
+  "address": "8 Bramble Crescent, Dunfermline, KY11 8PZ",
+  "postcode": "KY11 8PZ",
+  "price": 280000,
+  "bathrooms": 1,
+  "bedrooms": 3,
+  "image": "https://espc.com/images?i=https://media.scottishhomereports.com/MediaServer/PropertyMarketing/590063/MainImage/590063_0.202611251606.jpg&width=1200&height=800",
+  "epc": {
+   "band": "B"
+  },
+  "price_qualifier": "Offers Over",
+  "property_type": "detached",
+  "detached": true,
+  "floor_area_m2": 98,
+  "plot_parsed": true,
+  "parser_version": 4,
+  "garage": false,
+  "district": "KY11",
+  "price_history": [
+   [
+    "2026-11-25",
+    280000
    ]
   ],
   "fetched": "2026-11-25",
