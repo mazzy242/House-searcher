@@ -1,8 +1,7 @@
 name: Deploy site
 
 # Builds the site from the branch tip (code + the latest committed data) and publishes it to Pages.
-# Run on its own after each data refresh: late in a long refresh run, deploy-pages stopped finding
-# the artifact it had just been given, while a short fresh run deploys reliably.
+# Started by each data refresh once its data is committed, and called by code pushes.
 on:
   workflow_dispatch:
   workflow_call:
@@ -13,12 +12,8 @@ permissions:
   id-token: write
 
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
-    concurrency: { group: "pages-${{ github.ref }}", cancel-in-progress: false }
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
         with: { ref: "${{ github.ref_name }}" } # the branch tip, with the newest data commit
@@ -29,5 +24,23 @@ jobs:
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v5
         with: { path: dist }
-      - id: deployment
+
+  # A separate job, as in GitHub's own Pages workflow: deploy-pages looks the artifact up by name,
+  # and straight after the upload GitHub sometimes doesn't list it yet ("No artifacts named
+  # github-pages"). If that still happens, wait a minute and try once more.
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    concurrency: { group: "pages-${{ github.ref }}", cancel-in-progress: false }
+    environment:
+      name: github-pages
+      url: ${{ steps.first.outputs.page_url || steps.retry.outputs.page_url }}
+    steps:
+      - id: first
+        continue-on-error: true
+        uses: actions/deploy-pages@v5
+      - if: steps.first.outcome == 'failure'
+        run: sleep 60
+      - id: retry
+        if: steps.first.outcome == 'failure'
         uses: actions/deploy-pages@v5
