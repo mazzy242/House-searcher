@@ -66,8 +66,9 @@ jobs:
         id: build
         continue-on-error: true
         run: python pipeline/build.py ${{ inputs.skip_espc && '--skip-espc' || '' }}
+      # Only when the build failed: a second artifact in the run stopped deploy-pages finding the site's one.
       - name: Upload debug HTML (for fixing the ESPC parser)
-        if: always()
+        if: steps.build.outcome == 'failure'
         uses: actions/upload-artifact@v4
         with:
           name: espc-debug
@@ -106,10 +107,10 @@ jobs:
       - run: npm ci
       - run: npm run build
       - uses: actions/configure-pages@v5
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v5
         with: { path: dist }
       - id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
 
   report:
     needs: [refresh, deploy]
