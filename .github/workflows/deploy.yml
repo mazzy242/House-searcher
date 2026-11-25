@@ -1,0 +1,33 @@
+name: Deploy site
+
+# Builds the site from the branch tip (code + the latest committed data) and publishes it to Pages.
+# Run on its own after each data refresh: late in a long refresh run, deploy-pages stopped finding
+# the artifact it had just been given, while a short fresh run deploys reliably.
+on:
+  workflow_dispatch:
+  workflow_call:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    concurrency: { group: "pages-${{ github.ref }}", cancel-in-progress: false }
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+        with: { ref: "${{ github.ref_name }}" } # the branch tip, with the newest data commit
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+      - run: npm run build
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v5
+        with: { path: dist }
+      - id: deployment
+        uses: actions/deploy-pages@v5

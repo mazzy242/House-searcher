@@ -14,6 +14,7 @@ on:
 
 permissions:
   contents: write
+  actions: write # to start the separate "Deploy site" workflow after a refresh
   pages: write
   id-token: write
 
@@ -86,31 +87,15 @@ jobs:
           # refresh touched them meanwhile, this run's copy (the newest) wins.
           git pull --rebase -X theirs origin "${GITHUB_REF_NAME}"
           git push origin "HEAD:${GITHUB_REF_NAME}"
+      - name: Publish the site (separate "Deploy site" run)
+        env: { GH_TOKEN: "${{ github.token }}" }
+        run: gh workflow run deploy.yml --repo "${GITHUB_REPOSITORY}" --ref "${GITHUB_REF_NAME}"
 
+  # Code pushes deploy here once their tests pass; data refreshes start "Deploy site" themselves.
   deploy:
-    needs: [test, refresh]
-    # Deploy after a refresh, or after a push to the default branch once its tests pass.
-    if: >-
-      !cancelled() &&
-      ((github.event_name != 'push' && needs.refresh.result == 'success') ||
-       (github.event_name == 'push' && needs.test.result == 'success' &&
-        github.ref_name == github.event.repository.default_branch))
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - uses: actions/checkout@v4
-        with: { ref: "${{ github.ref_name }}" } # picks up the data commit made by the refresh job
-      - uses: actions/setup-node@v4
-        with: { node-version: 22, cache: npm }
-      - run: npm ci
-      - run: npm run build
-      - uses: actions/configure-pages@v5
-      - uses: actions/upload-pages-artifact@v5
-        with: { path: dist }
-      - id: deployment
-        uses: actions/deploy-pages@v5
+    needs: test
+    if: github.event_name == 'push' && github.ref_name == github.event.repository.default_branch
+    uses: ./.github/workflows/deploy.yml
 
   report:
     needs: [refresh, deploy]
