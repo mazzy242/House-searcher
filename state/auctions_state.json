@@ -1,445 +1,4 @@
 {
- "auc-auctionhouse-154459": {
-  "id": "auc-auctionhouse-154459",
-  "url": "https://www.auctionhouse.co.uk/scotland/auction/lot/154459",
-  "title": "2 bed flat at auction",
-  "image": "https://www.auctionhouse.co.uk/lot-image/956666",
-  "price": 55000,
-  "bedrooms": 2,
-  "postcode": "EH11 4LE",
-  "address": "36/9, Calder Gardens, Edinburgh, City Of Edinburgh EH11 4LE",
-  "detached": false,
-  "floor_area_m2": 70,
-  "epc": {
-   "band": "A"
-  },
-  "plot_parsed": true,
-  "parser_version": 4,
-  "garage": false,
-  "district": "EH11",
-  "source": "auction",
-  "auction": {
-   "house": "Auction House Scotland",
-   "date": "2026-11-26",
-   "basis": "Guide price"
-  },
-  "property_type": "flat",
-  "fetched": "2026-11-26",
-  "first_seen": "2026-11-16",
-  "active": false,
-  "excluded": "flat"
- },
- "auc-auctionhouse-154605": {
-  "id": "auc-auctionhouse-154605",
-  "url": "https://www.auctionhouse.co.uk/scotland/auction/lot/154605",
-  "title": "2 bed flat at auction",
-  "image": "https://www.auctionhouse.co.uk/lot-image/966464",
-  "bedrooms": 2,
-  "postcode": "AB11 6LN",
-  "address": "21 Portland Street, Aberdeen, Aberdeen City AB11 6LN",
-  "detached": false,
-  "epc": {
-   "band": "C"
-  },
-  "plot_parsed": true,
-  "parser_version": 4,
-  "garage": false,
-  "district": "AB11",
-  "source": "auction",
-  "auction": {
-   "house": "Auction House Scotland",
-   "date": "2026-11-26",
-   "basis": "Guide price"
-  },
-  "property_type": "flat",
-  "fetched": "2026-11-26",
-  "first_seen": "2026-11-16",
-  "active": false,
-  "excluded": "flat"
- },
- "auc-auctionhouse-153546": {
-  "id": "auc-auctionhouse-153546",
-  "url": "https://www.auctionhouse.co.uk/scotland/auction/lot/153546",
-  "title": "Plot / land at auction",
-  "image": "https://www.auctionhouse.co.uk/lot-image/944570",
-  "price": 50000,
-  "postcode": "EH23 4QA",
-  "address": "Plot Adjacent to Harvieston Cottage, Gorebridge, Midlothian EH23 4QA",
-  "property_type": "cottage",
-  "detached": false,
-  "floor_area_m2": 175,
-  "plot_parsed": true,
-  "parser_version": 4,
-  "garage": false,
-  "district": "EH23",
-  "source": "auction",
-  "auction": {
-   "house": "Auction House Scotland",
-   "date": "2026-11-26",
-   "basis": "Guide price"
-  },
-  "flags": [
-   "needs_work"
-  ],
-  "kind": "plot",
-  "fetched": "2026-11-26",
-  "first_seen": "2026-11-16",
-  "active": true,
-  "excluded": null,
-  "lat": 55.831419,
-  "lng": -3.039991,
-  "approx_location": true
- },
- "auc-auctionhouse-154458": {
-  "id": "auc-auctionhouse-154458",
-  "url": "https://www.auctionhouse.co.uk/scotland/auction/lot/154458",
-  "title": "Plot / land at auction",
-  "image": "https://www.auctionhouse.co.uk/lot-image/956638",
-  "price": 85000,
-  "bedrooms": 4,
-  "postcode": "KY3 9TT",
-  "address": "Plot at Burntisland Road, Kinghorn, Burntisland, Fife KY3 9TT",
-  "detached": false,
-  "plot_parsed": true,
-  "parser_version": 4,
-  "garage": false,
-  "district": "KY3",
-  "source": "auction",
-  "auction": {
-   "house": "Auction House Scotland",
-   "date": "2026-11-26",
-   "basis": "Guide price"
-  },
-  "property_type": "house",
-  "kind": "plot",
-  "fetched": "2026-11-26",
-  "first_seen": "2026-11-16",
-  "active": true,
-  "excluded": null,
-  "lat": 56.065546,
-  "lng": -3.18281,
-  "approx_location": true
- },
- "auc-auctionhouse-153610": {
-  "id": "auc-auctionhouse-153610",
-  "url": "https://www.auctionhouse.co.uk/scotland/auction/lot/153610",
-  "title": "2 bed terraced at auction",
-  "image": "https://www.auctionhouse.co.uk/lot-image/945419",
-  "bedrooms": 2,
-  "postcode": "KY14 6DA",
-  "address": "114 High Street, Newburgh, Cupar, Fife KY14 6DA",
-  "detached": false,
-  "plot_parsed": true,
-  "parser_version": 4,
-  "garage": false,
-  "district": "KY14",
-  "source": "auction",
-  "auction": {
-   "house": "Auction House Scotland",
-   "date": "2026-11-26",
-   "basis": "Guide price"
-  },
-  "property_type": "terraced",
-  "fetched": "2026-11-26",
-  "first_seen": "2026-11-16",
-  "active": false,
-  "excluded": "district KY14"
- },
- "auc-auctionhouse-153719": {
-  "id": "auc-auctionhouse-153719",
-  "url": "https://www.auctionhouse.co.uk/scotland/auction/lot/153719",
-  "title": "5 bed detached at auction",
-  "image": "https://www.auctionhouse.co.uk/lot-image/947092",
-  "price": 40000,
-  "bedrooms": 5,
-  "postcode": "AB42 4TN",
-  "address": "12 Coopers Brae, Longside, Peterhead, Aberdeenshire AB42 4TN",
-  "detached": false,
-  "plot_parsed": true,
-  "parser_version": 4,
-  "garage": false,
-  "district": "AB42",
-  "source": "auction",
-  "auction": {
-   "house": "Auction House Scotland",
-   "date": "2026-11-26",
-   "basis": "Guide price"
-  },
-  "property_type": "detached",
-  "fetched": "2026-11-26",
-  "first_seen": "2026-11-16",
-  "active": false,
-  "excluded": "district AB42"
- },
- "auc-auctionhouse-153545": {
-  "id": "auc-auctionhouse-153545",
-  "url": "https://www.auctionhouse.co.uk/scotland/auction/lot/153545",
-  "title": "2 bed semi-detached at auction",
-  "image": "https://www.auctionhouse.co.uk/lot-image/944552",
-  "bedrooms": 2,
-  "postcode": "DD8 1TJ",
-  "address": "Farmhouse 1, Mid Ingliston, Mid Ingliston, Forfar, Angus DD8 1TJ",
-  "detached": false,
-  "floor_area_m2": 750,
-  "plot_parsed": true,
-  "parser_version": 4,
-  "garage": false,
-  "district": "DD8",
-  "source": "auction",
-  "auction": {
-   "house": "Auction House Scotland",
-   "date": "2026-11-26",
-   "basis": "Guide price"
-  },
-  "flags": [
-   "needs_work"
-  ],
-  "property_type": "semi-detached",
-  "fetched": "2026-11-26",
-  "first_seen": "2026-11-16",
-  "active": false,
-  "excluded": "district DD8"
- },
- "auc-auctionhouse-153562": {
-  "id": "auc-auctionhouse-153562",
-  "url": "https://www.auctionhouse.co.uk/scotland/auction/lot/153562",
-  "title": "2 bed flat at auction",
-  "image": "https://www.auctionhouse.co.uk/lot-image/944863",
-  "price": 15000,
-  "bedrooms": 2,
-  "postcode": "PA7 5RX",
-  "address": "Flat 3/2, 29 Kilmartin Gardens, Bishopton, Renfrewshire PA7 5RX",
-  "property_type": "flat",
-  "detached": false,
-  "plot_parsed": true,
-  "parser_version": 4,
-  "garage": false,
-  "district": "PA7",
-  "source": "auction",
-  "auction": {
-   "house": "Auction House Scotland",
-   "date": "2026-11-26",
-   "basis": "Guide price"
-  },
-  "fetched": "2026-11-26",
-  "first_seen": "2026-11-16",
-  "active": false,
-  "excluded": "flat"
- },
- "auc-auctionhouse-153576": {
-  "id": "auc-auctionhouse-153576",
-  "url": "https://www.auctionhouse.co.uk/scotland/auction/lot/153576",
-  "title": "2 bed flat at auction",
-  "image": "https://www.auctionhouse.co.uk/lot-image/944986",
-  "bedrooms": 2,
-  "postcode": "PA17 5BA",
-  "address": "1D, Innes Park Road, Skelmorlie, North Ayrshire PA17 5BA",
-  "detached": false,
-  "plot_parsed": true,
-  "parser_version": 4,
-  "garage": false,
-  "district": "PA17",
-  "source": "auction",
-  "auction": {
-   "house": "Auction House Scotland",
-   "date": "2026-11-26",
-   "basis": "Guide price"
-  },
-  "flags": [
-   "needs_work"
-  ],
-  "property_type": "flat",
-  "fetched": "2026-11-26",
-  "first_seen": "2026-11-16",
-  "active": false,
-  "excluded": "flat"
- },
- "auc-auctionhouse-153612": {
-  "id": "auc-auctionhouse-153612",
-  "url": "https://www.auctionhouse.co.uk/scotland/auction/lot/153612",
-  "title": "2 bed flat at auction",
-  "image": "https://www.auctionhouse.co.uk/lot-image/945479",
-  "bedrooms": 2,
-  "postcode": "AB25 1DS",
-  "address": "108 Seamount Court, Aberdeen, Aberdeen City AB25 1DS",
-  "detached": false,
-  "plot_parsed": true,
-  "parser_version": 4,
-  "garage": false,
-  "district": "AB25",
-  "source": "auction",
-  "auction": {
-   "house": "Auction House Scotland",
-   "date": "2026-11-26",
-   "basis": "Guide price"
-  },
-  "property_type": "flat",
-  "fetched": "2026-11-26",
-  "first_seen": "2026-11-16",
-  "active": false,
-  "excluded": "flat"
- },
- "auc-auctionhouse-153614": {
-  "id": "auc-auctionhouse-153614",
-  "url": "https://www.auctionhouse.co.uk/scotland/auction/lot/153614",
-  "title": "2 bed flat at auction",
-  "image": "https://www.auctionhouse.co.uk/lot-image/945511",
-  "price": 10172,
-  "bedrooms": 2,
-  "postcode": "G20 0JJ",
-  "address": "Flat R, 63 Cumlodden Drive, Glasgow, Glasgow City G20 0JJ",
-  "property_type": "flat",
-  "detached": false,
-  "plot_parsed": true,
-  "parser_version": 4,
-  "garage": false,
-  "district": "G20",
-  "source": "auction",
-  "auction": {
-   "house": "Auction House Scotland",
-   "date": "2026-11-26",
-   "basis": "Guide price"
-  },
-  "fetched": "2026-11-26",
-  "first_seen": "2026-11-16",
-  "active": false,
-  "excluded": "flat"
- },
- "auc-auctionhouse-153615": {
-  "id": "auc-auctionhouse-153615",
-  "url": "https://www.auctionhouse.co.uk/scotland/auction/lot/153615",
-  "title": "house at auction",
-  "image": "https://www.auctionhouse.co.uk/lot-image/945530",
-  "price": 6600,
-  "postcode": "AB10 6EY",
-  "address": "1 Holburn Road, Aberdeen, Aberdeen City AB10 6EY",
-  "detached": false,
-  "floor_area_m2": 41,
-  "epc": {
-   "band": "E"
-  },
-  "plot_parsed": true,
-  "parser_version": 4,
-  "garage": false,
-  "district": "AB10",
-  "source": "auction",
-  "auction": {
-   "house": "Auction House Scotland",
-   "date": "2026-11-26",
-   "basis": "Guide price"
-  },
-  "property_type": "house",
-  "fetched": "2026-11-26",
-  "first_seen": "2026-11-16",
-  "active": false,
-  "excluded": "bedrooms unknown"
- },
- "auc-auctionhouse-153683": {
-  "id": "auc-auctionhouse-153683",
-  "url": "https://www.auctionhouse.co.uk/scotland/auction/lot/153683",
-  "title": "2 bed flat at auction",
-  "image": "https://www.auctionhouse.co.uk/lot-image/946424",
-  "price": 40000,
-  "bedrooms": 2,
-  "postcode": "AB11 6AY",
-  "address": "28D, Crown Street, Aberdeen, Aberdeen City AB11 6AY",
-  "detached": false,
-  "plot_parsed": true,
-  "parser_version": 4,
-  "garage": false,
-  "district": "AB11",
-  "source": "auction",
-  "auction": {
-   "house": "Auction House Scotland",
-   "date": "2026-11-26",
-   "basis": "Guide price"
-  },
-  "property_type": "flat",
-  "fetched": "2026-11-26",
-  "first_seen": "2026-11-16",
-  "active": false,
-  "excluded": "flat"
- },
- "auc-auctionhouse-153781": {
-  "id": "auc-auctionhouse-153781",
-  "url": "https://www.auctionhouse.co.uk/scotland/auction/lot/153781",
-  "title": "2 bed cottage at auction",
-  "image": "https://www.auctionhouse.co.uk/lot-image/947856",
-  "price": 8975,
-  "bedrooms": 2,
-  "postcode": "G66 2JY",
-  "address": "55 Meiklehill Road, Kirkintilloch, Glasgow, East Dunbartonshire G66 2JY",
-  "detached": false,
-  "plot_parsed": true,
-  "parser_version": 4,
-  "garage": false,
-  "district": "G66",
-  "source": "auction",
-  "auction": {
-   "house": "Auction House Scotland",
-   "date": "2026-11-26",
-   "basis": "Guide price"
-  },
-  "flags": [
-   "needs_work"
-  ],
-  "property_type": "cottage",
-  "fetched": "2026-11-26",
-  "first_seen": "2026-11-16",
-  "active": false,
-  "excluded": "district G66"
- },
- "auc-auctionhouse-153839": {
-  "id": "auc-auctionhouse-153839",
-  "url": "https://www.auctionhouse.co.uk/scotland/auction/lot/153839",
-  "title": "2 bed flat at auction",
-  "image": "https://www.auctionhouse.co.uk/lot-image/948572",
-  "price": 70000,
-  "bedrooms": 2,
-  "postcode": "DD2 3BH",
-  "address": "2B, Balgay Street, Dundee, Dundee City DD2 3BH",
-  "detached": false,
-  "plot_parsed": true,
-  "parser_version": 4,
-  "garage": false,
-  "district": "DD2",
-  "source": "auction",
-  "auction": {
-   "house": "Auction House Scotland",
-   "date": "2026-11-26",
-   "basis": "Guide price"
-  },
-  "property_type": "flat",
-  "fetched": "2026-11-26",
-  "first_seen": "2026-11-16",
-  "active": false,
-  "excluded": "flat"
- },
- "auc-auctionhouse-154149": {
-  "id": "auc-auctionhouse-154149",
-  "url": "https://www.auctionhouse.co.uk/scotland/auction/lot/154149",
-  "title": "3 bed semi-detached at auction",
-  "image": "https://www.auctionhouse.co.uk/lot-image/952369",
-  "bedrooms": 3,
-  "postcode": "PA1 3BG",
-  "address": "368 Glasgow Road, Paisley, Renfrewshire PA1 3BG",
-  "detached": false,
-  "plot_parsed": true,
-  "parser_version": 4,
-  "garage": false,
-  "district": "PA1",
-  "source": "auction",
-  "auction": {
-   "house": "Auction House Scotland",
-   "date": "2026-11-26",
-   "basis": "Guide price"
-  },
-  "property_type": "semi-detached",
-  "fetched": "2026-11-26",
-  "first_seen": "2026-11-16",
-  "active": false,
-  "excluded": "district PA1"
- },
  "auc-auctionhouse-154639": {
   "id": "auc-auctionhouse-154639",
   "url": "https://www.auctionhouse.co.uk/scotland/auction/lot/154639",
@@ -461,7 +20,7 @@
    "basis": "Guide price"
   },
   "property_type": "house",
-  "fetched": "2026-11-26",
+  "fetched": "2026-11-27",
   "first_seen": "2026-11-16",
   "active": false,
   "excluded": "bedrooms unknown"
@@ -487,7 +46,7 @@
    "basis": "Guide price"
   },
   "property_type": "terraced",
-  "fetched": "2026-11-26",
+  "fetched": "2026-11-27",
   "first_seen": "2026-11-16",
   "active": true,
   "excluded": null,
@@ -516,7 +75,7 @@
    "date": "2026-12-17",
    "basis": "Guide price"
   },
-  "fetched": "2026-11-26",
+  "fetched": "2026-11-27",
   "first_seen": "2026-11-16",
   "active": false,
   "excluded": "flat"
@@ -542,7 +101,7 @@
    "basis": "Guide price"
   },
   "property_type": "flat",
-  "fetched": "2026-11-26",
+  "fetched": "2026-11-27",
   "first_seen": "2026-11-16",
   "active": false,
   "excluded": "flat"
@@ -568,7 +127,7 @@
    "basis": "Guide price"
   },
   "property_type": "terraced",
-  "fetched": "2026-11-26",
+  "fetched": "2026-11-27",
   "first_seen": "2026-11-16",
   "active": true,
   "excluded": null,
@@ -599,7 +158,7 @@
    "needs_work"
   ],
   "property_type": "semi-detached",
-  "fetched": "2026-11-26",
+  "fetched": "2026-11-27",
   "first_seen": "2026-11-16",
   "active": false,
   "excluded": "district KY8"
@@ -628,7 +187,7 @@
    "needs_work"
   ],
   "property_type": "flat",
-  "fetched": "2026-11-26",
+  "fetched": "2026-11-27",
   "first_seen": "2026-11-16",
   "active": false,
   "excluded": "flat"
@@ -654,7 +213,7 @@
    "basis": "Guide price"
   },
   "property_type": "semi-detached",
-  "fetched": "2026-11-26",
+  "fetched": "2026-11-27",
   "first_seen": "2026-11-16",
   "active": false,
   "excluded": "1 bedroom"
@@ -680,62 +239,10 @@
    "basis": "Guide price"
   },
   "property_type": "house",
-  "fetched": "2026-11-26",
+  "fetched": "2026-11-27",
   "first_seen": "2026-11-16",
   "active": false,
   "excluded": "bedrooms unknown"
- },
- "auc-auctionhouse-154726": {
-  "id": "auc-auctionhouse-154726",
-  "url": "https://www.auctionhouse.co.uk/scotland/auction/lot/154726",
-  "title": "1 bed terraced at auction",
-  "image": "https://www.auctionhouse.co.uk/lot-image/960952",
-  "bedrooms": 1,
-  "postcode": "ML11 7EE",
-  "address": "12 Whites Neuk, Lanark, South Lanarkshire ML11 7EE",
-  "detached": false,
-  "plot_parsed": true,
-  "parser_version": 4,
-  "garage": false,
-  "district": "ML11",
-  "source": "auction",
-  "auction": {
-   "house": "Auction House Scotland",
-   "date": "2026-11-26",
-   "basis": "Guide price"
-  },
-  "property_type": "terraced",
-  "fetched": "2026-11-26",
-  "first_seen": "2026-11-17",
-  "active": false,
-  "excluded": "1 bedroom"
- },
- "auc-auctionhouse-154325": {
-  "id": "auc-auctionhouse-154325",
-  "url": "https://www.auctionhouse.co.uk/scotland/auction/lot/154325",
-  "title": "3 bed cottage at auction",
-  "image": "https://www.auctionhouse.co.uk/lot-image/954919",
-  "price": 130000,
-  "bedrooms": 3,
-  "postcode": "IV54 8YG",
-  "address": "Canada Cottage, 398 Upper Slumbay, Lochcarron, Strathcarron, Highland IV54 8YG",
-  "property_type": "cottage",
-  "detached": false,
-  "floor_area_m2": 139,
-  "plot_parsed": true,
-  "parser_version": 4,
-  "garage": false,
-  "district": "IV54",
-  "source": "auction",
-  "auction": {
-   "house": "Auction House Scotland",
-   "date": "2026-11-26",
-   "basis": "Guide price"
-  },
-  "fetched": "2026-11-26",
-  "first_seen": "2026-11-17",
-  "active": false,
-  "excluded": "district IV54"
  },
  "auc-auctionhouse-154780": {
   "id": "auc-auctionhouse-154780",
@@ -760,36 +267,8 @@
    "date": "2026-12-17",
    "basis": "Guide price"
   },
-  "fetched": "2026-11-26",
+  "fetched": "2026-11-27",
   "first_seen": "2026-11-18",
-  "active": false,
-  "excluded": "flat"
- },
- "auc-auctionhouse-153619": {
-  "id": "auc-auctionhouse-153619",
-  "url": "https://www.auctionhouse.co.uk/scotland/auction/lot/153619",
-  "title": "2 bed flat at auction",
-  "image": "https://www.auctionhouse.co.uk/lot-image/945582",
-  "bedrooms": 2,
-  "postcode": "PO11 9UA",
-  "address": "Flat A, 109 Southwood Road, Hayling Island, Hampshire PO11 9UA",
-  "property_type": "flat",
-  "detached": false,
-  "epc": {
-   "band": "C"
-  },
-  "plot_parsed": true,
-  "parser_version": 4,
-  "garage": false,
-  "district": "PO11",
-  "source": "auction",
-  "auction": {
-   "house": "Auction House Scotland",
-   "date": "2026-11-26",
-   "basis": "Guide price"
-  },
-  "fetched": "2026-11-26",
-  "first_seen": "2026-11-19",
   "active": false,
   "excluded": "flat"
  },
@@ -816,7 +295,7 @@
   "flags": [
    "needs_work"
   ],
-  "fetched": "2026-11-26",
+  "fetched": "2026-11-27",
   "first_seen": "2026-11-19",
   "active": false,
   "excluded": "district IV2"
@@ -841,7 +320,7 @@
    "basis": "Guide price"
   },
   "kind": "plot",
-  "fetched": "2026-11-26",
+  "fetched": "2026-11-27",
   "first_seen": "2026-11-20",
   "active": true,
   "excluded": null,
@@ -873,39 +352,13 @@
    "needs_work"
   ],
   "property_type": "house",
-  "fetched": "2026-11-26",
+  "fetched": "2026-11-27",
   "first_seen": "2026-11-20",
   "active": true,
   "excluded": null,
   "lat": 56.058777,
   "lng": -3.235325,
   "approx_location": true
- },
- "auc-futurepropertyauctions-14495815": {
-  "id": "auc-futurepropertyauctions-14495815",
-  "url": "https://www.futurepropertyauctions.co.uk/property_details.asp?id=14495815",
-  "title": "Plot / land at auction",
-  "lat": 55.773325,
-  "lng": -2.8491394,
-  "price": 1000,
-  "postcode": "TD2 6PU",
-  "address": "Plot 2 Hartside Wood, Lauder, Scottish Borders",
-  "detached": false,
-  "plot_parsed": true,
-  "parser_version": 4,
-  "garage": false,
-  "district": "TD2",
-  "source": "auction",
-  "auction": {
-   "house": "Future Property Auctions",
-   "date": "2026-12-03",
-   "basis": "Guide price"
-  },
-  "kind": "plot",
-  "fetched": "2026-11-26",
-  "first_seen": "2026-11-21",
-  "active": false,
-  "excluded": "district TD2"
  },
  "auc-futurepropertyauctions-14488165": {
   "id": "auc-futurepropertyauctions-14488165",
@@ -932,7 +385,7 @@
   ],
   "property_type": "flat",
   "kind": "plot",
-  "fetched": "2026-11-26",
+  "fetched": "2026-11-27",
   "first_seen": "2026-11-22",
   "active": true,
   "excluded": null
@@ -963,40 +416,8 @@
   ],
   "property_type": "detached",
   "kind": "plot",
-  "fetched": "2026-11-26",
+  "fetched": "2026-11-27",
   "first_seen": "2026-11-22",
-  "active": true,
-  "excluded": null
- },
- "auc-futurepropertyauctions-14112312": {
-  "id": "auc-futurepropertyauctions-14112312",
-  "url": "https://www.futurepropertyauctions.co.uk/property_details.asp?id=14112312",
-  "title": "Plot / land at auction",
-  "lat": 55.932563,
-  "lng": -3.4699537,
-  "price": 68000,
-  "bedrooms": 4,
-  "postcode": "EH52 5QR",
-  "address": "Station Road, Plot 4, Broxburn",
-  "detached": false,
-  "floor_area_m2": 324,
-  "plot_parsed": true,
-  "parser_version": 4,
-  "garage": false,
-  "district": "EH52",
-  "source": "auction",
-  "auction": {
-   "house": "Future Property Auctions",
-   "date": "2026-12-03",
-   "basis": "Guide price"
-  },
-  "flags": [
-   "needs_work"
-  ],
-  "property_type": "detached",
-  "kind": "plot",
-  "fetched": "2026-11-26",
-  "first_seen": "2026-11-23",
   "active": true,
   "excluded": null
  },
@@ -1024,42 +445,10 @@
    "basis": "Guide price"
   },
   "property_type": "semi-detached",
-  "fetched": "2026-11-26",
+  "fetched": "2026-11-27",
   "first_seen": "2026-11-23",
   "active": false,
   "excluded": "district TD5"
- },
- "auc-auctionhouse-154557": {
-  "id": "auc-auctionhouse-154557",
-  "url": "https://www.auctionhouse.co.uk/scotland/auction/lot/154557",
-  "title": "1 bed flat at auction",
-  "image": "https://www.auctionhouse.co.uk/lot-image/958360",
-  "price": 4487,
-  "bedrooms": 1,
-  "postcode": "KA25 7BA",
-  "address": "13 Milton Road, Kilbirnie, North Ayrshire KA25 7BA",
-  "detached": false,
-  "epc": {
-   "band": "D"
-  },
-  "plot_parsed": true,
-  "parser_version": 4,
-  "garage": false,
-  "district": "KA25",
-  "source": "auction",
-  "auction": {
-   "house": "Auction House Scotland",
-   "date": "2026-11-26",
-   "basis": "Guide price"
-  },
-  "flags": [
-   "needs_work"
-  ],
-  "property_type": "flat",
-  "fetched": "2026-11-26",
-  "first_seen": "2026-11-23",
-  "active": false,
-  "excluded": "flat"
  },
  "auc-auctionhouse-154697": {
   "id": "auc-auctionhouse-154697",
@@ -1084,7 +473,7 @@
    "needs_work"
   ],
   "property_type": "house",
-  "fetched": "2026-11-26",
+  "fetched": "2026-11-27",
   "first_seen": "2026-11-23",
   "active": false,
   "excluded": "bedrooms unknown"
@@ -1116,7 +505,7 @@
   ],
   "property_type": "detached",
   "kind": "plot",
-  "fetched": "2026-11-26",
+  "fetched": "2026-11-27",
   "first_seen": "2026-11-24",
   "active": true,
   "excluded": null
@@ -1146,7 +535,7 @@
    "needs_work"
   ],
   "property_type": "terraced",
-  "fetched": "2026-11-26",
+  "fetched": "2026-11-27",
   "first_seen": "2026-11-24",
   "active": false,
   "excluded": "district EH55"
@@ -1172,7 +561,7 @@
    "basis": "Guide price"
   },
   "kind": "plot",
-  "fetched": "2026-11-26",
+  "fetched": "2026-11-27",
   "first_seen": "2026-11-24",
   "active": false,
   "excluded": "district TD2"
@@ -1199,66 +588,10 @@
    "basis": "Guide price"
   },
   "property_type": "house",
-  "fetched": "2026-11-26",
+  "fetched": "2026-11-27",
   "first_seen": "2026-11-24",
   "active": true,
   "excluded": null
- },
- "auc-auctionhouse-154495": {
-  "id": "auc-auctionhouse-154495",
-  "url": "https://www.auctionhouse.co.uk/scotland/auction/lot/154495",
-  "title": "2 bed flat at auction",
-  "image": "https://www.auctionhouse.co.uk/lot-image/957342",
-  "price": 149000,
-  "bedrooms": 2,
-  "postcode": "G5 8EH",
-  "address": "Flat 5, 10 Riverview Place, Glasgow, Glasgow City G5 8EH",
-  "property_type": "flat",
-  "detached": false,
-  "plot_parsed": true,
-  "parser_version": 4,
-  "garage": false,
-  "district": "G5",
-  "source": "auction",
-  "auction": {
-   "house": "Auction House Scotland",
-   "date": "2026-11-26",
-   "basis": "Guide price"
-  },
-  "fetched": "2026-11-26",
-  "first_seen": "2026-11-24",
-  "active": false,
-  "excluded": "flat"
- },
- "auc-auctionhouse-154604": {
-  "id": "auc-auctionhouse-154604",
-  "url": "https://www.auctionhouse.co.uk/scotland/auction/lot/154604",
-  "title": "1 bed flat at auction",
-  "image": "https://www.auctionhouse.co.uk/lot-image/966463",
-  "price": 5684,
-  "bedrooms": 1,
-  "postcode": "AB11 5AA",
-  "address": "Flat 6, Trinity House, Trinity Quay, Aberdeen, Aberdeen City AB11 5AA",
-  "property_type": "flat",
-  "detached": false,
-  "floor_area_m2": 35,
-  "epc": {
-   "band": "C"
-  },
-  "plot_parsed": true,
-  "parser_version": 4,
-  "garage": false,
-  "district": "AB11",
-  "source": "auction",
-  "auction": {
-   "house": "Auction House Scotland",
-   "date": "2026-11-26",
-   "basis": "Guide price"
-  },
-  "fetched": "2026-11-26",
-  "first_seen": "2026-11-24",
-  "active": false,
-  "excluded": "flat"
  },
  "auc-futurepropertyauctions-14513342": {
   "id": "auc-futurepropertyauctions-14513342",
@@ -1288,7 +621,7 @@
   "flags": [
    "needs_work"
   ],
-  "fetched": "2026-11-26",
+  "fetched": "2026-11-27",
   "first_seen": "2026-11-25",
   "active": false,
   "excluded": "1 bedroom"
@@ -1318,7 +651,7 @@
    "needs_work"
   ],
   "kind": "plot",
-  "fetched": "2026-11-26",
+  "fetched": "2026-11-27",
   "first_seen": "2026-11-25",
   "active": true,
   "excluded": null
@@ -1345,7 +678,7 @@
   },
   "plot_acres": 12.0,
   "kind": "plot",
-  "fetched": "2026-11-26",
+  "fetched": "2026-11-27",
   "first_seen": "2026-11-25",
   "active": false,
   "excluded": "district TD2"
@@ -1371,36 +704,10 @@
    "basis": "Guide price"
   },
   "kind": "plot",
-  "fetched": "2026-11-26",
+  "fetched": "2026-11-27",
   "first_seen": "2026-11-25",
   "active": false,
   "excluded": "district TD2"
- },
- "auc-auctionhouse-153722": {
-  "id": "auc-auctionhouse-153722",
-  "url": "https://www.auctionhouse.co.uk/scotland/auction/lot/153722",
-  "title": "2 bed detached at auction",
-  "image": "https://www.auctionhouse.co.uk/lot-image/947174",
-  "price": 66000,
-  "bedrooms": 2,
-  "postcode": "AB15 8GA",
-  "address": "19 Bethlin Mews, Kingswells, Aberdeen, Aberdeen City AB15 8GA",
-  "detached": false,
-  "plot_parsed": true,
-  "parser_version": 4,
-  "garage": false,
-  "district": "AB15",
-  "source": "auction",
-  "auction": {
-   "house": "Auction House Scotland",
-   "date": "2026-11-26",
-   "basis": "Guide price"
-  },
-  "property_type": "detached",
-  "fetched": "2026-11-26",
-  "first_seen": "2026-11-25",
-  "active": false,
-  "excluded": "district AB15"
  },
  "auc-auctionhouse-154676": {
   "id": "auc-auctionhouse-154676",
@@ -1422,99 +729,10 @@
    "date": "2026-12-17",
    "basis": "Guide price"
   },
-  "fetched": "2026-11-26",
+  "fetched": "2026-11-27",
   "first_seen": "2026-11-25",
   "active": false,
   "excluded": "flat"
- },
- "auc-futurepropertyauctions-14524426": {
-  "id": "auc-futurepropertyauctions-14524426",
-  "url": "https://www.futurepropertyauctions.co.uk/property_details.asp?id=14524426",
-  "title": "6 bed house at auction",
-  "lat": 55.427156,
-  "lng": -2.7798946,
-  "price": 190000,
-  "bedrooms": 6,
-  "postcode": "TD9 9NR",
-  "address": "The Buccleuch, Trinity Street, Hawick",
-  "detached": false,
-  "floor_area_m2": 639,
-  "plot_parsed": true,
-  "parser_version": 4,
-  "garage": false,
-  "district": "TD9",
-  "source": "auction",
-  "auction": {
-   "house": "Future Property Auctions",
-   "date": "2026-12-03",
-   "basis": "Guide price"
-  },
-  "flags": [
-   "needs_work"
-  ],
-  "property_type": "house",
-  "fetched": "2026-11-26",
-  "first_seen": "2026-11-25",
-  "active": false,
-  "excluded": "district TD9"
- },
- "auc-auctionhouse-154811": {
-  "id": "auc-auctionhouse-154811",
-  "url": "https://www.auctionhouse.co.uk/scotland/auction/lot/154811",
-  "title": "6 bed cottage at auction",
-  "image": "https://www.auctionhouse.co.uk/lot-image/962112",
-  "bedrooms": 6,
-  "postcode": "G63 9AX",
-  "address": "Garden Cottage, Auchineden, Blanefield, Glasgow, Stirling G63 9AX",
-  "property_type": "cottage",
-  "detached": false,
-  "plot_parsed": true,
-  "parser_version": 4,
-  "garage": false,
-  "district": "G63",
-  "source": "auction",
-  "auction": {
-   "house": "Auction House Scotland",
-   "date": "2026-11-26",
-   "basis": "Guide price"
-  },
-  "flags": [
-   "needs_work"
-  ],
-  "fetched": "2026-11-26",
-  "first_seen": "2026-11-25",
-  "active": false,
-  "excluded": "district G63"
- },
- "auc-futurepropertyauctions-14526211": {
-  "id": "auc-futurepropertyauctions-14526211",
-  "url": "https://www.futurepropertyauctions.co.uk/property_details.asp?id=14526211",
-  "title": "property at auction",
-  "lat": 55.95122464620137,
-  "lng": -2.8364894158691456,
-  "price": 30000,
-  "postcode": "EH41 3SU",
-  "address": "The Orchard Spittalrigg , Haddington",
-  "detached": false,
-  "floor_area_m2": 721,
-  "plot_parsed": true,
-  "parser_version": 4,
-  "garage": false,
-  "district": "EH41",
-  "source": "auction",
-  "auction": {
-   "house": "Future Property Auctions",
-   "date": "2026-12-03",
-   "basis": "Guide price"
-  },
-  "plot_acres": 0.18,
-  "flags": [
-   "needs_work"
-  ],
-  "fetched": "2026-11-26",
-  "first_seen": "2026-11-25",
-  "active": false,
-  "excluded": "bedrooms unknown"
  },
  "auc-futurepropertyauctions-14507919": {
   "id": "auc-futurepropertyauctions-14507919",
@@ -1537,7 +755,7 @@
    "basis": "Guide price"
   },
   "kind": "plot",
-  "fetched": "2026-11-26",
+  "fetched": "2026-11-27",
   "first_seen": "2026-11-25",
   "active": false,
   "excluded": "district TD2"
@@ -1560,10 +778,10 @@
   "source": "auction",
   "auction": {
    "house": "Future Property Auctions",
-   "date": "2026-11-26",
+   "date": "2026-12-10",
    "basis": "Guide price"
   },
-  "fetched": "2026-11-26",
+  "fetched": "2026-11-27",
   "first_seen": "2026-11-25",
   "active": false,
   "excluded": "bedrooms unknown"
@@ -1590,7 +808,7 @@
    "basis": "Guide price"
   },
   "property_type": "house",
-  "fetched": "2026-11-26",
+  "fetched": "2026-11-27",
   "first_seen": "2026-11-25",
   "active": false,
   "excluded": "bedrooms unknown"
@@ -1617,7 +835,7 @@
   },
   "plot_acres": 1.18,
   "kind": "plot",
-  "fetched": "2026-11-26",
+  "fetched": "2026-11-27",
   "first_seen": "2026-11-25",
   "active": true,
   "excluded": null
@@ -1649,7 +867,7 @@
   ],
   "property_type": "house",
   "kind": "plot",
-  "fetched": "2026-11-26",
+  "fetched": "2026-11-27",
   "first_seen": "2026-11-25",
   "active": true,
   "excluded": null
@@ -1680,7 +898,7 @@
    "needs_work"
   ],
   "kind": "plot",
-  "fetched": "2026-11-26",
+  "fetched": "2026-11-27",
   "first_seen": "2026-11-25",
   "active": false,
   "excluded": "district TD1"
@@ -1704,39 +922,13 @@
    "date": "2026-12-03",
    "basis": "Guide price"
   },
-  "fetched": "2026-11-26",
+  "fetched": "2026-11-27",
   "first_seen": "2026-11-26",
   "active": true,
   "excluded": null,
   "lat": 55.919789,
   "lng": -3.149276,
   "approx_location": true
- },
- "auc-futurepropertyauctions-14513971": {
-  "id": "auc-futurepropertyauctions-14513971",
-  "url": "https://www.futurepropertyauctions.co.uk/property_details.asp?id=14513971",
-  "title": "property at auction",
-  "lat": 55.618179,
-  "lng": -2.8118375,
-  "price": 125000,
-  "postcode": "TD1 1RZ",
-  "address": "53 High Street, Sally Beauty Investment, Galashiels",
-  "detached": false,
-  "floor_area_m2": 160,
-  "plot_parsed": true,
-  "parser_version": 4,
-  "garage": false,
-  "district": "TD1",
-  "source": "auction",
-  "auction": {
-   "house": "Future Property Auctions",
-   "date": "2026-12-03",
-   "basis": "Guide price"
-  },
-  "fetched": "2026-11-26",
-  "first_seen": "2026-11-26",
-  "active": false,
-  "excluded": "bedrooms unknown"
  },
  "auc-futurepropertyauctions-14525973": {
   "id": "auc-futurepropertyauctions-14525973",
@@ -1759,7 +951,7 @@
    "basis": "Guide price"
   },
   "plot_acres": 10.0,
-  "fetched": "2026-11-26",
+  "fetched": "2026-11-27",
   "first_seen": "2026-11-26",
   "active": false,
   "excluded": "bedrooms unknown"
@@ -1789,37 +981,10 @@
    "motivated"
   ],
   "property_type": "semi-detached",
-  "fetched": "2026-11-26",
+  "fetched": "2026-11-27",
   "first_seen": "2026-11-26",
   "active": false,
   "excluded": "district TD7"
- },
- "auc-futurepropertyauctions-14528047": {
-  "id": "auc-futurepropertyauctions-14528047",
-  "url": "https://www.futurepropertyauctions.co.uk/property_details.asp?id=14528047",
-  "title": "Plot / land at auction",
-  "lat": 55.655996,
-  "lng": -3.1953015,
-  "price": 18000,
-  "postcode": "EH45 8GA",
-  "address": "Land with PLANNING PERMISSION at Ballantyne Place, Peebles",
-  "detached": false,
-  "plot_parsed": true,
-  "parser_version": 4,
-  "garage": false,
-  "district": "EH45",
-  "source": "auction",
-  "auction": {
-   "house": "Future Property Auctions",
-   "date": "2026-12-03",
-   "basis": "Guide price"
-  },
-  "property_type": "detached",
-  "kind": "plot",
-  "fetched": "2026-11-26",
-  "first_seen": "2026-11-26",
-  "active": false,
-  "excluded": "district EH45"
  },
  "auc-futurepropertyauctions-14514855": {
   "id": "auc-futurepropertyauctions-14514855",
@@ -1846,37 +1011,10 @@
    "needs_work"
   ],
   "property_type": "apartment",
-  "fetched": "2026-11-26",
+  "fetched": "2026-11-27",
   "first_seen": "2026-11-26",
   "active": false,
   "excluded": "flat"
- },
- "auc-futurepropertyauctions-14525684": {
-  "id": "auc-futurepropertyauctions-14525684",
-  "url": "https://www.futurepropertyauctions.co.uk/property_details.asp?id=14525684",
-  "title": "Plot / land at auction",
-  "lat": 55.932205,
-  "lng": -3.4799143,
-  "price": 13250,
-  "postcode": "EH52 5LU",
-  "address": "Portfolio of Land at Blyth Road, Broxburn, West Lothian",
-  "detached": false,
-  "plot_parsed": true,
-  "parser_version": 4,
-  "garage": false,
-  "district": "EH52",
-  "source": "auction",
-  "auction": {
-   "house": "Future Property Auctions",
-   "date": "2026-12-03",
-   "basis": "Guide price"
-  },
-  "plot_acres": 1.14,
-  "kind": "plot",
-  "fetched": "2026-11-26",
-  "first_seen": "2026-11-26",
-  "active": true,
-  "excluded": null
  },
  "auc-futurepropertyauctions-14504434": {
   "id": "auc-futurepropertyauctions-14504434",
@@ -1900,9 +1038,355 @@
   },
   "plot_acres": 22.0,
   "kind": "plot",
-  "fetched": "2026-11-26",
+  "fetched": "2026-11-27",
   "first_seen": "2026-11-26",
   "active": false,
   "excluded": "district TD2"
+ },
+ "auc-futurepropertyauctions-14115406": {
+  "id": "auc-futurepropertyauctions-14115406",
+  "url": "https://www.futurepropertyauctions.co.uk/property_details.asp?id=14115406",
+  "title": "property at auction",
+  "lat": 55.93722100240695,
+  "lng": -2.9617034399505626,
+  "price": 6000,
+  "postcode": "EH33 2LB",
+  "address": "Portfolio of Sites at West Windygoul Gardens, Tranent",
+  "detached": false,
+  "floor_area_m2": 238,
+  "plot_parsed": true,
+  "parser_version": 4,
+  "garage": false,
+  "district": "EH33",
+  "source": "auction",
+  "auction": {
+   "house": "Future Property Auctions",
+   "date": "2026-12-10",
+   "basis": "Guide price"
+  },
+  "plot_acres": 0.06,
+  "flags": [
+   "needs_work"
+  ],
+  "fetched": "2026-11-27",
+  "first_seen": "2026-11-27",
+  "active": false,
+  "excluded": "bedrooms unknown"
+ },
+ "auc-futurepropertyauctions-14487026": {
+  "id": "auc-futurepropertyauctions-14487026",
+  "url": "https://www.futurepropertyauctions.co.uk/property_details.asp?id=14487026",
+  "title": "property at auction",
+  "price": 47000,
+  "postcode": "TD1 1BJ",
+  "address": "49 Channel Street, Galashiels",
+  "detached": false,
+  "floor_area_m2": 57,
+  "plot_parsed": true,
+  "parser_version": 4,
+  "garage": false,
+  "district": "TD1",
+  "source": "auction",
+  "auction": {
+   "house": "Future Property Auctions",
+   "date": "2026-12-10",
+   "basis": "Guide price"
+  },
+  "fetched": "2026-11-27",
+  "first_seen": "2026-11-27",
+  "active": false,
+  "excluded": "bedrooms unknown"
+ },
+ "auc-futurepropertyauctions-14520261": {
+  "id": "auc-futurepropertyauctions-14520261",
+  "url": "https://www.futurepropertyauctions.co.uk/property_details.asp?id=14520261",
+  "title": "Plot / land at auction",
+  "lat": 55.965539,
+  "lng": -2.5536176,
+  "price": 210000,
+  "bedrooms": 3,
+  "postcode": "EH42 1XY",
+  "address": "Plots 7-10 Little Spott Development Site with Planning, Dunbar",
+  "detached": false,
+  "plot_parsed": true,
+  "parser_version": 4,
+  "garage": false,
+  "district": "EH42",
+  "source": "auction",
+  "auction": {
+   "house": "Future Property Auctions",
+   "date": "2026-12-03",
+   "basis": "Guide price"
+  },
+  "kind": "plot",
+  "fetched": "2026-11-27",
+  "first_seen": "2026-11-27",
+  "active": true,
+  "excluded": null
+ },
+ "auc-futurepropertyauctions-14498399": {
+  "id": "auc-futurepropertyauctions-14498399",
+  "url": "https://www.futurepropertyauctions.co.uk/property_details.asp?id=14498399",
+  "title": "Plot / land at auction",
+  "lat": 55.932712,
+  "lng": -3.4698424,
+  "price": 97000,
+  "bedrooms": 4,
+  "postcode": "EH52 5QR",
+  "address": "Plot 1 at Station Road, Broxburn, West Lothian",
+  "detached": false,
+  "floor_area_m2": 478,
+  "plot_parsed": true,
+  "parser_version": 4,
+  "garage": false,
+  "district": "EH52",
+  "source": "auction",
+  "auction": {
+   "house": "Future Property Auctions",
+   "date": "2026-12-03",
+   "basis": "Guide price"
+  },
+  "flags": [
+   "needs_work"
+  ],
+  "property_type": "detached",
+  "kind": "plot",
+  "fetched": "2026-11-27",
+  "first_seen": "2026-11-27",
+  "active": true,
+  "excluded": null
+ },
+ "auc-futurepropertyauctions-14524035": {
+  "id": "auc-futurepropertyauctions-14524035",
+  "url": "https://www.futurepropertyauctions.co.uk/property_details.asp?id=14524035",
+  "title": "Plot / land at auction",
+  "lat": 55.69600961083427,
+  "lng": -3.3818241431304874,
+  "price": 8750,
+  "postcode": "EH46 7AN",
+  "address": "Land adjacent to 1 Old Smiddyfield Park, Blyth Bridge, West Linton, Peebleshire, Scottish Borders",
+  "detached": false,
+  "floor_area_m2": 883,
+  "plot_parsed": true,
+  "parser_version": 4,
+  "garage": false,
+  "district": "EH46",
+  "source": "auction",
+  "auction": {
+   "house": "Future Property Auctions",
+   "date": "2026-12-03",
+   "basis": "Guide price"
+  },
+  "plot_acres": 0.22,
+  "kind": "plot",
+  "fetched": "2026-11-27",
+  "first_seen": "2026-11-27",
+  "active": false,
+  "excluded": "district EH46"
+ },
+ "auc-futurepropertyauctions-14525106": {
+  "id": "auc-futurepropertyauctions-14525106",
+  "url": "https://www.futurepropertyauctions.co.uk/property_details.asp?id=14525106",
+  "title": "3 bed semi-detached at auction",
+  "lat": 55.471725,
+  "lng": -2.5480171,
+  "price": 55000,
+  "bedrooms": 3,
+  "postcode": "TD8 6JY",
+  "address": "15 Howden Crescent, Jedburgh, Scottish Borders",
+  "detached": false,
+  "plot_parsed": true,
+  "parser_version": 4,
+  "garage": false,
+  "district": "TD8",
+  "source": "auction",
+  "auction": {
+   "house": "Future Property Auctions",
+   "date": "2026-12-03",
+   "basis": "Guide price"
+  },
+  "property_type": "semi-detached",
+  "fetched": "2026-11-27",
+  "first_seen": "2026-11-27",
+  "active": false,
+  "excluded": "district TD8"
+ },
+ "auc-futurepropertyauctions-14528081": {
+  "id": "auc-futurepropertyauctions-14528081",
+  "url": "https://www.futurepropertyauctions.co.uk/property_details.asp?id=14528081",
+  "title": "detached at auction",
+  "lat": 55.466579,
+  "lng": -2.3522493,
+  "price": 15000,
+  "postcode": "TD5 8AL",
+  "address": "Hownam Church Hownam, Kelso, Roxburghshire, Scottish Borders",
+  "detached": false,
+  "floor_area_m2": 122,
+  "epc": {
+   "band": "D"
+  },
+  "plot_parsed": true,
+  "parser_version": 4,
+  "garage": false,
+  "district": "TD5",
+  "source": "auction",
+  "auction": {
+   "house": "Future Property Auctions",
+   "date": "2026-12-03",
+   "basis": "Guide price"
+  },
+  "property_type": "detached",
+  "fetched": "2026-11-27",
+  "first_seen": "2026-11-27",
+  "active": false,
+  "excluded": "bedrooms unknown"
+ },
+ "auc-futurepropertyauctions-14478730": {
+  "id": "auc-futurepropertyauctions-14478730",
+  "url": "https://www.futurepropertyauctions.co.uk/property_details.asp?id=14478730",
+  "title": "Plot / land at auction",
+  "lat": 55.87332170064585,
+  "lng": -3.210062919851675,
+  "price": 79000,
+  "postcode": "EH10 7DX",
+  "address": "Plot 7, Land West of Boghall Farmhouse, Bigger Road, Edinburgh",
+  "detached": false,
+  "plot_parsed": true,
+  "parser_version": 4,
+  "garage": false,
+  "district": "EH10",
+  "source": "auction",
+  "auction": {
+   "house": "Future Property Auctions",
+   "date": "2026-12-03",
+   "basis": "Guide price"
+  },
+  "flags": [
+   "needs_work"
+  ],
+  "property_type": "detached",
+  "kind": "plot",
+  "fetched": "2026-11-27",
+  "first_seen": "2026-11-27",
+  "active": true,
+  "excluded": null
+ },
+ "auc-futurepropertyauctions-14478764": {
+  "id": "auc-futurepropertyauctions-14478764",
+  "url": "https://www.futurepropertyauctions.co.uk/property_details.asp?id=14478764",
+  "title": "Plot / land at auction",
+  "lat": 55.932631,
+  "lng": -3.4698263,
+  "price": 87000,
+  "bedrooms": 4,
+  "postcode": "EH52 5QR",
+  "address": "Plot 3, Station Road, Broxburn, West Lothian",
+  "detached": false,
+  "floor_area_m2": 438,
+  "plot_parsed": true,
+  "parser_version": 4,
+  "garage": false,
+  "district": "EH52",
+  "source": "auction",
+  "auction": {
+   "house": "Future Property Auctions",
+   "date": "2026-12-03",
+   "basis": "Guide price"
+  },
+  "flags": [
+   "needs_work"
+  ],
+  "property_type": "detached",
+  "kind": "plot",
+  "fetched": "2026-11-27",
+  "first_seen": "2026-11-27",
+  "active": true,
+  "excluded": null
+ },
+ "auc-futurepropertyauctions-14519309": {
+  "id": "auc-futurepropertyauctions-14519309",
+  "url": "https://www.futurepropertyauctions.co.uk/property_details.asp?id=14519309",
+  "title": "3 bed flat at auction",
+  "price": 125000,
+  "bedrooms": 3,
+  "postcode": "DG12 6DS",
+  "address": "2-4 Church Street, Annan",
+  "detached": false,
+  "floor_area_m2": 83,
+  "plot_parsed": true,
+  "parser_version": 4,
+  "garage": false,
+  "district": "DG12",
+  "source": "auction",
+  "auction": {
+   "house": "Future Property Auctions",
+   "date": "2026-12-03",
+   "basis": "Guide price"
+  },
+  "flags": [
+   "needs_work"
+  ],
+  "property_type": "flat",
+  "fetched": "2026-11-27",
+  "first_seen": "2026-11-27",
+  "active": false,
+  "excluded": "flat"
+ },
+ "auc-futurepropertyauctions-14497736": {
+  "id": "auc-futurepropertyauctions-14497736",
+  "url": "https://www.futurepropertyauctions.co.uk/property_details.asp?id=14497736",
+  "title": "property at auction",
+  "price": 60000,
+  "postcode": "TD1 1RZ",
+  "address": "113-117 High Street, Galashiels",
+  "detached": false,
+  "floor_area_m2": 1100,
+  "plot_parsed": true,
+  "parser_version": 4,
+  "garage": false,
+  "district": "TD1",
+  "source": "auction",
+  "auction": {
+   "house": "Future Property Auctions",
+   "date": "2026-12-03",
+   "basis": "Guide price"
+  },
+  "flags": [
+   "needs_work"
+  ],
+  "fetched": "2026-11-27",
+  "first_seen": "2026-11-27",
+  "active": false,
+  "excluded": "bedrooms unknown"
+ },
+ "auc-auctionhouse-154689": {
+  "id": "auc-auctionhouse-154689",
+  "url": "https://www.auctionhouse.co.uk/scotland/auction/lot/154689",
+  "title": "3 bed house at auction",
+  "image": "https://www.auctionhouse.co.uk/lot-image/960423",
+  "price": 8700,
+  "bedrooms": 3,
+  "postcode": "DD8 4EZ",
+  "address": "10-12 Roods, Kirriemuir, Angus DD8 4EZ",
+  "detached": false,
+  "floor_area_m2": 68,
+  "plot_parsed": true,
+  "parser_version": 4,
+  "garage": false,
+  "district": "DD8",
+  "source": "auction",
+  "auction": {
+   "house": "Auction House Scotland",
+   "date": "2026-12-17",
+   "basis": "Guide price"
+  },
+  "flags": [
+   "needs_work"
+  ],
+  "property_type": "house",
+  "fetched": "2026-11-27",
+  "first_seen": "2026-11-27",
+  "active": false,
+  "excluded": "district DD8"
  }
 }
